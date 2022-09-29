@@ -8,13 +8,10 @@ library("glmnet")
 library("ppcor")
 library("L0Learn")
 library("pracma")
-<<<<<<< HEAD
 library("ggplot2")
 library("reshape2")
 library("RColorBrewer")
 library("patchwork")
-=======
->>>>>>> origin/master
 source("framework_main.R")
 source("ground-truth.R")
 
@@ -69,12 +66,8 @@ for (j in 1:length(data_path)) {
     }
 
     DATA <- uploading(paste0(simulation_data_dir, "ExpressionData_all", ".csv"))
-<<<<<<< HEAD
     # result_L0 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 0, penalty = "L0L2", algorithm = "CD")
     result_L0 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 1, SIGN = 0, penalty = "L0L2", algorithm = "CD")
-=======
-    result_L0 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 0, penalty = "L0L2", algorithm = "CD")
->>>>>>> origin/master
 
     # Final ranked list of regulatory edges
     adj_matrix_L0 <- result_L0$adj_matrix / max(result_L0$adj_matrix)
@@ -107,16 +100,10 @@ for (j in 1:length(data_path)) {
     L0_AUPR2 <- AUCresult_L0$AUPR
     L0_AUROC
     L0_AUROC2
-<<<<<<< HEAD
 
     # --------------------------------------------------
     # result <- SINCERITITES(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 1)
     result <- SINCERITITES(DATA, distance = 1, method = 1, noDIAG = 1, SIGN = 0)
-=======
-    # --------------------------------------------------
-    result <- SINCERITITES(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 1)
-
->>>>>>> origin/master
     # Final ranked list of regulatory edges
     adj_matrix <- result$adj_matrix / max(result$adj_matrix)
     table <- final_ranked_predictions(adj_matrix, DATA$genes, SIGN = 1, saveFile = TRUE)
@@ -141,7 +128,6 @@ for (j in 1:length(data_path)) {
     AUCresult_SINCERITITES <- auc_from_ranks_TC_sign(adj_matrix, truth_network, 1000)
     SINCERITITES_AUROC2 <- AUCresult_SINCERITITES$AUROC
     SINCERITITES2_AUPR <- AUCresult_SINCERITITES$AUPR
-<<<<<<< HEAD
     SINCERITITES_AUROC
     SINCERITITES_AUROC2
     # --------------------------------------------------
@@ -149,15 +135,6 @@ for (j in 1:length(data_path)) {
       data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_all.csv"),
         header = T
       ) %>% as.matrix()
-=======
-
-    # --------------------------------------------------
-    if (F) {
-      data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_all.csv"),
-        header = T
-      ) %>%
-        as.matrix()
->>>>>>> origin/master
 
       PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
       # PseudoTime <- PseudoTime[order(PseudoTime), ] %>% as.data.frame()
@@ -172,11 +149,7 @@ for (j in 1:length(data_path)) {
         SVMRankThreshold = 5, SVMEnsembleSize = 100,
         ELPredSampleMin = 20, ELPredSampleMax = 80,
         ELExpSampleMin = 20, ELExpSampleMax = 80,
-<<<<<<< HEAD
         ELRankThreshold = 5, ELEnsembleSize = 500
-=======
-        ELRankThreshold = 5, ELEnsembleSize = 200
->>>>>>> origin/master
       )
 
       evaluationObject <- prepareEval("output/output_GENIE3.txt",
@@ -186,7 +159,6 @@ for (j in 1:length(data_path)) {
 
       GENIE3_AUROC <- calcAUROC(evaluationObject)
       GENIE3_AUPR <- calcAUPR(evaluationObject)
-<<<<<<< HEAD
       GENIE3_AUROC
       GENIE3_AUPR
     }
@@ -250,16 +222,6 @@ for (j in 1:length(data_path)) {
       L0_AUROC3 = L0_AUROC3_L0L2,
       SINCERITITES_AUROC = SINCERITITES_AUROC2, # SINCERITITES_AUROC2 = SINCERITITES_AUROC2,
       GENIE3_AUROC = GENIE3_AUROC
-=======
-    }
-
-    # --------------------------------------------------
-    evaluation_infromation <- data.frame(
-      datasets = paste0(data_path[j], "_", cell_drop[i]),
-      L0_AUROC = L0_AUROC, # L0_AUROC2 = L0_AUROC2,
-      SINCERITITES_AUROC = SINCERITITES_AUROC # , SINCERITITES_AUROC2 = SINCERITITES_AUROC2,
-      # GENIE3_AUROC = GENIE3_AUROC
->>>>>>> origin/master
     )
     message(paste0("----- ", evaluation_infromation, " -----"))
     evaluation_infromations <- rbind.data.frame(evaluation_infromations, evaluation_infromation)
@@ -267,7 +229,6 @@ for (j in 1:length(data_path)) {
   evaluation_infromations_all <- rbind.data.frame(evaluation_infromations_all, evaluation_infromations)
 }
 
-<<<<<<< HEAD
 if (F) {
   mycol <- c("black", "gray", "white")
   data_path <- c(
@@ -333,56 +294,3 @@ if (F) {
 
   # ggsave("Results/L0-time_VS_SINCERITITES.png",width = 8, height = 4, dpi =600)
 }
-=======
-
-library(ggplot2)
-library(reshape2)
-library(RColorBrewer)
-library(patchwork)
-
-mycol <- c("gray", "white")
-
-results_10nets <- evaluation_infromations_all
-results_10nets$datasets <- c("Net1", "Net2", "Net3", "Net4", "Net5", "Net6", "Net7", "Net8", "Net9", "Net10", "Net11", "Net12")
-names(results_10nets) <- c("Dataset", "L0-time", "SINCERITITES")
-df_res10 <- melt(results_10nets, id = "Dataset", variable.name = "Method", value.name = "AUROC")
-df_res10$Method <- factor(df_res10$Method,
-  levels = c("L0-time", "SINCERITITES"),
-  labels = c("L0-time", "SINCERITITES")
-)
-
-p2 <- ggplot(df_res10, aes(x = Dataset, y = AUROC, fill = Method)) +
-  geom_bar(stat = "identity", position = position_dodge(), color = "black", width = .6) +
-  scale_fill_manual(values = mycol) +
-  # geom_errorbar(aes(ymin=AUROC - Sd, ymax=AUROC + Sd), position = position_dodge(.6), width=.2)
-  scale_x_discrete(labels = c("Net1", "Net2", "Net3", "Net4", "Net5", "Net6", "Net7", "Net8", "Net9", "Net10", "Net11", "Net12")) +
-  theme_bw()
-p2
-results_5nets <- read.csv(paste0("evaluation_gnw_5_", 2, ".csv"))
-results_5nets <- results_5nets[, -1]
-
-df_res5 <- melt(results_5nets, id = "Dataset", variable.name = "Method", value.name = "AUROC")
-df_res5$Method <- factor(df_res5$Method,
-  levels = c("L0Reg.framework", "GENIE3"),
-  labels = c("L0Reg framework", "GENIE3")
-)
-
-p1 <- ggplot(df_res5, aes(x = Dataset, y = AUROC, fill = Method)) +
-  geom_bar(stat = "identity", position = position_dodge(), color = "black", width = .6) +
-  scale_fill_manual(values = mycol) +
-  # geom_errorbar(aes(ymin=AUROC - Sd, ymax=AUROC + Sd), position = position_dodge(.6), width=.2)
-  theme_bw() +
-  ylim(0, 1)
-
-p1 + p2 + plot_layout(widths = c(1, 2)) +
-  plot_annotation(tag_levels = "a") +
-  # plot_layout(ncol = 2) +
-  plot_annotation(tag_levels = "a") +
-  plot_layout(guides = "collect") &
-  theme(legend.position = "bottom") +
-    theme(text = element_text(size = 12)) +
-    # theme(legend.title = element_text(color="134", size=16, face="bold"))+
-    theme(text = element_text(family = "Times New Roman")) # ,face = "bold"
-
-# ggsave("Results/L0-time_VS_SINCERITITES.png",width = 8, height = 4, dpi =600)
->>>>>>> origin/master

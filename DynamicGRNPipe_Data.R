@@ -54,12 +54,8 @@ CellInfor_B <- data.frame(
     sampleType = GSE131907_annotation_B$Sample_Origin
 )
 rownames(CellInfor_B) <- CellInfor_B$UniqueCell_ID
-<<<<<<< HEAD
 
 save(CellInfor_B, GSE131907_B,file = "../scGRN-L0_data/DynamicGRNPipe_ExampleData/GSE131907_B.RData")
-=======
-scRNAseq.Exp <- as.matrix(scRNAseq.Exp)
->>>>>>> origin/master
 # GSE131907_B_seu <- CreateSeuratObject(
 #     counts = GSE131907_B,
 #     project = "GSE131907",

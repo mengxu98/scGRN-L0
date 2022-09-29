@@ -1,0 +1,26 @@
+VERSION 1.13.3
+---------------------
+    - The regulators can now be provided as a list with different regulators for each gene/feature.
+    
+VERSION 1.5.2
+---------------------
+    - Adding check for duplicated rownames (gene id/names)
+    - Bugfix in getLinkList: diag <- NA
+
+VERSION 0.99.7
+----------------------
+    - Solved error for not found "%dopar%"
+    
+VERSION 0.99.4
+----------------------
+    Removed argument "seed", use set.seed instead
+    Minor improvemtents
+    
+VERSION 0.99.2
+----------------------
+INTERFACE CHANGES
+    - Functions and parameters renamed to CamelCase rather than containing dots (e.g. get.link.list into getLinkList)
+    
+NEW FEATURES
+    - GENIE3 now accepts ExpressionSet, SummarizedExperiment and SCESet as input
+    

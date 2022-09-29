@@ -1,0 +1,125 @@
+SourceGENES,TargetGENES,Interaction,Edges
+<<<<<<< HEAD
+Nkx62,Dbx2,1,activation
+Dbx2,Nkx62,0.64183810121157,activation
+Olig2,Pax6,0.413134614504759,activation
+Nkx62,Dbx1,0.400214932328631,activation
+Pax6,Nkx61,0.378730018304408,activation
+Dbx1,Dbx2,0.313624707631325,activation
+Irx3,Pax6,0.303195201873843,activation
+Dbx1,Nkx62,0.272991853055794,activation
+Dbx2,Nkx61,0.248376254168366,activation
+Dbx2,Dbx1,0.24326726884487,activation
+Irx3,Nkx62,0.221132916608947,activation
+Olig2,Nkx62,0.192122257031277,activation
+Olig2,Dbx2,0.181964585465478,activation
+Dbx2,Olig2,0.15099872075213,activation
+Pax6,Olig2,0.140135431935419,activation
+Nkx22,Dbx2,0.13677036354493,activation
+Irx3,Olig2,0.113267853891021,activation
+Irx3,Dbx2,0.103115903161634,activation
+Nkx22,Olig2,0.0994459834350378,activation
+Olig2,Dbx1,0.0937212573904459,activation
+Nkx22,Pax6,0.0935135278511889,activation
+Nkx61,Olig2,0.0909628309573493,activation
+Nkx61,Nkx22,0.0740820615570818,activation
+Nkx61,Pax6,0.0723725405031481,activation
+Irx3,Nkx61,0.0721311894168707,activation
+Nkx61,Irx3,0.067208026468256,activation
+Nkx22,Nkx61,0.0614089077612531,activation
+Nkx62,Nkx61,0.0608617765056691,activation
+Nkx22,Irx3,0.0493410722851726,activation
+Nkx22,Dbx1,0.047525817678198,activation
+Irx3,Nkx22,0.0407203995468098,activation
+Nkx61,Nkx62,0.0366662055508811,activation
+Dbx1,Dbx1,0,no regulation
+=======
+Nkx62,Nkx62,1,activation
+Dbx2,Dbx2,0.660052873228899,activation
+Nkx22,Nkx22,0.57330243239324,activation
+Pax6,Pax6,0.569808057457497,activation
+Dbx1,Dbx1,0.505323865882042,activation
+Olig2,Olig2,0.444714610181127,activation
+Irx3,Irx3,0.387817605638819,activation
+Nkx61,Nkx61,0.293985209122515,activation
+Irx3,Pax6,0.287860847451104,activation
+Nkx62,Dbx2,0.281635071464697,activation
+Dbx2,Nkx62,0.25975794197711,activation
+Olig2,Pax6,0.254274802833483,activation
+Pax6,Nkx61,0.225901580229101,repression
+Nkx22,Dbx2,0.220503747341525,repression
+Irx3,Nkx62,0.179788191425469,repression
+Dbx1,Dbx2,0.158999006666533,activation
+Dbx1,Nkx62,0.12821083834618,activation
+Olig2,Nkx62,0.120187041698797,repression
+Nkx22,Olig2,0.111136894370532,repression
+Nkx61,Olig2,0.107591613449444,activation
+Irx3,Olig2,0.0991515076082177,repression
+Olig2,Dbx2,0.0913368946630689,repression
+Nkx62,Dbx1,0.0879739808570969,activation
+Nkx61,Pax6,0.0849486548157239,repression
+Nkx22,Pax6,0.0782639906252781,repression
+Nkx61,Nkx22,0.0775678887593189,activation
+Olig2,Dbx1,0.0723612828871205,repression
+Dbx2,Nkx61,0.0707948613631014,repression
+Dbx2,Dbx1,0.0580638974745624,activation
+Nkx61,Irx3,0.0537556242642839,activation
+Dbx2,Olig2,0.0427648035842559,repression
+Irx3,Dbx2,0.0401166840357515,activation
+Nkx61,Nkx62,0.0262436545036815,repression
+Pax6,Olig2,0.0233661199476872,activation
+Nkx22,Nkx61,0.00216379857730753,activation
+>>>>>>> origin/master
+Dbx1,Irx3,0,no regulation
+Dbx1,Nkx22,0,no regulation
+Dbx1,Nkx61,0,no regulation
+Dbx1,Olig2,0,no regulation
+Dbx1,Pax6,0,no regulation
+<<<<<<< HEAD
+Dbx2,Dbx2,0,no regulation
+=======
+>>>>>>> origin/master
+Dbx2,Irx3,0,no regulation
+Dbx2,Nkx22,0,no regulation
+Dbx2,Pax6,0,no regulation
+Irx3,Dbx1,0,no regulation
+<<<<<<< HEAD
+Irx3,Irx3,0,no regulation
+Nkx22,Nkx22,0,no regulation
+Nkx22,Nkx62,0,no regulation
+Nkx61,Dbx1,0,no regulation
+Nkx61,Dbx2,0,no regulation
+Nkx61,Nkx61,0,no regulation
+Nkx62,Irx3,0,no regulation
+Nkx62,Nkx22,0,no regulation
+Nkx62,Nkx62,0,no regulation
+=======
+Irx3,Nkx22,0,no regulation
+Irx3,Nkx61,0,no regulation
+Nkx22,Dbx1,0,no regulation
+Nkx22,Irx3,0,no regulation
+Nkx22,Nkx62,0,no regulation
+Nkx61,Dbx1,0,no regulation
+Nkx61,Dbx2,0,no regulation
+Nkx62,Irx3,0,no regulation
+Nkx62,Nkx22,0,no regulation
+Nkx62,Nkx61,0,no regulation
+>>>>>>> origin/master
+Nkx62,Olig2,0,no regulation
+Nkx62,Pax6,0,no regulation
+Olig2,Irx3,0,no regulation
+Olig2,Nkx22,0,no regulation
+Olig2,Nkx61,0,no regulation
+<<<<<<< HEAD
+Olig2,Olig2,0,no regulation
+=======
+>>>>>>> origin/master
+Pax6,Dbx1,0,no regulation
+Pax6,Dbx2,0,no regulation
+Pax6,Irx3,0,no regulation
+Pax6,Nkx22,0,no regulation
+Pax6,Nkx62,0,no regulation
+<<<<<<< HEAD
+Pax6,Pax6,0,no regulation
+=======
+>>>>>>> origin/master

@@ -57,7 +57,7 @@ for (j in 1:length(data_path)) {
       simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], "-2000-1", "/")
     } else {
       message(paste0("----- Now run the GRN model with ", data_path[j], " dataset and drop-out of cell with ", cell_drop[i], "! -----"))
-      simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], "-2000-", cell_drop[i], "/")
+      simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], cell_num[k], cell_drop[i], "/")
     }
     simulation_data_file <- "ExpressionData.csv"
     simulation_PseudoTime_file <- "PseudoTime.csv"

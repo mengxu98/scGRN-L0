@@ -22,31 +22,31 @@ auc_from_ranks_TC_sign <- dget("SINCERITIES functions/auc_from_ranks_TC_sign.R")
 final_ranked_predictions <- dget("SINCERITIES functions/final_ranked_predictions.R")
 
 data_path <- c(
-  "dyn-BF",
+  "dyn-BF"#,
   # "dyn-BFC",
   # "dyn-CY",
-  "dyn-LI",
-  "dyn-LL",
-  "dyn-TF"
+  # "dyn-LI",
+  # "dyn-LL",
+  # "dyn-TF"
 )
 cell_num <- c(
-  "100",
-  "200",
-  "500",
-  "2000",
-  "5000"
+  "100"#,
+  # "200",
+  # "500",
+  # "2000",
+  # "5000"
 )
 cell_drop <- c(
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10"
+  "1"#,
+  # "2",
+  # "3",
+  # "4",
+  # "5",
+  # "6",
+  # "7",
+  # "8",
+  # "9",
+  # "10"
 )
 evaluation_infromations_all <- c()
 for (j in 1:length(data_path)) {
@@ -54,13 +54,13 @@ for (j in 1:length(data_path)) {
   for (k in 1:length(cell_num)) {
     evaluation_infromations <- c()
     for (i in 1:length(cell_drop)) {
-      if (i == 1) {
-        message(paste0("----- Now run the GRN model with ", data_path[j], " dataset and drop-out of cell with 1", "! -----"))
-        simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], "-2000-1", "/")
-      } else {
-        message(paste0("----- Now run the GRN model with ", data_path[j], " dataset and drop-out of cell with ", cell_drop[i], "! -----"))
+      # if (i == 1) {
+      #   message(paste0("----- Now run the GRN model with ", data_path[j], " dataset and drop-out of cell with 1", "! -----"))
+      #   simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], "-2000-1", "/")
+      # } else {
+      #   message(paste0("----- Now run the GRN model with ", data_path[j], " dataset and drop-out of cell with ", cell_drop[i], "! -----"))
         simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], cell_num[k], cell_drop[i], "/")
-      }
+      # }
       simulation_data_file <- "ExpressionData.csv"
       simulation_PseudoTime_file <- "PseudoTime.csv"
 

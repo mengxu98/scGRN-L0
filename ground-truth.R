@@ -33,7 +33,6 @@ data_filetr <- function(data, dataset_dir, database = "ALL") {
   } else {
     message("----- Regulatory network dataset does not exist! -----")
     message("----- Please choose one of STRING, ChIP-seq, HepG2-ChIP-seq and hESC-ChIP-seq, or All! -----")
-<<<<<<< HEAD
   }
 }
 
@@ -91,35 +90,13 @@ ground_truth <- function(intput, output, dataset_dir, database = "STRING") {
   } else {
     message("----- Regulatory network dataset does not exist! -----")
     message("----- Please choose one of STRING, ChIP-seq, HepG2-ChIP-seq and hESC-ChIP-seq, or All! -----")
-=======
->>>>>>> origin/master
   }
 }
 
 
-<<<<<<< HEAD
 ground_truth_simulation <- function(intput, output, dataset_dir, file) {
   if (!is.null(dataset_dir) && !is.null(file)) {
     dataset <- read.csv(paste0(dataset_dir, file))
-=======
-ground_truth <- function(intput, output, dataset_dir, database = "STRING") {
-  if (database %in% c("STRING", "ChIP-seq", "HepG2-ChIP-se", "hESC-ChIP-seq", "All")) {
-    if (database == "STRING") {
-      dataset <- read.csv(paste0(dataset_dir, "STRING-network.csv"))
-    } else if (database == "ChIP-seq") {
-      dataset <- read.csv(paste0(dataset_dir, "Non-specific-ChIP-seq-network.csv"))
-    } else if (database == "HepG2-ChIP-seq") {
-      dataset <- read.csv(paste0(dataset_dir, "HepG2-ChIP-seq-network.csv"))
-    } else if (database == "hESC-ChIP-seq") {
-      dataset <- read.csv(paste0(dataset_dir, "hESC-ChIP-seq-network.csv"))
-    } else if (database == "All") {
-      dataset1 <- read.csv(paste0(dataset_dir, "STRING-network.csv"))
-      dataset2 <- read.csv(paste0(dataset_dir, "Non-specific-ChIP-seq-network.csv"))
-      dataset3 <- read.csv(paste0(dataset_dir, "HepG2-ChIP-seq-network.csv"))
-      dataset4 <- read.csv(paste0(dataset_dir, "hESC-ChIP-seq-network.csv"))
-      dataset <- rbind.data.frame(dataset1, dataset2, dataset3, dataset4)
-    }
->>>>>>> origin/master
 
     if (!exists("output")) {
       message("----- Output folder does not exist! Please reset! -----")
@@ -130,7 +107,6 @@ ground_truth <- function(intput, output, dataset_dir, database = "STRING") {
     } else {
       grn <- read.table(paste0(intput))
       tf_genes <- c()
-<<<<<<< HEAD
       pred_tf_genes <- c()
       for (i in 1:nrow(grn)) {
         if (grn$V1[i] != grn$V2[i]) {
@@ -139,27 +115,12 @@ ground_truth <- function(intput, output, dataset_dir, database = "STRING") {
             tf_gene <- data.frame(Gene1 = grn$V1[i], Gene2 = grn$V2[i], label = "1")
           } else {
             tf_gene <- data.frame(Gene1 = grn$V1[i], Gene2 = grn$V2[i], label = "0")
-=======
-      for (i in 1:nrow(grn)) {
-        gene1 <- grn$V1[i]
-        gene2 <- grn$V2[i]
-        if (gene1 %in% dataset$Gene1) {
-          dataset_list <- dataset$Gene2[which(dataset$Gene1 == gene1)]
-          if (gene1 != gene2) {
-            if (gene2 %in% dataset_list) {
-              tf_gene <- data.frame(Gene1 = gene1, Gene2 = gene2, label = "1")
-            } else {
-              tf_gene <- data.frame(Gene1 = gene1, Gene2 = gene2, label = "0")
-            }
->>>>>>> origin/master
           }
           tf_genes <- rbind.data.frame(tf_genes, tf_gene)
           pred_tf_gene <- data.frame(Gene1 = grn$V1[i], Gene2 = grn$V2[i], rank = i)
           pred_tf_genes <- rbind.data.frame(pred_tf_genes, pred_tf_gene)
         }
-        tf_genes <- rbind.data.frame(tf_genes, tf_gene)
       }
-<<<<<<< HEAD
       write.table(pred_tf_genes,
         paste0(output, "ground_pred.txt"),
         quote = F,
@@ -167,8 +128,6 @@ ground_truth <- function(intput, output, dataset_dir, database = "STRING") {
         row.names = F,
         col.names = F
       )
-=======
->>>>>>> origin/master
       write.table(tf_genes,
         paste0(output, "ground_truth.tsv"),
         quote = F,
@@ -184,7 +143,6 @@ ground_truth <- function(intput, output, dataset_dir, database = "STRING") {
 }
 
 
-<<<<<<< HEAD
 # For T cell dynamic regulation
 
 ground_truth_T <- function(input, dataset,output=NULL) {
@@ -204,37 +162,10 @@ ground_truth_T <- function(input, dataset,output=NULL) {
           }
           tf_genes <- rbind.data.frame(tf_genes, tf_gene)
           pred_tf_gene <- data.frame(Gene1 = grn$regulatoryGene[i], Gene2 = grn$targetGene[i], rank = i)
-=======
-ground_truth_simulation <- function(intput, output, dataset_dir, file) {
-  if (!is.null(dataset_dir) && !is.null(file)) {
-    dataset <- read.csv(paste0(dataset_dir, file))
-
-    if (!exists("output")) {
-      message("----- Output folder does not exist! Please reset! -----")
-    }
-
-    if (!exists("intput")) {
-      message("----- Regulatory network does not exist! Please run NIMEFI! -----")
-    } else {
-      grn <- read.table(paste0(intput))
-      tf_genes <- c()
-      pred_tf_genes <- c()
-      for (i in 1:nrow(grn)) {
-        if (grn$V1[i] != grn$V2[i]) {
-          dataset_list <- dataset$Gene2[which(dataset$Gene1 == grn$V1[i])]
-          if (grn$V2[i] %in% dataset_list) {
-            tf_gene <- data.frame(Gene1 = grn$V1[i], Gene2 = grn$V2[i], label = "1")
-          } else {
-            tf_gene <- data.frame(Gene1 = grn$V1[i], Gene2 = grn$V2[i], label = "0")
-          }
-          tf_genes <- rbind.data.frame(tf_genes, tf_gene)
-          pred_tf_gene <- data.frame(Gene1 = grn$V1[i], Gene2 = grn$V2[i], rank = i)
->>>>>>> origin/master
           pred_tf_genes <- rbind.data.frame(pred_tf_genes, pred_tf_gene)
         }
       }
       write.table(pred_tf_genes,
-<<<<<<< HEAD
                   paste0(output, "ground_pred.txt"),
                   quote = F,
                   sep = "\t",
@@ -249,24 +180,4 @@ ground_truth_simulation <- function(intput, output, dataset_dir, file) {
                   col.names = F
       )
     }
-=======
-        paste0(output, "ground_pred.txt"),
-        quote = F,
-        sep = "\t",
-        row.names = F,
-        col.names = F
-      )
-      write.table(tf_genes,
-        paste0(output, "ground_truth.tsv"),
-        quote = F,
-        sep = "\t",
-        row.names = F,
-        col.names = F
-      )
-    }
-  } else {
-    message("----- Regulatory network dataset does not exist! -----")
-    message("----- Please choose one of STRING, ChIP-seq, HepG2-ChIP-seq and hESC-ChIP-seq, or All! -----")
-  }
->>>>>>> origin/master
 }

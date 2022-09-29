@@ -204,11 +204,7 @@ function(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 1, penalty = "L0L2",
       )
       temp <- as.vector(temp)
       wghts <- temp[-1]
-<<<<<<< HEAD
       wghts <- abs(wghts)
-=======
-      # wghts <- abs(wghts)
->>>>>>> origin/master
     }
     pred_lambda_min[, gi] <- t(wghts)
   }

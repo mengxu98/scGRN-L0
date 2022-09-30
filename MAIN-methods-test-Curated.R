@@ -23,13 +23,13 @@ final_ranked_predictions <- dget("SINCERITIES functions/final_ranked_predictions
 
 data_path <- c(
   "GSD",
-  # "HSC",
-  # "mCAD",
+  "HSC",
+  "mCAD",
   "VSC"
 )
 cell_drop <- c(
   "1", "1-50", "1-70",
-  # "2", "2-50", "2-70",
+  "2", "2-50", "2-70",
   # "3", "3-50", "3-70",
   # "4", "4-50", "4-70",
   # "5", "5-50", "5-70",

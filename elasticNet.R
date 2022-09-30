@@ -172,7 +172,7 @@ elasticNetRankedSolve <- function(expressionMatrix,
       # get the weights
       wghts <- abs(as.vector(bestModel$beta))
     } else {
-      message("----- Run ", penalty, " model for ", colnames(target), "! -----")
+      # message("----- Run ", penalty, " model for ", colnames(target), "! -----")
       # L0_Model_cvfit <- L0Learn.cvfit(predictorsWithoutTarget,
       #                         target,
       #                         penalty = penalty,

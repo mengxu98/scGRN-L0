@@ -84,11 +84,11 @@ for (j in 1:length(data_path)) {
       adj_matrix_L0 <- result_L0$adj_matrix / max(result_L0$adj_matrix)
       table_L0 <- final_ranked_predictions(adj_matrix_L0, DATA$genes, SIGN = 1, saveFile = TRUE)
       table_L0 <- as.data.frame(table_L0)
-      write.table(table_L0[, -4], "output/test_L0.txt", row.names = F, col.names = F, sep = "\t", quote = F)
+      write.table(table_L0[, -4], "output/test_L0_Synthetic.txt", row.names = F, col.names = F, sep = "\t", quote = F)
 
       # test
       ground_truth_simulation(
-        intput = "output/test_L0.txt",
+        intput = "output/test_L0_Synthetic.txt",
         output = "output/",
         dataset_dir = simulation_data_dir,
         file = "refNetwork.csv"

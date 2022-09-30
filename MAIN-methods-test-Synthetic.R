@@ -22,31 +22,31 @@ auc_from_ranks_TC_sign <- dget("SINCERITIES functions/auc_from_ranks_TC_sign.R")
 final_ranked_predictions <- dget("SINCERITIES functions/final_ranked_predictions.R")
 
 data_path <- c(
-  "dyn-BF"#,
-  # "dyn-BFC",
-  # "dyn-CY",
-  # "dyn-LI",
-  # "dyn-LL",
-  # "dyn-TF"
+  "dyn-BF",
+  "dyn-BFC",
+  "dyn-CY",
+  "dyn-LI",
+  "dyn-LL",
+  "dyn-TF"
 )
 cell_num <- c(
-  "100"#,
-  # "200",
-  # "500",
-  # "2000",
-  # "5000"
+  "100",
+  "200",
+  "500",
+  "2000",
+  "5000"
 )
 cell_drop <- c(
-  "1"#,
-  # "2",
-  # "3",
-  # "4",
-  # "5",
-  # "6",
-  # "7",
-  # "8",
-  # "9",
-  # "10"
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10"
 )
 evaluation_infromations_all <- c()
 for (j in 1:length(data_path)) {
@@ -59,7 +59,7 @@ for (j in 1:length(data_path)) {
       #   simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], "-2000-1", "/")
       # } else {
       #   message(paste0("----- Now run the GRN model with ", data_path[j], " dataset and drop-out of cell with ", cell_drop[i], "! -----"))
-        simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], cell_num[k], cell_drop[i], "/")
+        simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], "-",cell_num[k], "-", cell_drop[i], "/")
       # }
       simulation_data_file <- "ExpressionData.csv"
       simulation_PseudoTime_file <- "PseudoTime.csv"
@@ -227,10 +227,10 @@ for (j in 1:length(data_path)) {
       }
       # --------------------------------------------------
       evaluation_infromation <- data.frame(
-        datasets = paste0(data_path[j], "_", cell_drop[i]),
+        datasets = paste0(data_path[j], "-",cell_num[k], "-", cell_drop[i]),
         L0_AUROC = L0_AUROC2, # L0_AUROC2 = L0_AUROC2,
-        L0_AUROC3 = L0_AUROC3_L0,
-        L0_AUROC3 = L0_AUROC3_L0L2,
+        L0_AUROC_L0 = L0_AUROC3_L0,
+        L0_AUROC_L0L2 = L0_AUROC3_L0L2,
         SINCERITITES_AUROC = SINCERITITES_AUROC2, # SINCERITITES_AUROC2 = SINCERITITES_AUROC2,
         GENIE3_AUROC = GENIE3_AUROC
       )
@@ -239,7 +239,7 @@ for (j in 1:length(data_path)) {
     }
     evaluation_infromations2 <- rbind.data.frame(evaluation_infromations2, evaluation_infromations)
   }
-  evaluation_infromations_all <- rbind.data.frame(evaluation_infromations_all, evaluation_infromationss)
+  evaluation_infromations_all <- rbind.data.frame(evaluation_infromations_all, evaluation_infromations2)
 }
 
 if (F) {

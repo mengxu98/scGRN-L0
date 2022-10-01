@@ -62,8 +62,8 @@ DynNet_L0 <- function(Windows, CD8TCellExp.trajectory, DynamicGene, allTFs, dete
 
 L0REG <- function(matrix,
                   penalty = penalty,
-                  regulators,
-                  targets) {
+                  regulators = NULL,
+                  targets = rownames(matrix)) {
   library(L0Learn)
   matrix <- as.data.frame(t(matrix))
   if (!is.null(regulators)) {
@@ -88,13 +88,25 @@ L0REG <- function(matrix,
       temp <- as.vector(temp)
       wghts <- temp[-1]
       wghts <- wghts / max(wghts)
-
+      #   wghts <- abs(wghts)
+      #   # Now sort the wghts
+        indices <- sort.list(wghts, decreasing = TRUE)
+      
+        # Check for zero entries
+        zeros <- which(wghts == 0)
+      
+        # Now replace by ones that are in the top and are non-zero
+        wghts[1:length(wghts)] <- 0
+        wghts[indices[1:(0.25*length(wghts))]] <- 1
+      
+        # Set the ones that were zero to zero anyway
+        wghts[zeros] <- 0
       weightd <- data.frame(regulatoryGene = regulators[i], colnames(X), weight = wghts)
       weightdf <- rbind.data.frame(weightdf, weightd)
       if (i == length(regulators)) {
-        # weightdf$weight <- weightdf$weight / max(weightdf$weight)
+        weightdf$weight <- weightdf$weight / max(weightdf$weight)
         names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
-      weightdf <- weightdf[order(weightdf$weight, decreasing = FALSE), ]
+        weightdf <- weightdf[order(weightdf$weight, decreasing = FALSE), ]
       }
     }
   } else {
@@ -139,9 +151,9 @@ L0REG <- function(matrix,
       #   wghts[zeros] <- 0
       # }
       # write result to matrix
-      if (weight_out == FALSE) {
-        weightdf[colnames(matrix)[-i], colnames(matrix)[i]] <- wghts
-      }
+      weightdf[colnames(matrix)[-i], colnames(matrix)[i]] <- wghts
+      rownames(weightdf) <- colnames(matrix)
+    colnames(weightdf) <- colnames(matrix)
     }
   }
 

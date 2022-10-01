@@ -269,11 +269,17 @@ for (j in 1:length(data_path)) {
 
       if (T) {
         source("DynamicGRNPipe_3.constructionNetwork_L0.R")
-        test <- L0REG(t(data_GENIE3),
+        L0REG_L0 <- L0REG(t(data_GENIE3),
           regulators = colnames(data_GENIE3),
           targets = colnames(data_GENIE3), penalty = "L0"
         )
-        write.table(test, paste0(output, "output_L0GRN.txt"), sep = "\t", quote = F, row.names = F, col.names = F)
+        write.table(L0REG_L0,
+          paste0(output, "output_L0GRN.txt"),
+          sep = "\t",
+          quote = F,
+          row.names = F,
+          col.names = F
+        )
         evaluationObject <- prepareEval(paste0(output, "output_L0GRN.txt"),
           paste0(paste0(output, "ground_truth.tsv")),
           totalPredictionsAccepted = 100000
@@ -283,11 +289,11 @@ for (j in 1:length(data_path)) {
         AUPR_L0REG_L0L2 <- calcAUPR(evaluationObject)
         AUROC_L0REG_L0L2
 
-        test2 <- L0REG(t(data_GENIE3),
+        L0REG_L0 <- L0REG(t(data_GENIE3),
           # regulators = colnames(data_GENIE3),
           targets = colnames(data_GENIE3), penalty = "L0"
         )
-        AUCresult_L0REG <- auc_from_ranks_TC_sign(test2, truth_network, 1000)
+        AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0, truth_network, 1000)
         AUROC_L0REG_L0_S <- AUCresult_L0REG$AUROC
         AUROC_L0REG_L0_S
       }

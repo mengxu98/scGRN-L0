@@ -1,50 +1,101 @@
 SourceGENES,TargetGENES,Interaction,Edges
-g7,g6,1,activation
-g8,g7,0.795393540381801,activation
-g8,g2,0.501466426405014,activation
-g4,g8,0.475167599771362,activation
-g6,g7,0.456578598446644,activation
-g8,g4,0.427299277617925,activation
-g4,g7,0.400527389215944,activation
-g8,g1,0.389012080710027,activation
-g7,g8,0.383990867761567,activation
-g8,g6,0.33722801739527,activation
-g1,g6,0.302171429980265,activation
-g2,g8,0.299674216245357,activation
-g2,g1,0.276183473130947,activation
-g4,g6,0.274463606216376,activation
-g7,g1,0.257895199758937,activation
-g7,g4,0.242357419407157,activation
-g6,g8,0.236283008178266,activation
-g1,g4,0.224317839352067,activation
-g4,g3,0.221041316632378,activation
-g1,g8,0.205447232307341,activation
-g3,g6,0.179201600066898,activation
-g6,g4,0.158704654175431,activation
-g3,g7,0.147180849397454,activation
-g3,g8,0.146430519906965,activation
-g4,g2,0.144131831747002,activation
-g1,g3,0.13097502743978,activation
-g3,g1,0.128313057412788,activation
-g2,g6,0.118824798897665,activation
-g3,g4,0.117177557495372,activation
-g1,g2,0.111138324532961,activation
-g3,g2,0.102383601707572,activation
-g6,g3,0.0859979852435676,activation
-g6,g1,0.0627608192987621,activation
+g6,g7,1,activation
+g6,g2,0.884756548831922,activation
+g7,g10,0.793564494561167,activation
+g7,g4,0.792099725509851,activation
+g1,g2,0.758463141748835,activation
+g4,g5,0.728101196369388,activation
+g7,g6,0.610006111741362,activation
+g1,g4,0.599321565061901,activation
+g9,g6,0.578411141042204,activation
+g4,g10,0.576311755584062,activation
+g7,g2,0.561802573460641,activation
+g4,g7,0.552801614866832,activation
+g5,g10,0.539905166569517,activation
+g5,g3,0.534994285410929,activation
+g7,g3,0.519089139284412,activation
+g9,g2,0.51422711701802,activation
+g8,g5,0.467947152634583,activation
+g4,g6,0.455540191359126,activation
+g9,g4,0.445686033246815,activation
+g9,g3,0.440505857716925,activation
+g3,g6,0.433242523478656,activation
+g9,g10,0.430506138875271,activation
+g3,g9,0.390402610306322,activation
+g8,g9,0.38921673876229,activation
+g8,g2,0.386510666493781,activation
+g1,g3,0.375068496777878,activation
+g8,g7,0.360008868086464,activation
+g5,g6,0.338509202427562,activation
+g8,g6,0.331583018016504,activation
+g10,g6,0.329810876616865,activation
+g3,g8,0.328605585984979,activation
+g3,g7,0.324132942382621,activation
+g8,g10,0.32303250006476,activation
+g4,g9,0.305604941412096,activation
+g7,g5,0.298532024612606,activation
+g5,g7,0.298161531944086,activation
+g5,g4,0.294313519834532,activation
+g3,g5,0.284288385126265,activation
+g4,g2,0.282125987599929,activation
+g6,g4,0.281825667188255,activation
+g3,g1,0.280557527573867,activation
+g1,g9,0.275593112661328,activation
+g8,g4,0.267134158633272,activation
+g2,g3,0.26297675007104,activation
+g10,g1,0.26041477882241,activation
+g5,g2,0.259183268779516,activation
+g10,g2,0.259127641580009,activation
+g5,g9,0.255496783433642,activation
+g9,g7,0.240397920237226,activation
+g2,g6,0.229412121809201,activation
+g6,g5,0.21681860590196,activation
+g6,g1,0.213603427466123,activation
+g2,g5,0.208338039700561,activation
+g3,g4,0.20829146165016,activation
+g10,g5,0.198235241482046,activation
+g10,g9,0.194994278053174,activation
+g1,g10,0.190827252738677,activation
+g3,g2,0.190003907884832,activation
+g2,g4,0.187588561982196,activation
+g1,g7,0.184818248303577,activation
+g3,g10,0.177679122763433,activation
+g2,g7,0.175902643190826,activation
+g6,g8,0.168073935331845,activation
+g8,g3,0.161244373590813,activation
+g1,g6,0.151765222055421,activation
+g10,g7,0.150867225181717,activation
+g2,g10,0.149852424121822,activation
+g2,g8,0.145370047232548,activation
+g10,g3,0.142433276823776,activation
+g5,g1,0.138285622550092,activation
+g10,g4,0.133580547765289,activation
+g1,g8,0.126104389308095,activation
+g8,g1,0.122736555772152,activation
+g9,g8,0.121972253038609,activation
+g2,g9,0.115747633237388,activation
+g6,g9,0.108230172229146,activation
+g4,g3,0.106703443419907,activation
+g6,g3,0.0958534450238855,activation
+g9,g1,0.0564455479417111,activation
+g2,g1,0.0405433472099461,activation
 g1,g1,0,no regulation
-g1,g7,0,no regulation
+g1,g5,0,no regulation
+g10,g10,0,no regulation
+g10,g8,0,no regulation
 g2,g2,0,no regulation
-g2,g3,0,no regulation
-g2,g4,0,no regulation
-g2,g7,0,no regulation
 g3,g3,0,no regulation
 g4,g1,0,no regulation
 g4,g4,0,no regulation
-g6,g2,0,no regulation
+g4,g8,0,no regulation
+g5,g5,0,no regulation
+g5,g8,0,no regulation
+g6,g10,0,no regulation
 g6,g6,0,no regulation
-g7,g2,0,no regulation
-g7,g3,0,no regulation
+g7,g1,0,no regulation
 g7,g7,0,no regulation
-g8,g3,0,no regulation
+g7,g8,0,no regulation
+g7,g9,0,no regulation
 g8,g8,0,no regulation
+g9,g5,0,no regulation
+g9,g9,0,no regulation

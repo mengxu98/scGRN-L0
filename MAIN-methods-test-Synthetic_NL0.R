@@ -149,48 +149,6 @@ for (j in 1:length(data_path)) {
 
       # --------------------------------------------------
       if (T) {
-        # result <- SINCERITITES(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 1)
-        result <- SINCERITITES(DATA, distance = 1, method = 1, noDIAG = 1, SIGN = 0)
-        # Final ranked list of regulatory edges
-        adj_matrix <- result$adj_matrix / max(result$adj_matrix)
-        if (adj_matrix[1, 1] == "NaN") {
-          SINCERITITES_AUROC_S <- 0
-          SINCERITITES_AUROC_N <- 0
-        } else {
-          table <- final_ranked_predictions(adj_matrix, DATA$genes, SIGN = 1, saveFile = TRUE)
-          table <- as.data.frame(table)
-          write.table(table[, -4], paste0(output, "test_SINCERITITES.txt"), row.names = F, col.names = F, sep = "\t", quote = F)
-
-          ground_truth_simulation(
-            intput = paste0(output, "test_SINCERITITES.txt"),
-            output = output,
-            dataset_dir = simulation_data_dir,
-            file = "refNetwork.csv"
-          )
-
-          evaluationObject <- prepareEval(paste0(output, "test_SINCERITITES.txt"),
-            paste0(paste0(output, "ground_truth.tsv")),
-            totalPredictionsAccepted = 100000
-          )
-          evaluationObject <- prepareEval(paste0(output, "ground_pred.txt"),
-            paste0(paste0(output, "ground_truth.tsv")),
-            totalPredictionsAccepted = 100000
-          )
-          SINCERITITES_AUROC_N <- calcAUROC(evaluationObject)
-          SINCERITITES_AUPR_N <- calcAUPR(evaluationObject)
-
-          adj_matrix <- na.omit(adj_matrix)
-          AUCresult_SINCERITITES <- auc_from_ranks_TC_sign(adj_matrix, truth_network, 1000)
-          SINCERITITES_AUROC_S <- AUCresult_SINCERITITES$AUROC
-          SINCERITITES_AUPR_S <- AUCresult_SINCERITITES$AUPR
-        }
-
-
-        SINCERITITES_AUROC_N
-        SINCERITITES_AUROC_S
-      }
-      # --------------------------------------------------
-      if (T) {
         data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_all.csv"),
           header = T
         ) %>% as.matrix()
@@ -201,30 +159,10 @@ for (j in 1:length(data_path)) {
 
         data_GENIE3 <- data_GENIE3[, -ncol(data_GENIE3)]
 
-        NIMEFI(data_GENIE3,
-          GENIE = T, SVM = F, EL = F, penalty = "L0",
-          outputFileName = paste0(output, "output_GENIE3"),
-          outputFileFormat = "txt",
-          SVMRankThreshold = 5, SVMEnsembleSize = 100,
-          ELPredSampleMin = 20, ELPredSampleMax = 80,
-          ELExpSampleMin = 20, ELExpSampleMax = 80,
-          ELRankThreshold = 5, ELEnsembleSize = 500
-        )
-
-        evaluationObject <- prepareEval(paste0(output, "output_GENIE3.txt"),
-          paste0(paste0(output, "ground_truth.tsv")),
-          totalPredictionsAccepted = 100000
-        )
-
-        GENIE3_AUROC <- calcAUROC(evaluationObject)
-        GENIE3_AUPR <- calcAUPR(evaluationObject)
-        GENIE3_AUROC
-        GENIE3_AUPR
-
-        # AAA <- convertSortedRankTSVToAdjMatrix(paste0(output, "output_GENIE3.txt"))
       }
 
       if (T) {
+
         NIMEFI(data_GENIE3,
           GENIE = F, SVM = F, EL = T, penalty = "L0",
           outputFileName = paste0(output, "output_NIMEFI_L0"),
@@ -265,7 +203,7 @@ for (j in 1:length(data_path)) {
         AUROC_NIMEFI_L0L2
         AUROC_NIMEFI_L0
       }
-
+      
       if (T) {
         source("DynamicGRNPipe_3.constructionNetwork_L0.R")
         L0REG_L0 <- L0REG(t(data_GENIE3),
@@ -337,10 +275,7 @@ for (j in 1:length(data_path)) {
         AUROC_L0REG_L0L2_N = AUROC_L0REG_L0L2_N,
         AUROC_L0REG_L0L2_S = AUROC_L0REG_L0L2_S,
         AUROC_NIMEFI_L0L2 = AUROC_NIMEFI_L0L2,
-        AUROC_NIMEFI_L0 = AUROC_NIMEFI_L0,
-        AUROC_GENIE3 = GENIE3_AUROC,
-        AUROC_SINCERITITES_N = SINCERITITES_AUROC_N,
-        AUROC_SINCERITITES_S = SINCERITITES_AUROC_S
+        AUROC_NIMEFI_L0 = AUROC_NIMEFI_L0
       )
       message(paste0("----- ", evaluation_infromation, " -----"))
       evaluation_infromations <- rbind.data.frame(evaluation_infromations, evaluation_infromation)

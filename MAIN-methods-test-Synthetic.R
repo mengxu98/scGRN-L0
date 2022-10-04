@@ -378,7 +378,7 @@ methods_barplot_all <- evaluation_infromations_all %>%
 
 
 my_comparisons <- list(
-  c("AUROC_SINCERITITES_L0", "AUROC_GENIE3")
+  c("AUROC_NIMEFI_L0", "AUROC_GENIE3")
 )
 
   p <- ggplot(

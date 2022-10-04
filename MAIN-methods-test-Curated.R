@@ -43,9 +43,9 @@ output <- "output_Curated/"
 
 evaluation_infromations_all <- c()
 for (j in 1:length(data_path)) {
-  evaluation_infromations2 <- c()
+  # evaluation_infromations2 <- c()
   # for (k in 1:length(cell_num)) {
-  #   evaluation_infromations <- c()
+  evaluation_infromations <- c()
     for (i in 1:length(cell_drop)) {
       # if (i == 1) {
       #   message(paste0("----- Now run the GRN model with ", data_path[j], " dataset and drop-out of cell with 1", "! -----"))

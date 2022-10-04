@@ -154,8 +154,8 @@ for (j in 1:length(data_path)) {
         # Final ranked list of regulatory edges
         adj_matrix <- result$adj_matrix / max(result$adj_matrix)
         if (adj_matrix[1, 1] == "NaN") {
-          SINCERITITES_AUROC_S <- 0
-          SINCERITITES_AUROC_N <- 0
+          SINCERITITES_AUROC_S <- NA
+          SINCERITITES_AUROC_N <- NA
         } else {
           table <- final_ranked_predictions(adj_matrix, DATA$genes, SIGN = 1, saveFile = TRUE)
           table <- as.data.frame(table)
@@ -328,20 +328,21 @@ for (j in 1:length(data_path)) {
       # --------------------------------------------------
       evaluation_infromation <- data.frame(
         datasets = paste0(data_path[j], "-", cell_num[k], "-", cell_drop[i]),
-        AUROC_SINCERITITES_L0_N = AUROC_L0_N,
-        AUROC_SINCERITITES_L0_S = AUROC_L0_S,
-        AUROC_SINCERITITES_L0L2_N = AUROC_L0L2_N,
-        AUROC_SINCERITITES_L0L2_S = AUROC_L0L2_S,
-        AUROC_L0REG_L0_N = AUROC_L0REG_L0_N,
-        AUROC_L0REG_L0_S = AUROC_L0REG_L0_S,
-        AUROC_L0REG_L0L2_N = AUROC_L0REG_L0L2_N,
-        AUROC_L0REG_L0L2_S = AUROC_L0REG_L0L2_S,
+        AUROC_SINCERITITES_L0 = AUROC_L0_N,
+        # AUROC_SINCERITITES_L0_S = AUROC_L0_S,
+        AUROC_SINCERITITES_L0L2 = AUROC_L0L2_N,
+        # AUROC_SINCERITITES_L0L2_S = AUROC_L0L2_S,
+        # AUROC_L0REG_L0_N = AUROC_L0REG_L0_N,
+        # AUROC_L0REG_L0_S = AUROC_L0REG_L0_S,
+        # AUROC_L0REG_L0L2_N = AUROC_L0REG_L0L2_N,
+        # AUROC_L0REG_L0L2_S = AUROC_L0REG_L0L2_S,
         AUROC_NIMEFI_L0L2 = AUROC_NIMEFI_L0L2,
         AUROC_NIMEFI_L0 = AUROC_NIMEFI_L0,
         AUROC_GENIE3 = GENIE3_AUROC,
-        AUROC_SINCERITITES_N = SINCERITITES_AUROC_N,
-        AUROC_SINCERITITES_S = SINCERITITES_AUROC_S
+        AUROC_SINCERITITES = SINCERITITES_AUROC_N#,
+        # AUROC_SINCERITITES_S = SINCERITITES_AUROC_S
       )
+      
       message(paste0("----- ", evaluation_infromation, " -----"))
       evaluation_infromations <- rbind.data.frame(evaluation_infromations, evaluation_infromation)
     }
@@ -349,8 +350,116 @@ for (j in 1:length(data_path)) {
   }
   evaluation_infromations_all <- rbind.data.frame(evaluation_infromations_all, evaluation_infromations2)
 }
-
+# evaluation_infromations_all
+# evaluation_infromations_all[evaluation_infromations_all==0] <- NA
+na.omit(evaluation_infromations_all)
 write.csv(evaluation_infromations_all, "Results/evaluation_infromations.csv")
+
+if(F){
+  library(patchwork)
+library(ggplot2)
+library(reshape2)
+library(ggpubr)
+library(dplyr)
+library(tidyr)
+library(pheatmap)
+library(tidyverse)
+library(RColorBrewer)
+
+  evaluation_infromations_all <- read.csv("Results/evaluation_infromations.csv")
+  head(evaluation_infromations_all[1:3,1:3])
+methods_barplot_all <- evaluation_infromations_all %>%
+    as.data.frame() %>%
+    pivot_longer(
+      cols = 2:c(ncol(evaluation_infromations_all)),
+      names_to = "Methods",
+      values_to = "AUROC"
+    )
+
+
+my_comparisons <- list(
+  c("AUROC_SINCERITITES_L0", "AUROC_GENIE3")
+)
+
+  p <- ggplot(
+    methods_barplot_all,
+    aes(
+      x = Methods,
+      y = AUROC
+    )
+  ) +
+    # guides(fill = guide_legend(title = NULL)) +
+    stat_compare_means(
+      method = "wilcox.test",
+      label = "p.signif",
+      comparisons = my_comparisons,
+      bracket.size = 0.6,
+      sizen = 4,
+      color = "#6699cc"
+    ) +
+    # ylim(0, max(methods_barplot_all$AUROC) + 0.07) +
+    labs(
+      x = "Methods",
+      y = "Percentage"
+    ) +
+    # stat_summary(
+    #   fun.data = "mean_sdl",
+    #   fun.args = list(mult = 1),
+    #   geom = "pointrange",
+    #   color = "gray"
+    # ) +
+    # geom_violin(aes(fill = datasets),
+    #   trim = FALSE
+    # ) +
+    geom_boxplot(width = 0.5) +
+    scale_fill_manual(values = c(
+      "#2874c5",
+      "#008a00",
+      "#c6524a",
+      "#eabf00",
+      "#696969",
+      "#008a00",
+      "#c6524a",
+      "#eabf00",
+      "#696969",
+      "#008a00",
+      "#c6524a",
+      "#eabf00",
+      "#696969"
+    )) +
+    theme(legend.position = "bottom") +
+    scale_color_manual(values = c(
+      "#2874c5",
+      "#008a00",
+      "#c6524a",
+      "#eabf00",
+      "#696969",
+      "#008a00",
+      "#c6524a",
+      "#eabf00",
+      "#696969",
+      "#008a00",
+      "#c6524a",
+      "#eabf00",
+      "#696969"
+    )) +
+    # facet_wrap(~Methods) +
+    # theme_gray() +
+    theme_bw() +
+    theme(
+      axis.text.x = element_text(
+        angle = 45,
+        hjust = 1,
+        vjust = 1,
+        size = 10
+      )
+    )
+  p
+ggsave(paste0("Results/", "Fig. 7.png"), width = 11, height = 8)
+ggsave(p, filename = paste0("Results/", "Fig. 7.png"))
+}
+
+
 
 if (F) {
   mycol <- c("black", "gray", "white")

@@ -456,7 +456,7 @@ if (T) {
       ggtitle(" ") + # 设置总的标题
       theme_bw() +
       theme(legend.position = "bottom") +
-      # theme(legend.position="none", #不需要图例
+      # theme(legend.position="none",
       #       axis.text.x=element_text(colour="black",family="Times",size=14), #设置x轴刻度标签的字体属性
       #       axis.text.y=element_text(family="Times",size=14,face="plain"), #设置x轴刻度标签的字体属性
       #       axis.title.y=element_text(family="Times",size = 14,face="plain"), #设置y轴的标题的字体属性

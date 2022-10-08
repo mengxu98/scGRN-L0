@@ -359,6 +359,7 @@ if (F) {
 
   evaluation_infromations_all <- read.csv("Results/evaluation_infromations_Curated.csv")
   head(evaluation_infromations_all[1:3, 1:3])
+  evaluation_infromations_all <- evaluation_infromations_all[, -1]
   methods_barplot_all <- evaluation_infromations_all %>%
     as.data.frame() %>%
     pivot_longer(
@@ -369,7 +370,9 @@ if (F) {
 
 
   my_comparisons <- list(
-    c("AUROC_NIMEFI_L0", "AUROC_GENIE3")
+    c("AUROC_NIMEFI_L0", "AUROC_GENIE3"),
+    c("AUROC_SINCERITITES", "AUROC_GENIE3"),
+    c("AUROC_SINCERITITES", "AUROC_NIMEFI_L0")
   )
 
   p <- ggplot(
@@ -391,7 +394,7 @@ if (F) {
     # ylim(0, max(methods_barplot_all$AUROC) + 0.07) +
     labs(
       x = "Methods",
-      y = "Percentage"
+      y = "AUROC"
     ) +
     # stat_summary(
     #   fun.data = "mean_sdl",
@@ -442,15 +445,41 @@ if (F) {
         angle = 45,
         hjust = 1,
         vjust = 1,
-        size = 10
+        size = 15
       )
     )
   p
-  ggsave(paste0("Results/", "Fig. 7.png"), width = 11, height = 8)
-  ggsave(p, filename = paste0("Results/", "Fig. 7.png"))
+  ggsave(paste0("Results/", "Methods-contrast-cur.png"), width = 11, height = 8, dpi = 600)
+  ggsave(p, filename = paste0("Results/", "Methods-contrast-cur.png"))
+
+  methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUROC, colour = Methods)) +
+    geom_boxplot() +
+    theme_bw() +
+    theme(legend.position = "none")
+
+
+  P1 <- ggplot(methods_barplot_all, aes(x = Methods, y = AUROC, fill = Methods)) + # ”fill=“设置填充颜色
+    stat_boxplot(geom = "errorbar", width = 0.15, aes(color = "black")) + # 由于自带的箱形图没有胡须末端没有短横线，使用误差条的方式补上
+    geom_boxplot(size = 0.5, fill = "white", outlier.fill = "white", outlier.color = "white") + # size设置箱线图的边框线和胡须的线宽度，fill设置填充颜色，outlier.fill和outlier.color设置异常点的属性
+    geom_jitter(aes(fill = Methods), width = 0.2, shape = 21, size = 2.5) + # 设置为向水平方向抖动的散点图，width指定了向水平方向抖动，不改变纵轴的值
+    scale_fill_manual(values = c("#E69F00", "#0072B2", "#F0E442", "#c6524a", "#eabf00", "#696969")) + # 设置填充的颜色
+    scale_color_manual(values = c("black", "#2874c5", "#008a00", "#c6524a", "#eabf00", "#696969")) + # 设置散点图的圆圈的颜色为黑色
+    ggtitle(" ") + # 设置总的标题
+    theme_bw() +
+    theme(legend.position = "bottom") +
+    # theme(legend.position="none", #不需要图例
+    #       axis.text.x=element_text(colour="black",family="Times",size=14), #设置x轴刻度标签的字体属性
+    #       axis.text.y=element_text(family="Times",size=14,face="plain"), #设置x轴刻度标签的字体属性
+    #       axis.title.y=element_text(family="Times",size = 14,face="plain"), #设置y轴的标题的字体属性
+    #       axis.title.x=element_text(family="Times",size = 14,face="plain"), #设置x轴的标题的字体属性
+    #       plot.title = element_text(family="Times",size=15,face="bold",hjust = 0.5), #设置总标题的字体属性
+    #       # panel.grid.major = element_blank(), #不显示网格线
+    #       panel.grid.minor = element_blank())+
+    ylab("AUROC") +
+    xlab("Methods") # 设置x轴和y轴的标题
+
+  P1
 }
-
-
 
 if (F) {
   mycol <- c("black", "gray", "white")

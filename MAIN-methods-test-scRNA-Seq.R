@@ -95,7 +95,7 @@ for (j in 1:length(data_path)) {
       paste0(paste0(output, "ground_truth.tsv")),
       totalPredictionsAccepted = 100000
     )
-    
+
     AUROC_L0_N <- calcAUROC(evaluationObject)
     AUPR_L0_N <- calcAUPR(evaluationObject)
     truth_network <- convertSortedRankTSVToAdjMatrix(paste0(output, "ground_truth.tsv"))
@@ -341,7 +341,7 @@ for (j in 1:length(data_path)) {
 # evaluation_infromations_all
 # evaluation_infromations_all[evaluation_infromations_all==0] <- NA
 na.omit(evaluation_infromations_all)
-write.csv(evaluation_infromations_all, "Results/evaluation_infromations.csv")
+write.csv(evaluation_infromations_all, "Results/evaluation_infromations_scRNA-Seq.csv")
 
 if (F) {
   library(patchwork)

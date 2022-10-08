@@ -468,8 +468,6 @@ if (T) {
       xlab("Method")
     # P1
     # ggsave("Results/Methods-contrast-1.png", width = 4, height = 4, dpi = 600)
-    # ggsave(paste0("Results/", "Methods-contrast-cur.png"), width = 11, height = 8, dpi = 600)
-    # ggsave(p, filename = paste0("Results/", "Methods-contrast-cur.png"))
 
     mycol <- c("black", "gray", "white")
     results_10nets <- evaluation_infromations_GSD

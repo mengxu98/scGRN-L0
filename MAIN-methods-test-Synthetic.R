@@ -465,7 +465,7 @@ if (T) {
       #       # panel.grid.major = element_blank(), #不显示网格线
       #       panel.grid.minor = element_blank())+
       ylab("AUROC") +
-      xlab("Methods") # 设置x轴和y轴的标题
+      xlab("Method")
     # P1
     # ggsave("Results/Methods-contrast-1.png", width = 4, height = 4, dpi = 600)
     # ggsave(paste0("Results/", "Methods-contrast-cur.png"), width = 11, height = 8, dpi = 600)

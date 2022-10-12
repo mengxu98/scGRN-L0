@@ -197,7 +197,6 @@ doublets_filter <- function(seu_obj, doublet_rate = 0.039) {
   #         cols = colP)+
   #   theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))#+theme_light()
   # )
-
   seu_obj_sce <- as.SingleCellExperiment(seu_obj)
   seu_obj_sce <- scDblFinder(seu_obj_sce, dbr = 0.1)
   plotDoubletMap(seu_obj_sce)

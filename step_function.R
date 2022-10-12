@@ -104,7 +104,7 @@ normalize_data <- function(seu_obj) {
 
 # seu_obj <- ScaleData(seu_obj)  #seu_obj@assays$RNA@data
 # seu_obj <- SCTransform(seu_obj)
-## switch目前的assay
+# # switch目前的assay
 # DefaultAssay(object = seu_obj) <- "SCT"
 # #Seurat对象输出10x数据
 # #这里使用的seurat对象必须是由10X文件构建的，不能是counts文件，否则就会报错：path exist
@@ -169,6 +169,8 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
 
 # Doublets --------------------------------------------------
 doublets_filter <- function(seu_obj, doublet_rate = 0.039) {
+  library(DoubletFinder)
+  library(scDblFinder)
   pc.num <- 1:pc_num(seu_obj)
   seu_obj_raw <- seu_obj
   # Seek optimal pK value
@@ -183,13 +185,11 @@ doublets_filter <- function(seu_obj, doublet_rate = 0.039) {
   nExp_poi <- round(doublet_rate * ncol(seu_obj))
   nExp_poi.adj <- round(nExp_poi * (1 - homotypic.prop))
   seu_obj <- doubletFinder_v3(seu_obj,
-    PCs = pc.num, pN = 0.25, pK = pK_bcmvn,
-    nExp = nExp_poi.adj, reuse.pANN = F, sct = T
+    PCs = pc.num, pN = 0.25, pK = pK_bcmvn, nExp = nExp_poi.adj, reuse.pANN = F, sct = T
   )
   seu_obj$doubFind.class <- seu_obj@meta.data %>% select(contains("DF.classifications"))
   seu_obj$doubFind.score <- seu_obj@meta.data %>% select(contains("pANN"))
   # table(seu_obj$doubFind.class)
-  # 结果展示，分类结果在seu_obj@meta.data中
   # print(
   # DimPlot(seu_obj,
   #         reduction = "umap",
@@ -197,17 +197,7 @@ doublets_filter <- function(seu_obj, doublet_rate = 0.039) {
   #         cols = colP)+
   #   theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))#+theme_light()
   # )
-  #
-  # print(
-  # DimPlot(seu_obj,
-  #         reduction = "tsne",
-  #         group.by = "doubFind.class",
-  #         cols = colP)+
-  #   theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))#+theme_light()
-  # )
 
-  ### scDblFinder
-  # Verify
   seu_obj_sce <- as.SingleCellExperiment(seu_obj)
   seu_obj_sce <- scDblFinder(seu_obj_sce, dbr = 0.1)
   plotDoubletMap(seu_obj_sce)

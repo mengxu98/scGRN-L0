@@ -5,9 +5,8 @@ if (T) {
   gc()
   source("step_function.R")
   # devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
-  library(DoubletFinder)
+  
   library(tidyverse)
-  library(scDblFinder)
   library(patchwork)
   library(scuttle)
   library(Seurat)

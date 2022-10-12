@@ -30,9 +30,7 @@ if (T) {
   celltypist <- import("celltypist")
 }
 
-
 load("/data/mengxu/data/all/lung_stage-1_list_raw.Rdata") #seu_obj_list lung_L0_data.Rdata
-# seu_obj_list <- readRDS("/data/mengxu/data/all/lung_stage-1_list_raw.Rdata")
 seu_obj_data_Plasma_list <- list()
 for (i in 1:length(seu_obj_list)) {
   message("[", Sys.time(), "] -----: data normalization!")

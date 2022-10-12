@@ -58,7 +58,7 @@ dim(seu_obj_data)
 seu_obj_data <- SCTransform(seu_obj_data)
 
 # ElbowPlot(seu_obj_data)
-pc <- pc_num(seu_obj_data) # 自动推断合适的'pc'值
+pc <- pc_num(seu_obj_data) # Auto infer 'pc' value
 pc.num <- 1:pc
 
 seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
@@ -82,7 +82,7 @@ scRNA_harmony <- RunHarmony(seu_obj_data,
                             max.iter.harmony = 20
 )
 ElbowPlot(scRNA_harmony, ndims = 50)
-pc <- pc_num(scRNA_harmony) # 自动推断合适的'pc'值
+pc <- pc_num(scRNA_harmony)
 pc.num <- 1:pc
 scRNA_harmony <- RunUMAP(scRNA_harmony, reduction = "harmony", dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
 scRNA_harmony <- FindNeighbors(scRNA_harmony, dims = pc.num) %>% FindClusters(resolution = 1)

@@ -102,7 +102,7 @@ normalize_data <- function(seu_obj) {
   return(seu_obj)
 }
 
-# seu_obj <- ScaleData(seu_obj)  #seu_obj@assays$RNA@data #标准化后的数据,后续分析时注意选择
+# seu_obj <- ScaleData(seu_obj)  #seu_obj@assays$RNA@data
 # seu_obj <- SCTransform(seu_obj)
 ## switch目前的assay
 # DefaultAssay(object = seu_obj) <- "SCT"
@@ -119,8 +119,7 @@ normalize_data <- function(seu_obj) {
 # rownames(seu_obj@assays$RNA@counts)
 annotation_celltype <- function(seu_obj, method = "celltypist") {
   if (method == "celltypist") {
-    # Python
-    library(reticulate)
+    library(reticulate) # For Python packages
     pandas <- import("pandas")
     numpy <- import("numpy")
     scanpy <- import("scanpy")
@@ -150,7 +149,7 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
     model$cell_types
     scanpy$pp$normalize_total(adata, target_sum = 1e4)
     scanpy$pp$log1p(adata)
-    predictions <- celltypist$annotate(adata, model = "Cells_Lung_Airway.pkl", majority_voting = F)
+    predictions <- celltypist$annotate(adata, model = "Cells_Lung_Airway.pkl", majority_voting = FALSE)
     seu_obj <- AddMetaData(seu_obj, predictions$predicted_labels)
     # names(seu_obj@meta.data)[names(seu_obj@meta.data) == 'predicted_labels'] <- 'celltype'
     return(seu_obj)
@@ -169,33 +168,24 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
 }
 
 # Doublets --------------------------------------------------
-doublets_filter <- function(seu_obj, doublet_rate) {
+doublets_filter <- function(seu_obj, doublet_rate = 0.039) {
+  pc.num <- 1:pc_num(seu_obj)
   seu_obj_raw <- seu_obj
-  # seu_obj <- seu_obj_data
-  raw_cell_num <- length(colnames(seu_obj))
-  # 寻找最优pK值
+  # Seek optimal pK value
   sweep.res.list <- paramSweep_v3(seu_obj, PCs = pc.num, sct = T)
   sweep.stats <- summarizeSweep(sweep.res.list, GT = FALSE)
   bcmvn <- find.pK(sweep.stats)
   pK_bcmvn <- bcmvn$pK[which.max(bcmvn$BCmetric)] %>%
     as.character() %>%
     as.numeric()
-
-  # 排除不能检出的同源doublets，优化期望的doublets数量
-  # DoubletRate = 0.039 # 5000细胞对应的doublets rate是3.9%
-  DoubletRate <- doublet_rate
-  # DoubletRate = ncol(seu_obj)*8*1e-6 #按每增加1000个细胞，双细胞比率增加千分之8来计算 #更通用
-  homotypic.prop <- modelHomotypic(seu_obj$celltype) # 最好提供celltype，而不是seurat_clusters。
-  nExp_poi <- round(DoubletRate * ncol(seu_obj))
+  # doublet_rate = ncol(seu_obj)*8*1e-6 #The doublets rate is 3.9% of 5000 cells. For every 1000 additional cells, the double cell ratio increases by 8%
+  homotypic.prop <- modelHomotypic(seu_obj$celltype)
+  nExp_poi <- round(doublet_rate * ncol(seu_obj))
   nExp_poi.adj <- round(nExp_poi * (1 - homotypic.prop))
-
-  ## 使用确定好的参数鉴定doublets
   seu_obj <- doubletFinder_v3(seu_obj,
     PCs = pc.num, pN = 0.25, pK = pK_bcmvn,
     nExp = nExp_poi.adj, reuse.pANN = F, sct = T
   )
-
-  ###
   seu_obj$doubFind.class <- seu_obj@meta.data %>% select(contains("DF.classifications"))
   seu_obj$doubFind.score <- seu_obj@meta.data %>% select(contains("pANN"))
   # table(seu_obj$doubFind.class)
@@ -224,163 +214,35 @@ doublets_filter <- function(seu_obj, doublet_rate) {
   table(truth = seu_obj_sce$scDblFinder.class, call = seu_obj_sce$scDblFinder.class)
   table(seu_obj_sce$scDblFinder.class)
   seu_obj_sce <- as.Seurat(seu_obj_sce)
-
-  #
-
   intersection_doublet <- intersect(
     colnames(seu_obj[, which(seu_obj@meta.data$doubFind.class == "Doublet")]), # Singlet
     colnames(seu_obj_sce[, which(seu_obj_sce@meta.data$scDblFinder.class == "doublet")])
   ) # singlet
-
   if (length(intersection_doublet) == 0) {
     seu_obj <- seu_obj_raw[, colnames(seu_obj_raw[, which(seu_obj@meta.data$doubFind.class == "Singlet")])]
   } else {
     seu_obj <- seu_obj_raw[, setdiff(colnames(seu_obj_raw), intersection_doublet)]
   }
-  ###
+  raw_cell_num <- length(colnames(seu_obj_raw))
   filter_cell_num <- length(colnames(seu_obj))
-
   cell_num_filtered <- raw_cell_num - filter_cell_num
-
   message("[", Sys.time(), "] -----: ", cell_num_filtered, " cells had filtered")
-
   return(seu_obj)
 }
 
-#
+# Merge multiple Seurat objects --------------------------------------------------
 merge_seu_obj <- function(seu_obj_list, samples, stage) {
-  if (stage == "normal") {
-    seu_obj_list <- merge(seu_obj_list[[1]],
+    seu_obj <- merge(seu_obj_list[[1]],
       y = c(
-        seu_obj_list[[2]],
-        seu_obj_list[[3]],
-        seu_obj_list[[4]],
-        seu_obj_list[[5]],
-        seu_obj_list[[6]],
-        seu_obj_list[[7]],
-        seu_obj_list[[8]],
-        seu_obj_list[[9]],
-        seu_obj_list[[10]]
+        seu_obj_list[2:length(seu_obj_list)]
       ),
       add.cell.ids = samples,
-      project = "NSCLC_Normal"
+      project = paste0("NSCLC-stage-", stage)
     )
-  } else if (stage == "1") {
-    seu_obj_list <- merge(seu_obj_list[[1]],
-      y = c(
-        seu_obj_list[[2]],
-        seu_obj_list[[3]],
-        seu_obj_list[[4]],
-        seu_obj_list[[5]],
-        seu_obj_list[[6]],
-        seu_obj_list[[7]],
-        seu_obj_list[[8]],
-        seu_obj_list[[9]],
-        seu_obj_list[[10]],
-        seu_obj_list[[11]],
-        seu_obj_list[[12]],
-        seu_obj_list[[13]],
-        seu_obj_list[[14]],
-        seu_obj_list[[15]]
-      ),
-      add.cell.ids = samples,
-      project = "NSCLC_Stage-1"
-    )
-  } else if (stage == "2") {
-    seu_obj_list <- merge(seu_obj_list[[1]],
-      y = c(
-        seu_obj_list[[2]],
-        seu_obj_list[[3]],
-        seu_obj_list[[4]],
-        seu_obj_list[[5]],
-        seu_obj_list[[6]],
-        seu_obj_list[[7]],
-        seu_obj_list[[8]],
-        seu_obj_list[[9]],
-        seu_obj_list[[10]],
-        seu_obj_list[[11]],
-        seu_obj_list[[12]]
-      ),
-      add.cell.ids = samples,
-      project = "NSCLC_Stage-2"
-    )
-  } else if (stage == "3") {
-    seu_obj_list <- merge(seu_obj_list[[1]],
-      y = c(
-        seu_obj_list[[2]],
-        seu_obj_list[[3]],
-        seu_obj_list[[4]],
-        seu_obj_list[[5]],
-        seu_obj_list[[6]],
-        seu_obj_list[[7]],
-        seu_obj_list[[8]],
-        seu_obj_list[[9]],
-        seu_obj_list[[10]],
-        seu_obj_list[[11]],
-        seu_obj_list[[12]],
-        seu_obj_list[[13]],
-        seu_obj_list[[14]],
-        seu_obj_list[[15]],
-        seu_obj_list[[16]],
-        seu_obj_list[[17]],
-        seu_obj_list[[18]]
-      ),
-      add.cell.ids = samples,
-      project = "NSCLC_Stage-3"
-    )
-  } else if (stage == "4") {
-    seu_obj_list <- merge(seu_obj_list[[1]],
-      y = c(
-        seu_obj_list[[2]],
-        seu_obj_list[[3]],
-        seu_obj_list[[4]],
-        seu_obj_list[[5]],
-        seu_obj_list[[6]],
-        seu_obj_list[[7]],
-        seu_obj_list[[8]],
-        seu_obj_list[[9]],
-        seu_obj_list[[10]],
-        seu_obj_list[[11]],
-        seu_obj_list[[12]],
-        seu_obj_list[[13]],
-        seu_obj_list[[14]],
-        seu_obj_list[[15]],
-        seu_obj_list[[16]],
-        seu_obj_list[[17]],
-        seu_obj_list[[18]],
-        seu_obj_list[[19]],
-        seu_obj_list[[20]],
-        seu_obj_list[[21]],
-        seu_obj_list[[22]],
-        seu_obj_list[[23]],
-        seu_obj_list[[24]],
-        seu_obj_list[[25]],
-        seu_obj_list[[26]],
-        seu_obj_list[[27]],
-        seu_obj_list[[28]],
-        seu_obj_list[[29]],
-        seu_obj_list[[30]],
-        seu_obj_list[[31]],
-        seu_obj_list[[32]]
-      ),
-      add.cell.ids = samples,
-      project = "NSCLC_Stage-4"
-    )
-  }
-
-  return(seu_obj_list)
+  return(seu_obj)
 }
 
-
-
-
-
-
-
-
-
-
-
+# Plot function --------------------------------------------------
 qc_std_plot_helper <- function(x) {
   x +
     scale_color_viridis() +

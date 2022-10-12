@@ -22,12 +22,6 @@ if (T) {
   load("/data/mengxu/data/SingleR_data/HumanPrimaryCellAtlas_hpca.se_human.RData")
   load("/data/mengxu/data/SingleR_data/BlueprintEncode_bpe.se_human.RData")
   
-  # Python
-  library(reticulate)
-  pandas <- import("pandas")
-  numpy <- import("numpy")
-  scanpy <- import("scanpy")
-  celltypist <- import("celltypist")
 }
 
 load("/data/mengxu/data/all/lung_L0_data.Rdata") #seu_obj_list

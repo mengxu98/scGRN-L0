@@ -1,5 +1,6 @@
 
-# color
+
+# Color--------------------------------------------------
 colP <- c(
   "#3366cc", "#66ff66", "#003366", "#66ffcc", "#ffffcc", "#66ffff",
   "#ffcc00", "#66cc66", "#ffcc66", "#66cccc", "#ffcccc", "#66ccff",
@@ -40,140 +41,94 @@ colP <- c(
 )
 
 pc_num <- function(sce) {
-  # 判断标准：
-  # 1.主成分累积贡献大于90%
-  # 2.PC本身对方差贡献小于5%
-  # 3.两个连续PCs之间差异小于0.1%
-
-  # 将要检测的seurat对象传递给sce
-
-  # if (sce@reductions[1]=='NULL') {
-  #   message(Sys.time(), " --- Not found 'pac' in the seurat object, now run RunPCA!")
-  #   sce <- normalize_data(sce)
-  #   sce <- ScaleData(sce,
-  #                    #vars.to.regress = c("nCount_RNA", "pMT"), #针对每个样本处理是是否还需要消除测序深度和线粒体的影响呢？
-  #                    #vars.to.regress = "CC.Difference", #too slow
-  #                    features = rownames(sce))
-  #
-  #   sce <- FindVariableFeatures(sce,
-  #                               #, nfeatures=2000
-  #                               selection.method = 'vst')
-  #
-  #   sce <- sce %>% RunPCA(verbose = T,
-  #                         features = VariableFeatures(sce),
-  #                         #ndims.print = 6:10,
-  #                         nfeatures.print = 10)
-  #
-  #
-  # }else{
-  message(Sys.time(), " --- Now compute 'pc'number!")
+  # Judgment criteria:
+  # 1. The cumulative contribution of principal components is greater than 90%
+  # 2. The contribution of PC itself to the other party's difference is less than 5%
+  # 3. The difference between two consecutive PCs is less than 0.1%
+  message("[", Sys.time(), "]", " --- Now compute 'pc' number!")
   # Determine percent of variation associated with each PC
   pct <- sce[["pca"]]@stdev / sum(sce[["pca"]]@stdev) * 100
-
   # Calculate cumulative percents for each PC
   cumu <- cumsum(pct)
-
-  # Determine which PC exhibits cumulative percent greater than 90% and % variation associated with the PC as less than 5
+  # Determine which PC exhibits cumulative percent greater than 90% and variation associated with the PC as less than 5
   co1 <- which(cumu > 90 & pct < 5)[1]
-  co1
-
-  # Determine the difference between variation of PC and subsequent PC
+  # Determine the difference between variation of PC and subsequent PC, last point where change of variation is more than 0.1%.
   co2 <- sort(which((pct[1:length(pct) - 1] - pct[2:length(pct)]) > 0.1), decreasing = T)[1] + 1
-
-  # last point where change of % of variation is more than 0.1%.
-  co2
-
   # Minimum of the two calculation
   pcs <- min(co1, co2)
-  pcs
   message("[", Sys.time(), "]", " --- PC num should set as 1:", pcs)
-
   # Create a dataframe with values
   plot_df <- data.frame(pct = pct, cumu = cumu, rank = 1:length(pct))
-
   # Elbow plot to visualize
   p <- ggplot(plot_df, aes(cumu, pct, label = rank, color = rank > pcs)) +
     geom_text() +
     geom_vline(xintercept = cumu[pcs], color = "blue") + # 90
     geom_hline(yintercept = min(pct[pct > pct[pcs]]), color = "blue") + # pct > 5
-    theme_gray()
-
+    theme_bw()
   print(p)
-
   return(pcs)
-  # }
 }
 
-
-# annotation
-
+# Normalization for sample --------------------------------------------------
 normalize_data <- function(seu_obj) {
   if (seu_obj$platform[1] == "10X") {
     message("[", Sys.time(), "] -----: platform 10x Genomics")
-
-    # seu_obj <- seu_obj_data
-    ###
     seu_obj <- NormalizeData(object = seu_obj, normalization.method = "LogNormalize", scale.factor = 1e4)
-
-    # seu_obj <- ScaleData(seu_obj)  #seu_obj@assays$RNA@data #标准化后的数据,后续分析时注意选择
-
-    # seu_obj@assays$RNA@counts[1:40,1:4]
-    # seu_obj@assays$RNA@data[1:40,1:4]
-    # seu_obj <- SCTransform(seu_obj)
-    ## switch目前的assay
-    # DefaultAssay(object = seu_obj) <- "SCT"
-    # #Seurat对象输出10x数据
-    # #这里使用的seurat对象必须是由10X文件构建的，不能是counts文件，否则就会报错：path exist
-    # library(DropletUtils)
-    # write10xCounts(x = seu_obj@assays$RNA@counts, path = '10x', version="3")
   } else if (seu_obj$platform[1] == "IndropSeq") {
     message("[", Sys.time(), "] -----: platform IndropSeq")
     seu_obj <- NormalizeData(object = seu_obj, normalization.method = "LogNormalize", scale.factor = 1e4)
   } else if (seu_obj$platform[1] == "SmartSeq2") {
     message("[", Sys.time(), "] -----: platform Smart-seq2")
-
+    project.name <- seu_obj@project.name
     seu_obj <- as.SingleCellExperiment(seu_obj)
-
     # QC
     qcstats <- perCellQCMetrics(seu_obj)
     qcfilter <- quickPerCellQC(qcstats)
     summary(qcfilter$discard)
     seu_obj <- seu_obj[, !qcfilter$discard]
     clusters <- quickCluster(seu_obj)
-
-    # 标准化
+    # Normalization
     seu_obj <- computeSumFactors(seu_obj, clusters = clusters)
     summary(sizeFactors(seu_obj))
     seu_obj <- logNormCounts(seu_obj)
-
-    # seu_obj@assays@data$logcounts #标准化后的数据
     seu_obj <- CreateSeuratObject(
       counts = seu_obj@assays@data$logcounts,
-      project = samples[i],
+      project = project.name,
       min.features = 200,
       min.cells = 3
     )
-
-    #
     seu_obj$platform <- "SmartSeq2"
   }
-
   return(seu_obj)
 }
 
-annotation_celltype <- function(seu_obj, method) {
+# seu_obj <- ScaleData(seu_obj)  #seu_obj@assays$RNA@data #标准化后的数据,后续分析时注意选择
+# seu_obj <- SCTransform(seu_obj)
+## switch目前的assay
+# DefaultAssay(object = seu_obj) <- "SCT"
+# #Seurat对象输出10x数据
+# #这里使用的seurat对象必须是由10X文件构建的，不能是counts文件，否则就会报错：path exist
+# library(DropletUtils)
+# write10xCounts(x = seu_obj@assays$RNA@counts, path = '10x', version="3")
+
+# Annotation --------------------------------------------------
+# annotation_celltypist <- function(seu_obj){
+# https://github.com/Teichlab/celltypist
+# celltypist$models$download_models(force_update = T) #First run needs to download the trained model data.
+# source_python('celltypist_model_download.py')
+# rownames(seu_obj@assays$RNA@counts)
+annotation_celltype <- function(seu_obj, method = "celltypist") {
   if (method == "celltypist") {
+    # Python
+    library(reticulate)
+    pandas <- import("pandas")
+    numpy <- import("numpy")
+    scanpy <- import("scanpy")
+    celltypist <- import("celltypist")
     message("[", Sys.time(), "] -----: Run 'celltypist'!")
-
-    # annotation_celltypist <- function(seu_obj){
-    # https://github.com/Teichlab/celltypist
-    # celltypist$models$download_models(force_update = T) #First run needs to download the trained model data.
-    # source_python('celltypist_model_download.py')
-    # rownames(seu_obj@assays$RNA@counts)
-
     if (length(colnames(seu_obj)) < 100000) {
       adata <- scanpy$AnnData(
-        X = numpy$array(t(as.matrix(seu_obj[["RNA"]]@counts))), # X = numpy$array(as.matrix(t(seu_obj[['RNA']]@counts)))
+        X = numpy$array(t(as.matrix(seu_obj[["RNA"]]@counts))),
         obs = pandas$DataFrame(seu_obj@meta.data),
         var = pandas$DataFrame(data.frame(
           gene = rownames(seu_obj[["RNA"]]@counts),
@@ -183,7 +138,7 @@ annotation_celltype <- function(seu_obj, method) {
     } else {
       source("as_matrix_cpp.R")
       adata <- scanpy$AnnData(
-        X = numpy$array(t(as_matrix(seu_obj[["RNA"]]@counts))), #
+        X = numpy$array(t(as_matrix(seu_obj[["RNA"]]@counts))),
         obs = pandas$DataFrame(seu_obj@meta.data),
         var = pandas$DataFrame(data.frame(
           gene = rownames(seu_obj[["RNA"]]@counts),
@@ -191,83 +146,29 @@ annotation_celltype <- function(seu_obj, method) {
         ))
       )
     }
-
-
     model <- celltypist$models$Model$load(model = "Cells_Lung_Airway.pkl")
     model$cell_types
     scanpy$pp$normalize_total(adata, target_sum = 1e4)
     scanpy$pp$log1p(adata)
-
     predictions <- celltypist$annotate(adata, model = "Cells_Lung_Airway.pkl", majority_voting = F)
-
     seu_obj <- AddMetaData(seu_obj, predictions$predicted_labels)
     # names(seu_obj@meta.data)[names(seu_obj@meta.data) == 'predicted_labels'] <- 'celltype'
-
     return(seu_obj)
-    # }
   } else if (method == "singleR") {
+    library("SingleR")
     message("[", Sys.time(), "] -----: Run 'singleR'!")
-    # annotation_SingleR <- function(seu_obj){
-
-    # SingleR_obj <- GetAssayData(scRNA_harmony, slot="data") #获取SCT标准矩阵
+    # SingleR_obj <- GetAssayData(scRNA_harmony, slot= "data")
     # SingleR_obj <- scRNA_harmony@assays$SCT@counts
-    # seu_obj <- seu_obj_data
     SingleR_obj <- seu_obj@assays$RNA@counts
     scRNA.hesc <- SingleR(test = SingleR_obj, ref = hpca.se, labels = hpca.se$label.main)
-
     seu_obj@meta.data$celltype <- scRNA.hesc$labels
-
-    # print(
-    #   DimPlot(seu_obj,
-    #           group.by = c("seurat_clusters", "celltype"),
-    #           reduction = "umap",
-    #           label = T,
-    #           repel = T,
-    #           #pt.size = 0.2,
-    #           cols = colP) #+
-    #   #theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))+
-    #   #NoLegend()
-    # )
-    #
-    # print(
-    #   DimPlot(seu_obj,
-    #           group.by = c("seurat_clusters", "celltype"),
-    #           reduction = "tsne",
-    #           label = T,
-    #           repel = T,
-    #           #pt.size = 0.2,
-    #           cols = colP) #+
-    #   #theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))+
-    #   #NoLegend()
-    # )
-    #
-    # ###查看注释结果
-    #
-    # #基于scores within cells
-    # print(
-    #   plotScoreHeatmap(scRNA.hesc)
-    # )
-    # #基于 per-cell “deltas”诊断
-    # print(
-    #   plotDeltaDistribution(scRNA.hesc, ncol = 3)
-    # )
-    # #与cluster结果比较
-    #
-    # # tab <- table(label = scRNA.hesc$labels, cluster = seu_obj@meta.data$seurat_clusters)
-    # # print(
-    # #   pheatmap(log10(tab + 10))
-    # # )
-
     return(seu_obj)
-
-    # }
   } else if (T) {
-    message("[", Sys.time(), "] -----: Please choose one method between 'celltypist' or 'singleR!'")
+    message("[", Sys.time(), "] -----: Please choose one of methods: 'celltypist' or 'singleR!'")
   }
 }
 
-
-
+# Doublets --------------------------------------------------
 doublets_filter <- function(seu_obj, doublet_rate) {
   seu_obj_raw <- seu_obj
   # seu_obj <- seu_obj_data

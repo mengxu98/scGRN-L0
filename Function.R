@@ -160,7 +160,7 @@ normalize_data <- function(seu_obj) {
 
 # Doublets --------------------------------------------------
 doublets_filter <- function(seu_obj, doublet_rate = 0.039, plot = FALSE, filename = NULL) {
-  package.check(c("scDblFinder", "DoubletFinder"))
+  package.check(c("scDblFinder", "DoubletFinder")) #devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
   pc.num <- 1:pc_num(seu_obj)
   seu_obj_raw <- seu_obj
   # Seek optimal pK value
@@ -220,17 +220,19 @@ doublets_filter <- function(seu_obj, doublet_rate = 0.039, plot = FALSE, filenam
 # celltypist$models$download_models(force_update = T) # First run needs to download the trained model data.
 # source_python('celltypist_model_download.py')
 # rownames(seu_obj@assays$RNA@counts)
+package.check("reticulate") # For Python packages
+pandas <- import("pandas")
+numpy <- import("numpy")
+scanpy <- import("scanpy")
+celltypist <- import("celltypist")
+
 annotation_celltype <- function(seu_obj, method = "celltypist") {
   if (method == "celltypist") {
-    package.check("reticulate") # For Python packages
-    pandas <- import("pandas")
-    numpy <- import("numpy")
-    scanpy <- import("scanpy")
-    celltypist <- import("celltypist")
     message("[", Sys.time(), "] -----: Run 'celltypist'!")
     if (length(colnames(seu_obj)) < 100000) {
       adata <- scanpy$AnnData(
-        X = numpy$array(t(as.matrix(seu_obj[["RNA"]]@counts))),
+        # X = numpy$array(t(as.matrix(seu_obj[["RNA"]]@counts))),
+        X = numpy$array(t(as.matrix(seu_obj[["RNA"]]@data))),
         obs = pandas$DataFrame(seu_obj@meta.data),
         var = pandas$DataFrame(data.frame(
           gene = rownames(seu_obj[["RNA"]]@counts),

@@ -47,8 +47,8 @@ pc.num <- 1:pc
 seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
 seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 1)
 
-DimPlot(
-  seu_obj_data,
+DimPlot(seu_obj_data,
+  reduction = "umap",
   group.by = "orig.ident"
 ) +
   theme_bw()+
@@ -57,33 +57,47 @@ DimPlot(
 library(harmony)
 scRNA_harmony <- RunHarmony(seu_obj_data,
                             group.by.vars = "orig.ident",
-                            assay.use = "SCT",
+                            # assay.use = "SCT",
                             max.iter.harmony = 20
 )
-ElbowPlot(scRNA_harmony, ndims = 50)
 pc <- pc_num(scRNA_harmony)
 pc.num <- 1:pc
-scRNA_harmony <- RunUMAP(scRNA_harmony, reduction = "harmony", dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
+scRNA_harmony <- RunUMAP(scRNA_harmony, reduction = "harmony", dims = pc.num)
 scRNA_harmony <- FindNeighbors(scRNA_harmony, dims = pc.num) %>% FindClusters(resolution = 1)
-DimPlot(scRNA_harmony,
-        reduction = "umap",
-        group.by = "orig.ident",
-        label = T,
-        cols = colP,
-        repel = T
-        # pt.size = 0.2
-) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) + # NoLegend() +
-  scale_colour_viridis_d(option = "inferno")
 
-DimPlot(seu_obj_data,
+p1 <- DimPlot(seu_obj_data,
         reduction = "umap",
-        group.by = "orig.ident",
-        label = T,
-        cols = colP,
-        repel = T
-        # pt.size = 0.2
-) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) + # NoLegend() +
-  scale_colour_viridis_d(option = "inferno")
+        group.by = "orig.ident"
+) +
+  theme_bw()+
+  NoLegend()
+
+p2 <- DimPlot(scRNA_harmony,
+        reduction = "umap",
+        group.by = "orig.ident"
+) +
+  theme_bw()+
+  NoLegend()
+p1+p2
+# DimPlot(scRNA_harmony,
+#         reduction = "umap",
+#         group.by = "orig.ident",
+#         label = T,
+#         cols = colP,
+#         repel = T
+#         # pt.size = 0.2
+# ) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) + # NoLegend() +
+#   scale_colour_viridis_d(option = "inferno")
+# 
+# DimPlot(seu_obj_data,
+#         reduction = "umap",
+#         group.by = "orig.ident",
+#         label = T,
+#         cols = colP,
+#         repel = T
+#         # pt.size = 0.2
+# ) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) + # NoLegend() +
+#   scale_colour_viridis_d(option = "inferno")
 
 #-----------------------------------------------------------------------------------#
 scRNA_harmony <- annotation_celltype(scRNA_harmony, method = "celltypist") # method = "celltypist" or "singleR"
@@ -96,12 +110,6 @@ print(DimPlot(seu_obj_data, group.by = c("labels"), reduction = "umap"))
 print(DimPlot(scRNA_harmony, group.by = c("orig.ident"), reduction = "umap"))
 print(DimPlot(scRNA_harmony, group.by = c("labels"), reduction = "umap"))
 
-if (length(which(scRNA_harmony$labels == c("B_mature","B_naive","B_plasma","B_plasmablast"))) == 0) {
-  print("No B cell !!!")
-} else {
-  seu_obj_data_Plasma <- scRNA_harmony[, (scRNA_harmony$labels == c("B_mature","B_naive","B_plasma","B_plasmablast"))]
-}
-
 obj_cells <- c("B_mature","B_naive","B_plasma","B_plasmablast")
 seu_obj_data_obj_cells <- list()
 for (i in 1:length(obj_cells)) {
@@ -113,6 +121,9 @@ seu_obj_data_B <- merge(seu_obj_data_obj_cells[[1]],seu_obj_data_obj_cells[2:len
 
 dim(seu_obj_data_B)
 seu_obj_data_B <- SCTransform(seu_obj_data_B)
+# seu_obj_data <- NormalizeData(seu_obj_data)
+# seu_obj_data <- FindVariableFeatures(seu_obj_data)
+# seu_obj_data <- ScaleData(seu_obj_data)
 seu_obj_data_B <- RunPCA(seu_obj_data_B, verbose = T)
 pc <- pc_num(seu_obj_data_B)
 pc.num <- 1:pc
@@ -126,7 +137,7 @@ DimPlot(
   repel = T,
   pt.size = 0.2
 ) + 
-  theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
   theme_bw()
 
 DimPlot(
@@ -136,9 +147,8 @@ DimPlot(
   repel = T,
   pt.size = 0.2
 ) + 
-  theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
   theme_bw()
-
 
 scRNA_harmony_B <- RunHarmony(seu_obj_data_B,
                             group.by.vars = "orig.ident",

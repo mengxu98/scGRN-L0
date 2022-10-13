@@ -135,7 +135,7 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
         ))
       )
     } else {
-      source("as_matrix_cpp.R")
+      source("Function-as_matrix_cpp.R")
       adata <- scanpy$AnnData(
         X = numpy$array(t(as_matrix(seu_obj[["RNA"]]@counts))),
         obs = pandas$DataFrame(seu_obj@meta.data),
@@ -220,6 +220,15 @@ doublets_filter <- function(seu_obj, doublet_rate = 0.039) {
 }
 
 # Merge multiple Seurat objects --------------------------------------------------
+nFeature_lower <- 500
+nFeature_upper <- 10000
+nCount_lower <- 1000
+nCount_upper <- 100000
+pMT_lower <- 0
+pMT_upper <- 25
+pHB_lower <- 0
+pHB_upper <- 5
+
 merge_seu_obj <- function(seu_obj_list, samples, stage) {
     seu_obj <- merge(seu_obj_list[[1]],
       y = c(
@@ -241,7 +250,6 @@ qc_std_plot_helper <- function(x) {
 qc_std_plot_nf <- function(seu_obj) {
   qc_data <- as_tibble(FetchData(seu_obj, c("nCount_RNA", "nFeature_RNA", "pMT", "pHB", "pRP")))
   plot_grid(
-
     qc_std_plot_helper(ggplot(qc_data, aes(log2(nCount_RNA), log2(nFeature_RNA), color = pMT))),
     qc_std_plot_helper(ggplot(qc_data, aes(log2(nCount_RNA), log2(nFeature_RNA), color = pHB))),
     qc_std_plot_helper(ggplot(qc_data, aes(log2(nCount_RNA), log2(nFeature_RNA), color = pRP))),
@@ -260,19 +268,9 @@ qc_std_plot_nf <- function(seu_obj) {
   )
 }
 
-nFeature_lower <- 500
-nFeature_upper <- 10000
-nCount_lower <- 1000
-nCount_upper <- 100000
-pMT_lower <- 0
-pMT_upper <- 25
-pHB_lower <- 0
-pHB_upper <- 5
-
 qc_std_plot <- function(seu_obj) {
   qc_data <- as_tibble(FetchData(seu_obj, c("nCount_RNA", "nFeature_RNA", "pMT", "pHB", "pRP")))
   plot_grid(
-
     qc_std_plot_helper(ggplot(qc_data, aes(log2(nCount_RNA), log2(nFeature_RNA), color = pMT))) +
       geom_hline(yintercept = log2(nFeature_lower), color = "red", linetype = 2) +
       geom_hline(yintercept = log2(nFeature_upper), color = "red", linetype = 2) +

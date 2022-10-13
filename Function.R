@@ -40,34 +40,49 @@ colP <- c(
   "#000000", "#990099", "#ffffff", "#990033", "#9900ff", "#000033"
 )
 
-# Packages check --------------------------------------------------
-package.check <- function(package) {
-  if (!requireNamespace(package, quietly = TRUE)) {
-    library(dplyr)
-    library(rvest)
-    message("[", Sys.time(), "] -----: No package: ", package, " in R environment!")
-    CRANpackages <- available.packages() %>%
-      as.data.frame() %>%
-      select(Package) %>%
-      mutate(source = "CRAN")
-    url <- "https://www.bioconductor.org/packages/release/bioc/"
-    biocPackages <- url %>%
-      read_html() %>%
-      html_table() %>%
-      .[[1]] %>%
-      select(Package) %>%
-      mutate(source = "BioConductor")
-    if (package %in% CRANpackages$Package) {
-      message("[", Sys.time(), "] -----: Now install package: ", package, " from CRAN!")
-      install.packages(package)
-      library(package, character.only = T)
-    } else if (package %in% biocPackages$Package) {
-      message("[", Sys.time(), "] -----: Now install package: ", package, " from BioConductor!")
-      BiocManager::install(package)
+# Packages check, download and library --------------------------------------------------
+package.check <- function(packages) {
+  for (package in packages) {
+    if (!requireNamespace(package, quietly = TRUE)) {
+      if (!requireNamespace("dplyr", quietly = TRUE)) {
+        install.packages("dplyr")
+      }
+      library(dplyr)
+      if (!requireNamespace("rvest", quietly = TRUE)) {
+        install.packages("rvest")
+      }
+      library(rvest)
+      message("[", Sys.time(), "] -----: No package: ", package, " in R environment!")
+      CRANpackages <- available.packages() %>%
+        as.data.frame() %>%
+        select(Package) %>%
+        mutate(source = "CRAN")
+      url <- "https://www.bioconductor.org/packages/release/bioc/"
+      biocPackages <- url %>%
+        read_html() %>%
+        html_table() %>%
+        .[[1]] %>%
+        select(Package) %>%
+        mutate(source = "BioConductor")
+      if (package %in% CRANpackages$Package) {
+        message("[", Sys.time(), "] -----: Now install package: ", package, " from CRAN!")
+        install.packages(package)
+        library(package, character.only = T)
+      } else if (package %in% biocPackages$Package) {
+        message("[", Sys.time(), "] -----: Now install package: ", package, " from BioConductor!")
+        BiocManager::install(package)
+        library(package, character.only = T)
+      } else {
+        if (!requireNamespace("githubinstall", quietly = TRUE)) {
+          install.packages("githubinstall")
+        }
+        library(githubinstall)
+        # githubinstall(package)
+        gh_suggest(package)
+      }
+    } else {
       library(package, character.only = T)
     }
-  } else {
-    library(package, character.only = T)
   }
 }
 
@@ -151,8 +166,7 @@ normalize_data <- function(seu_obj) {
 # rownames(seu_obj@assays$RNA@counts)
 annotation_celltype <- function(seu_obj, method = "celltypist") {
   if (method == "celltypist") {
-    library(reticulate) # For Python packages
-    package.check("reticulate")
+    package.check("reticulate") # For Python packages
     pandas <- import("pandas")
     numpy <- import("numpy")
     scanpy <- import("scanpy")
@@ -187,7 +201,7 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
     # names(seu_obj@meta.data)[names(seu_obj@meta.data) == 'predicted_labels'] <- 'celltype'
     return(seu_obj)
   } else if (method == "singleR") {
-    library("SingleR")
+    package.check("SingleR")
     load("/data/mengxu/data/SingleR_data/HumanPrimaryCellAtlas_hpca.se_human.RData")
     load("/data/mengxu/data/SingleR_data/BlueprintEncode_bpe.se_human.RData")
     message("[", Sys.time(), "] -----: Run 'singleR'!")
@@ -204,8 +218,7 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
 
 # Doublets --------------------------------------------------
 doublets_filter <- function(seu_obj, doublet_rate = 0.039) {
-  library(DoubletFinder)
-  library(scDblFinder)
+  package.check(c("scDblFinder", "DoubletFinder"))
   pc.num <- 1:pc_num(seu_obj)
   seu_obj_raw <- seu_obj
   # Seek optimal pK value
@@ -265,6 +278,7 @@ pHB_lower <- 0
 pHB_upper <- 5
 
 merge_seu_obj <- function(seu_obj_list, samples, stage) {
+  package.check("Seurat")
   seu_obj <- merge(seu_obj_list[[1]],
     y = c(
       seu_obj_list[2:length(seu_obj_list)]

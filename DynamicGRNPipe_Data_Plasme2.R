@@ -3,7 +3,7 @@
 if (T) {
   rm(list = ls())
   gc()
-  source("step_function.R")
+  source("Function.R")
   # devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
   
   library(tidyverse)
@@ -13,14 +13,10 @@ if (T) {
   library(scran)
   # BiocManager::install("celldex")
   # BiocManager::install("SingleR")
-  
   library(SingleR)
   library(celldex)
   library(Seurat)
   library(pheatmap)
-  load("/data/mengxu/data/SingleR_data/HumanPrimaryCellAtlas_hpca.se_human.RData")
-  load("/data/mengxu/data/SingleR_data/BlueprintEncode_bpe.se_human.RData")
-  
 }
 
 load("/data/mengxu/data/all/lung_L0_data.Rdata") #seu_obj_list

@@ -40,6 +40,38 @@ colP <- c(
   "#000000", "#990099", "#ffffff", "#990033", "#9900ff", "#000033"
 )
 
+# Packages check --------------------------------------------------
+package.check <- function(package) {
+  if (!requireNamespace(package, quietly = TRUE)) {
+    library(dplyr)
+    library(rvest)
+    message("[", Sys.time(), "] -----: No package: ", package, " in R environment!")
+    CRANpackages <- available.packages() %>%
+      as.data.frame() %>%
+      select(Package) %>%
+      mutate(source = "CRAN")
+    url <- "https://www.bioconductor.org/packages/release/bioc/"
+    biocPackages <- url %>%
+      read_html() %>%
+      html_table() %>%
+      .[[1]] %>%
+      select(Package) %>%
+      mutate(source = "BioConductor")
+    if (package %in% CRANpackages$Package) {
+      message("[", Sys.time(), "] -----: Now install package: ", package, " from CRAN!")
+      install.packages(package)
+      library(package, character.only = T)
+    } else if (package %in% biocPackages$Package) {
+      message("[", Sys.time(), "] -----: Now install package: ", package, " from BioConductor!")
+      BiocManager::install(package)
+      library(package, character.only = T)
+    }
+  } else {
+    library(package, character.only = T)
+  }
+}
+
+# Auto compute PC value --------------------------------------------------
 pc_num <- function(sce) {
   # Judgment criteria:
   # 1. The cumulative contribution of principal components is greater than 90%
@@ -120,6 +152,7 @@ normalize_data <- function(seu_obj) {
 annotation_celltype <- function(seu_obj, method = "celltypist") {
   if (method == "celltypist") {
     library(reticulate) # For Python packages
+    package.check("reticulate")
     pandas <- import("pandas")
     numpy <- import("numpy")
     scanpy <- import("scanpy")
@@ -155,6 +188,8 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
     return(seu_obj)
   } else if (method == "singleR") {
     library("SingleR")
+    load("/data/mengxu/data/SingleR_data/HumanPrimaryCellAtlas_hpca.se_human.RData")
+    load("/data/mengxu/data/SingleR_data/BlueprintEncode_bpe.se_human.RData")
     message("[", Sys.time(), "] -----: Run 'singleR'!")
     # SingleR_obj <- GetAssayData(scRNA_harmony, slot= "data")
     # SingleR_obj <- scRNA_harmony@assays$SCT@counts
@@ -230,13 +265,13 @@ pHB_lower <- 0
 pHB_upper <- 5
 
 merge_seu_obj <- function(seu_obj_list, samples, stage) {
-    seu_obj <- merge(seu_obj_list[[1]],
-      y = c(
-        seu_obj_list[2:length(seu_obj_list)]
-      ),
-      add.cell.ids = samples,
-      project = paste0("NSCLC-stage-", stage)
-    )
+  seu_obj <- merge(seu_obj_list[[1]],
+    y = c(
+      seu_obj_list[2:length(seu_obj_list)]
+    ),
+    add.cell.ids = samples,
+    project = paste0("NSCLC-stage-", stage)
+  )
   return(seu_obj)
 }
 

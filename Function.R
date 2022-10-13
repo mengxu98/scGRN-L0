@@ -258,6 +258,7 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
     return(seu_obj)
   } else if (method == "singleR") {
     package.check("SingleR")
+    # hpca.se <- HumanPrimaryCellAtlasData()
     load("/data/mengxu/data/SingleR_data/HumanPrimaryCellAtlas_hpca.se_human.RData")
     load("/data/mengxu/data/SingleR_data/BlueprintEncode_bpe.se_human.RData")
     message("[", Sys.time(), "] -----: Run 'singleR'!")
@@ -273,15 +274,6 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
 }
 
 # Merge multiple Seurat objects --------------------------------------------------
-nFeature_lower <- 500
-nFeature_upper <- 10000
-nCount_lower <- 1000
-nCount_upper <- 100000
-pMT_lower <- 0
-pMT_upper <- 25
-pHB_lower <- 0
-pHB_upper <- 5
-
 merge_seu_obj <- function(seu_obj_list, samples, stage) {
   package.check("Seurat")
   seu_obj <- merge(seu_obj_list[[1]],
@@ -295,6 +287,15 @@ merge_seu_obj <- function(seu_obj_list, samples, stage) {
 }
 
 # Plot function --------------------------------------------------
+nFeature_lower <- 500
+nFeature_upper <- 10000
+nCount_lower <- 1000
+nCount_upper <- 100000
+pMT_lower <- 0
+pMT_upper <- 25
+pHB_lower <- 0
+pHB_upper <- 5
+
 qc_std_plot_helper <- function(x) {
   x +
     scale_color_viridis() +

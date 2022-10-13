@@ -5,7 +5,6 @@ if (T) {
   gc()
   source("Function.R")
   # devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
-  
   library(tidyverse)
   library(patchwork)
   library(scuttle)
@@ -18,51 +17,42 @@ if (T) {
   library(Seurat)
   library(pheatmap)
 }
-
-load("/data/mengxu/data/all/lung_L0_data.Rdata") #seu_obj_list
-head(mat_com[1:3,1:3])
-mat_com <- t(mat_com)
-
-message("[", Sys.time(), "] -----: data normalization!")
-
+load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_SCT_harmony_PCA.Rdata"))
+# load("/data/mengxu/data/all/lung_L0_data.Rdata") #seu_obj_list
+seu_obj_data1 <- seu_obj_data
+mat_com <- seu_obj_data1@assays$SCT@data
 seu_obj_data <- CreateSeuratObject(
-  counts = mat_com,
-  min.features = 200,
-  min.cells = 3
+  counts = mat_com
 )
 rm(mat_com)
 gc()
-### QC
 seu_obj_data <- PercentageFeatureSet(seu_obj_data, pattern = "^MT-", col.name = "pMT")
 seu_obj_data <- PercentageFeatureSet(seu_obj_data, pattern = "^HBA|^HBB", col.name = "pHB")
 seu_obj_data <- PercentageFeatureSet(seu_obj_data, pattern = "^RPS|^RPL", col.name = "pRP")
 dim(seu_obj_data)
-
+dim(seu_obj_data1)
 # Pre-process Seurat object (standard)
-# seu_obj_data <- NormalizeData(seu_obj_data)
-# seu_obj_data <- FindVariableFeatures(seu_obj_data)
-# seu_obj_data <- ScaleData(seu_obj_data)
+seu_obj_data <- NormalizeData(seu_obj_data)
+seu_obj_data <- FindVariableFeatures(seu_obj_data)
+seu_obj_data <- ScaleData(seu_obj_data)
 
 # Pre-process Seurat object (sctransform)
-seu_obj_data <- SCTransform(seu_obj_data)
+# seu_obj_data <- SCTransform(seu_obj_data)
 
+seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
 # ElbowPlot(seu_obj_data)
 pc <- pc_num(seu_obj_data) # Auto infer 'pc' value
 pc.num <- 1:pc
 
-seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
 seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
-seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 0.3)
+seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 1)
 
 DimPlot(
   seu_obj_data,
-  # group.by = "orig.ident",
-  # label = T,
-  # repel = T
-  # pt.size = 0.2
-) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
-  theme_bw()
-#+NoLegend()
+  group.by = "orig.ident"
+) +
+  theme_bw()+
+  NoLegend()
 
 library(harmony)
 scRNA_harmony <- RunHarmony(seu_obj_data,

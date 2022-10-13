@@ -39,11 +39,6 @@ if (T) {
   source("step_function.R")
   s.genes <- cc.genes$s.genes
   g2m.genes <- cc.genes$g2m.genes
-  ## 下载注释数据库
-  # hpca.se <- HumanPrimaryCellAtlasData()
-  # hpca.se
-  # load("/data/mengxu/data/SingleR_data/HumanPrimaryCellAtlas_hpca.se_human.RData")
-  # load("/data/mengxu/data/SingleR_data/BlueprintEncode_bpe.se_human.RData")
   s.genes <- cc.genes$s.genes
   g2m.genes <- cc.genes$g2m.genes
 
@@ -260,7 +255,7 @@ if (T) {
     )
     # load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter_SCT.Rdata")
 
-    pc <- pc_num(seu_obj_data) # 自动推断合适的'pc'值
+    pc <- pc_num(seu_obj_data)
     pc.num <- 1:pc
 
     seu_obj_data <- seu_obj_data %>% RunUMAP(dims = pc.num) # %>% RunTSNE(dims=pc.num) #'tsne' compute is too slow
@@ -378,7 +373,6 @@ if (T) {
     #                                          |___/
     ################################################################################
 
-    ### harmony整合
     # rm(list=ls())
     # seu_obj_filter <- readRDS("seu_obj_filter.rds")
     # cellinfo <- subset(seu_obj_data@meta.data, select = c("nFeature_RNA", "nCount_RNA", "pMT", "pHB", "pRP"))
@@ -414,7 +408,7 @@ if (T) {
     # lambda值调小，整合力度变大，反之。（只有这个参数影响整合力度，调整范围一般在0.5-2之间）
 
     ElbowPlot(scRNA_harmony, ndims = 50)
-    pc <- pc_num(scRNA_harmony) # 自动推断合适的'pc'值
+    pc <- pc_num(scRNA_harmony)
     pc.num <- 1:pc
     scRNA_harmony <- RunUMAP(scRNA_harmony, reduction = "harmony", dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
 

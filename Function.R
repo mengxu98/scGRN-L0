@@ -119,13 +119,13 @@ pc_num <- function(sce) {
 # Normalization for sample --------------------------------------------------
 normalize_data <- function(seu_obj) {
   if (seu_obj$platform[1] == "10X") {
-    message("[", Sys.time(), "] -----: platform 10x Genomics")
+    message("[", Sys.time(), "] -----: Platform 10x Genomics")
     seu_obj <- NormalizeData(object = seu_obj, normalization.method = "LogNormalize", scale.factor = 1e4)
   } else if (seu_obj$platform[1] == "IndropSeq") {
-    message("[", Sys.time(), "] -----: platform IndropSeq")
+    message("[", Sys.time(), "] -----: Platform IndropSeq")
     seu_obj <- NormalizeData(object = seu_obj, normalization.method = "LogNormalize", scale.factor = 1e4)
   } else if (seu_obj$platform[1] == "SmartSeq2") {
-    message("[", Sys.time(), "] -----: platform Smart-seq2")
+    message("[", Sys.time(), "] -----: Platform Smart-seq2")
     project.name <- seu_obj@project.name
     seu_obj <- as.SingleCellExperiment(seu_obj)
     # QC
@@ -149,19 +149,75 @@ normalize_data <- function(seu_obj) {
   return(seu_obj)
 }
 
+# Seurat object to 10x files --------------------------------------------------
 # seu_obj <- ScaleData(seu_obj)  #seu_obj@assays$RNA@data
 # seu_obj <- SCTransform(seu_obj)
-# # switch目前的assay
+# # switch assay
 # DefaultAssay(object = seu_obj) <- "SCT"
-# #Seurat对象输出10x数据
-# #这里使用的seurat对象必须是由10X文件构建的，不能是counts文件，否则就会报错：path exist
-# library(DropletUtils)
+# # Seurat object as 10x files, and the Seurat must be construst from 10X files, or will error: path exist
+# package.check("DropletUtils")
 # write10xCounts(x = seu_obj@assays$RNA@counts, path = '10x', version="3")
 
+# Doublets --------------------------------------------------
+doublets_filter <- function(seu_obj, doublet_rate = 0.039, plot = FALSE, filename = NULL) {
+  package.check(c("scDblFinder", "DoubletFinder"))
+  pc.num <- 1:pc_num(seu_obj)
+  seu_obj_raw <- seu_obj
+  # Seek optimal pK value
+  sweep.res.list <- paramSweep_v3(seu_obj, PCs = pc.num, sct = T)
+  sweep.stats <- summarizeSweep(sweep.res.list, GT = FALSE)
+  bcmvn <- find.pK(sweep.stats)
+  pK_bcmvn <- bcmvn$pK[which.max(bcmvn$BCmetric)] %>%
+    as.character() %>%
+    as.numeric()
+  # doublet_rate = ncol(seu_obj)*8*1e-6 #The doublets rate is 3.9% of 5000 cells. For every 1000 additional cells, the double cell ratio increases by 8%
+  homotypic.prop <- modelHomotypic(seu_obj$celltype)
+  nExp_poi <- round(doublet_rate * ncol(seu_obj))
+  nExp_poi.adj <- round(nExp_poi * (1 - homotypic.prop))
+  seu_obj <- doubletFinder_v3(seu_obj,
+    PCs = pc.num, pN = 0.25, pK = pK_bcmvn, nExp = nExp_poi.adj, reuse.pANN = F, sct = T
+  )
+  seu_obj$doubFind.class <- seu_obj@meta.data %>% select(contains("DF.classifications"))
+  seu_obj$doubFind.score <- seu_obj@meta.data %>% select(contains("pANN"))
+  # table(seu_obj$doubFind.class)
+  if (plot) {
+    p <- DimPlot(seu_obj,
+      reduction = "umap",
+      group.by = "doubFind.class",
+      cols = colP
+    ) +
+      theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+      theme_bw()
+    print(p)
+    if (filename == NULL) filename <- "Doublets.pdf"
+    ggsave(p, filename = filename)
+  }
+
+  seu_obj_sce <- as.SingleCellExperiment(seu_obj)
+  seu_obj_sce <- scDblFinder(seu_obj_sce, dbr = 0.1)
+  plotDoubletMap(seu_obj_sce)
+  # table(truth = seu_obj_sce$scDblFinder.class, call = seu_obj_sce$scDblFinder.class)
+  # table(seu_obj_sce$scDblFinder.class)
+  seu_obj_sce <- as.Seurat(seu_obj_sce)
+  intersection_doublet <- intersect(
+    colnames(seu_obj[, which(seu_obj@meta.data$doubFind.class == "Doublet")]), # Singlet
+    colnames(seu_obj_sce[, which(seu_obj_sce@meta.data$scDblFinder.class == "doublet")])
+  )
+  if (length(intersection_doublet) == 0) {
+    seu_obj <- seu_obj_raw[, colnames(seu_obj_raw[, which(seu_obj@meta.data$doubFind.class == "Singlet")])]
+  } else {
+    seu_obj <- seu_obj_raw[, setdiff(colnames(seu_obj_raw), intersection_doublet)]
+  }
+  raw_cell_num <- length(colnames(seu_obj_raw))
+  filter_cell_num <- length(colnames(seu_obj))
+  cell_num_filtered <- raw_cell_num - filter_cell_num
+  message("[", Sys.time(), "] -----: ", cell_num_filtered, " cells had filtered as doublets!")
+  return(seu_obj)
+}
+
 # Annotation --------------------------------------------------
-# annotation_celltypist <- function(seu_obj){
 # https://github.com/Teichlab/celltypist
-# celltypist$models$download_models(force_update = T) #First run needs to download the trained model data.
+# celltypist$models$download_models(force_update = T) # First run needs to download the trained model data.
 # source_python('celltypist_model_download.py')
 # rownames(seu_obj@assays$RNA@counts)
 annotation_celltype <- function(seu_obj, method = "celltypist") {
@@ -214,57 +270,6 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
   } else if (T) {
     message("[", Sys.time(), "] -----: Please choose one of methods: 'celltypist' or 'singleR!'")
   }
-}
-
-# Doublets --------------------------------------------------
-doublets_filter <- function(seu_obj, doublet_rate = 0.039) {
-  package.check(c("scDblFinder", "DoubletFinder"))
-  pc.num <- 1:pc_num(seu_obj)
-  seu_obj_raw <- seu_obj
-  # Seek optimal pK value
-  sweep.res.list <- paramSweep_v3(seu_obj, PCs = pc.num, sct = T)
-  sweep.stats <- summarizeSweep(sweep.res.list, GT = FALSE)
-  bcmvn <- find.pK(sweep.stats)
-  pK_bcmvn <- bcmvn$pK[which.max(bcmvn$BCmetric)] %>%
-    as.character() %>%
-    as.numeric()
-  # doublet_rate = ncol(seu_obj)*8*1e-6 #The doublets rate is 3.9% of 5000 cells. For every 1000 additional cells, the double cell ratio increases by 8%
-  homotypic.prop <- modelHomotypic(seu_obj$celltype)
-  nExp_poi <- round(doublet_rate * ncol(seu_obj))
-  nExp_poi.adj <- round(nExp_poi * (1 - homotypic.prop))
-  seu_obj <- doubletFinder_v3(seu_obj,
-    PCs = pc.num, pN = 0.25, pK = pK_bcmvn, nExp = nExp_poi.adj, reuse.pANN = F, sct = T
-  )
-  seu_obj$doubFind.class <- seu_obj@meta.data %>% select(contains("DF.classifications"))
-  seu_obj$doubFind.score <- seu_obj@meta.data %>% select(contains("pANN"))
-  # table(seu_obj$doubFind.class)
-  # print(
-  # DimPlot(seu_obj,
-  #         reduction = "umap",
-  #         group.by = "doubFind.class",
-  #         cols = colP)+
-  #   theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))#+theme_light()
-  # )
-  seu_obj_sce <- as.SingleCellExperiment(seu_obj)
-  seu_obj_sce <- scDblFinder(seu_obj_sce, dbr = 0.1)
-  plotDoubletMap(seu_obj_sce)
-  table(truth = seu_obj_sce$scDblFinder.class, call = seu_obj_sce$scDblFinder.class)
-  table(seu_obj_sce$scDblFinder.class)
-  seu_obj_sce <- as.Seurat(seu_obj_sce)
-  intersection_doublet <- intersect(
-    colnames(seu_obj[, which(seu_obj@meta.data$doubFind.class == "Doublet")]), # Singlet
-    colnames(seu_obj_sce[, which(seu_obj_sce@meta.data$scDblFinder.class == "doublet")])
-  ) # singlet
-  if (length(intersection_doublet) == 0) {
-    seu_obj <- seu_obj_raw[, colnames(seu_obj_raw[, which(seu_obj@meta.data$doubFind.class == "Singlet")])]
-  } else {
-    seu_obj <- seu_obj_raw[, setdiff(colnames(seu_obj_raw), intersection_doublet)]
-  }
-  raw_cell_num <- length(colnames(seu_obj_raw))
-  filter_cell_num <- length(colnames(seu_obj))
-  cell_num_filtered <- raw_cell_num - filter_cell_num
-  message("[", Sys.time(), "] -----: ", cell_num_filtered, " cells had filtered")
-  return(seu_obj)
 }
 
 # Merge multiple Seurat objects --------------------------------------------------

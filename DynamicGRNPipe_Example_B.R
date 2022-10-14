@@ -112,3 +112,70 @@ Dynnet_active1 <- lapply(lineage1dynet, function(x) {
 })
 names(Dynnet_active1) <- paste0("W", 1:length(Dynnet_active1))
 
+source("ground-truth.R")
+source("framework_main.R")
+ground_truth_T(lineage1dynet[[3]], dorothea_regulon_human)
+evaluationObject <- prepareEval("ground_pred.txt",
+  paste0("ground_truth.tsv"),
+  totalPredictionsAccepted = 100000
+)
+
+GENIE3_AUROC <- calcAUROC(evaluationObject)
+GENIE3_AUPR <- calcAUPR(evaluationObject)
+
+weightofWindows_L0 <- DynNet_L0(
+  Windows = Windows1[3],
+  CD8TCellExp.trajectory = CD8TCellExp.trajectory,
+  DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
+  allTFs = allTFs[1:200], # set regulators
+  detectNum = 10, detectPro = 0.05, meanExp = 1 # Noise filtering threshold
+)
+
+ground_truth_T(weightofWindows_L0[[1]], dorothea_regulon_human)
+evaluationObject_L0 <- prepareEval("ground_pred.txt",
+                                   paste0("ground_truth.tsv"),
+                                   totalPredictionsAccepted = 100000
+)
+
+L0_AUROC <- calcAUROC(evaluationObject_L0)
+L0_AUPR <- calcAUPR(evaluationObject_L0)
+
+GENIE3_AUROC
+GENIE3_AUPR
+L0_AUROC
+L0_AUPR
+
+# Filter the edges for each window
+lineage1dynet_L0 <- DynNet_filter(
+  Windows = Windows1,
+  CD8TCellExp.trajectory = CD8TCellExp.trajectory,
+  weightofWindows = weightofWindows_L0,
+  weightThr = 0.02,
+  nsd = 2,
+  positivecor = 0 # ,
+  # confidence = NULL
+)
+
+# extract active edges for each window
+Dynnet_active1_L0 <- lapply(lineage1dynet_L0, function(x) {
+  rownames(x) <- paste0(x[, 1], "_", x[, 2])
+  x <- x[x[, "spearmanCor"] > 0, ]
+  return(x)
+})
+names(Dynnet_active1_L0) <- paste0("W", 1:length(Dynnet_active1_L0))
+
+source("ground-truth.R")
+source("framework_main.R")
+ground_truth_T(weightofWindows_L0[[2]], dorothea_regulon_human)
+evaluationObject_L0 <- prepareEval("ground_pred.txt",
+  paste0("ground_truth.tsv"),
+  totalPredictionsAccepted = 100000
+)
+
+L0_AUROC <- calcAUROC(evaluationObject_L0)
+L0_AUPR <- calcAUPR(evaluationObject_L0)
+
+GENIE3_AUROC
+GENIE3_AUPR
+L0_AUROC
+L0_AUPR

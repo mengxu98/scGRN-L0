@@ -107,7 +107,7 @@ L0REG <- function(matrix,
       )
 
       L0_Model_Information <- as.data.frame(print(L0_Model))
-      L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$suppSize, decreasing = TRUE), ]
+      L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$suppSize, decreasing = T), ]
       lambda_L0 <- L0_Model_Information$lambda[1]
       gamma_L0 <- L0_Model_Information$gamma[1]
       temp <- coef(L0_Model,
@@ -116,6 +116,7 @@ L0REG <- function(matrix,
       )
       temp <- as.vector(temp)
       wghts <- temp[-1]
+      wghts <- wghts / max(wghts)
 
       # wghts <- abs(wghts)
       if (F) {
@@ -135,7 +136,7 @@ L0REG <- function(matrix,
       weightd <- data.frame(regulatoryGene = regulators[i], colnames(X), weight = wghts)
       weightdf <- rbind.data.frame(weightdf, weightd)
       if (i == length(regulators)) {
-        weightdf$weight <- weightdf$weight / max(weightdf$weight)
+        # weightdf$weight <- weightdf$weight / max(weightdf$weight)
         names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
         weightdf <- weightdf[order(weightdf$weight, decreasing = FALSE), ]
       }
@@ -187,7 +188,6 @@ L0REG <- function(matrix,
   # max(resultMatrix)
   return(weightdf)
 }
-
 
 # Prune weak edges
 #' @param Windows list,cells in each window

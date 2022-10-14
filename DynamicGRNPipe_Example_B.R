@@ -142,7 +142,6 @@ evaluationObject_L0 <- prepareEval("ground_pred.txt",
 L0_AUROC <- calcAUROC(evaluationObject_L0)
 L0_AUPR <- calcAUPR(evaluationObject_L0)
 L0_AUROC # 0.4601513 no parallel
-L0_AUPR
 
 GENIE3_AUROC
 GENIE3_AUPR

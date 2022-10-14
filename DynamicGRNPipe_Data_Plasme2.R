@@ -170,7 +170,7 @@ DimPlot(scRNA_harmony_B,
 
 DimPlot(scRNA_harmony_B,
         reduction = "umap",
-        group.by = "labels",
+        group.by = "celltype",
         label = T,
         # cols = colP,
         repel = T
@@ -186,12 +186,100 @@ DimPlot(seu_obj_data_B,
         # pt.size = 0.2
 ) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) + # NoLegend() +
   scale_colour_viridis_d(option = "inferno")
+table(seu_obj_data_B$orig.ident)
+
+obj_samples <- c("NayoungKim2020.P0006",
+"NayoungKim2020.P0008",
+"NayoungKim2020.P0018",
+"NayoungKim2020.P0019",
+"NayoungKim2020.P0020",
+"NayoungKim2020.P0025",
+"NayoungKim2020.P0030",
+"NayoungKim2020.P0034")
+seu_obj_data_obj_cells <- list()
+for (i in 1:length(obj_samples)) {
+  obj_cell <- obj_samples[i]
+  seu_obj_data_obj_cell <- seu_obj_data_B[, (seu_obj_data_B$orig.ident == obj_cell)]
+  seu_obj_data_obj_cells[[i]] <- seu_obj_data_obj_cell
+}
+seu_obj_data_B_samples <- merge(seu_obj_data_obj_cells[[1]],seu_obj_data_obj_cells[2:length(seu_obj_data_obj_cells)])
+
+
+
+dim(seu_obj_data_B_samples)
+seu_obj_data_B_samples <- SCTransform(seu_obj_data_B_samples)
+# seu_obj_data <- NormalizeData(seu_obj_data)
+# seu_obj_data <- FindVariableFeatures(seu_obj_data)
+# seu_obj_data <- ScaleData(seu_obj_data)
+seu_obj_data_B_samples <- RunPCA(seu_obj_data_B_samples, verbose = T)
+pc <- pc_num(seu_obj_data_B_samples)
+pc.num <- 1:pc
+
+seu_obj_data_B_samples <- RunUMAP(seu_obj_data_B_samples, dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
+seu_obj_data_B_samples <- FindNeighbors(seu_obj_data_B_samples, dims = pc.num) %>% FindClusters(resolution = 1)
+DimPlot(
+  seu_obj_data_B_samples,
+  group.by = "celltype",
+  label = T,
+  repel = T,
+  pt.size = 0.2
+) + 
+  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+  theme_bw()
+
+DimPlot(
+  seu_obj_data_B_samples,
+  group.by = "orig.ident",
+  label = T,
+  repel = T,
+  pt.size = 0.2
+) + 
+  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+  theme_bw()
+
+scRNA_harmony_B <- RunHarmony(seu_obj_data_B_samples,
+                            group.by.vars = "orig.ident",
+                            assay.use = "SCT",
+                            max.iter.harmony = 20
+)
+
+scRNA_harmony_B <- RunUMAP(scRNA_harmony_B, reduction = "harmony", dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
+scRNA_harmony_B <- FindNeighbors(scRNA_harmony_B, dims = pc.num) %>% FindClusters(resolution = 1)
+DimPlot(scRNA_harmony_B,
+        reduction = "umap",
+        group.by = "orig.ident",
+        label = T,
+        cols = colP,
+        repel = T
+        # pt.size = 0.2
+) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) + # NoLegend() +
+  scale_colour_viridis_d(option = "inferno")
+
+DimPlot(scRNA_harmony_B,
+        reduction = "umap",
+        group.by = "celltype",
+        label = T,
+        # cols = colP,
+        repel = T
+        # pt.size = 0.2
+)
+
+DimPlot(seu_obj_data_B_samples,
+        reduction = "umap",
+        group.by = "orig.ident",
+        label = T,
+        cols = colP,
+        repel = T
+        # pt.size = 0.2
+) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) + # NoLegend() +
+  scale_colour_viridis_d(option = "inferno")
+
+saveRDS(seu_obj_data_B_samples, file ="../scGRN-L0_data/seu_obj_data_B_samples.rds")
 
 
 
 
-
-
+  
 
 
 mat_com <- seu_obj_data_B@assays$RNA@counts

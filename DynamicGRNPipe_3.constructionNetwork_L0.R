@@ -47,12 +47,22 @@ DynNet_L0 <- function(Windows, CD8TCellExp.trajectory, DynamicGene, allTFs, dete
   # 2. run GENIE3
   library(GENIE3)
   weightofWindows <- lapply(ExpofWindows, function(matrix) {
-    weightdf <- L0REG(
-      matrix = matrix,
-      penalty = "L0",
-      regulators = intersect(allTFs, rownames(matrix)),
-      targets = rownames(matrix)
+    # weightdf <- L0REG(
+    #   matrix = matrix,
+    #   penalty = "L0",
+    #   regulators = intersect(allTFs, rownames(matrix)),
+    #   targets = rownames(matrix)
+    # )
+    NIMEFI(t(matrix),
+           GENIE = F, SVM = F, EL = T, penalty = "L0",
+           outputFileName = paste0("output_NIMEFI_L0"),
+           outputFileFormat = "txt",
+           SVMRankThreshold = 5, SVMEnsembleSize = 100,
+           ELPredSampleMin = 20, ELPredSampleMax = 80,
+           ELExpSampleMin = 20, ELExpSampleMax = 80,
+           ELRankThreshold = 5, ELEnsembleSize = dim(matrix)[1]
     )
+    weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
     # weightdf <- getLinkList(weightMat)
     return(weightdf)
   })

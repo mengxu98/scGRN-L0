@@ -12,7 +12,6 @@ if (T) {
   library(cowplot)
   library(ggplot2)
   library(dplyr)
-  library(reticulate)
   library(sctransform)
   library(viridis)
   library(tidyr)
@@ -22,7 +21,6 @@ if (T) {
   library(progeny)
   library(readr)
   library(stringr)
-  library(SingleR)
   library(celldex)
   library(ggsci)
   library(ggpubr)
@@ -35,22 +33,18 @@ if (T) {
   library(viridis)
   library(SingleCellExperiment)
   # BiocManager::install('glmGamPoi')
-  library(glmGamPoi) # 加速SCT
-  source("step_function.R")
+  library(glmGamPoi) # Boost 'SCTransform' function
+  source("Function.R")
   s.genes <- cc.genes$s.genes
   g2m.genes <- cc.genes$g2m.genes
-  s.genes <- cc.genes$s.genes
-  g2m.genes <- cc.genes$g2m.genes
-
 }
 
-# Raw
+# Merge samples --------------------------------------------------
 if (T) {
   stage <- c("normal", "1", "2", "3", "4")
-
   for (s in stage) {
     if (file.exists(paste0("/data/mengxu/data/all/lung_stage-", s, "_list_filter.Rdata")) == T) {
-      load(paste0("/data/mengxu/data/all/lung_stage-", s, "_list_filter.Rdata"))
+      load(paste0("/data/mengxu/data/all/lung_stage-", s, "_list_filter.Rdata")) # From 'step-01_doubletfinder&normalzation'
       seu_obj_filter <- merge_seu_obj(seu_obj_list_filter, samples, stage = s) # stage = "normal" or "1" or "2" or "3" or "4"
       save(seu_obj_filter, samples, file = paste0("/data/mengxu/data/all/lung_stage-", s, "_seu.Rdata"))
       rm(seu_obj_list_filter)
@@ -59,6 +53,77 @@ if (T) {
     }
   }
 }
+
+load(paste0("/data/mengxu/data/all/lung_stage-", 1, "_seu.Rdata"))
+dim(seu_obj_filter)
+seu_obj_data <- seu_obj_filter
+
+# seu_obj_data <- NormalizeData(seu_obj_data)
+# seu_obj_data <- FindVariableFeatures(seu_obj_data)
+# seu_obj_data <- ScaleData(seu_obj_data)
+seu_obj_data <- SCTransform(seu_obj_data)
+seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
+pc.num <- 1:pc_num(seu_obj_data)
+seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
+seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 1)
+p1 <- DimPlot(seu_obj_data,
+        reduction = "umap",
+        group.by = "orig.ident"
+) +
+  theme_bw()+
+  NoLegend()
+
+p2 <- DimPlot(seu_obj_data,
+        reduction = "umap",
+        group.by = "celltype"
+) +
+  theme_bw()+
+  NoLegend()
+p1+p2
+
+obj_cells <- c("B_mature","B_naive","B_plasma","B_plasmablast")
+seu_obj_data_obj_cells <- list()
+for (i in 1:length(obj_cells)) {
+  obj_cell <- obj_cells[i]
+  seu_obj_data_obj_cell <- seu_obj_data[, (seu_obj_data$celltype == obj_cell)]
+  seu_obj_data_obj_cells[[i]] <- seu_obj_data_obj_cell
+}
+seu_obj_data_B <- merge(seu_obj_data_obj_cells[[1]],seu_obj_data_obj_cells[2:length(seu_obj_data_obj_cells)])
+
+dim(seu_obj_data_B)
+table(seu_obj_data_B$celltype)
+seu_obj_data_B <- SCTransform(seu_obj_data_B)
+# seu_obj_data <- NormalizeData(seu_obj_data)
+# seu_obj_data <- FindVariableFeatures(seu_obj_data)
+# seu_obj_data <- ScaleData(seu_obj_data)
+seu_obj_data_B <- RunPCA(seu_obj_data_B, verbose = T)
+pc <- pc_num(seu_obj_data_B)
+pc.num <- 1:pc
+
+seu_obj_data_B <- RunUMAP(seu_obj_data_B, dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
+seu_obj_data_B <- FindNeighbors(seu_obj_data_B, dims = pc.num) %>% FindClusters(resolution = 1)
+DimPlot(
+  seu_obj_data_B,
+  group.by = "celltype",
+  label = T,
+  repel = T,
+  pt.size = 0.2
+) + 
+  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+  theme_bw()
+
+DimPlot(
+  seu_obj_data_B,
+  group.by = "orig.ident",
+  label = T,
+  repel = T,
+  pt.size = 0.2
+) + 
+  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+  theme_bw()
+
+
+
 # Filter
 if (T) {
   stage <- c("normal", "1", "2", "3", "4")
@@ -129,20 +194,15 @@ if (T) {
 
 if (T) {
   stage <- c("normal", "1", "2", "3", "4")
-
   for (s in stage) {
-
-    # s="normal"
     # load('/data/mengxu/data/all/lung_stage-normal_seu_filter.Rdata')
     load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter.Rdata"))
-
     seu_obj_data <- seu_obj_filter
     rm(seu_obj_filter)
     gc()
     # Normalize
     if (F) {
       seu_obj_data1 <- NormalizeData(seu_obj_data, normalization.method = "LogNormalize", scale.factor = 10000)
-
       seu_obj_data1 <- ScaleData(seu_obj_data1,
         # vars.to.regress = c("nCount_RNA", "pMT"),
         features = rownames(seu_obj_data)
@@ -165,23 +225,19 @@ if (T) {
         conserve.memory = T
       )
     }
-
     seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
-
     seu_obj_data <- CellCycleScoring(seu_obj_data,
       s.features = s.genes,
       g2m.features = g2m.genes,
       set.ident = TRUE
     )
-
     DimPlot(seu_obj_data)
-    ggsave2(paste0("SuppFig.2_stage-", s, "_CellCycleScoring_raw.png"),
-      path = paste0("/data/mengxu/results/figure/stage-", s),
-      width = 10, height = 8, units = "cm"
-    )
+    # ggsave2(paste0("SuppFig.2_stage-", s, "_CellCycleScoring_raw.png"),
+    #   path = paste0("/data/mengxu/results/figure/stage-", s),
+    #   width = 10, height = 8, units = "cm"
+    # )
 
     seu_obj_data$CC.Difference <- seu_obj_data$S.Score - seu_obj_data$G2M.Score
-
     seu_obj_data <- SCTransform(seu_obj_data,
       method = "glmGamPoi",
       vars.to.regress = "CC.Difference",
@@ -255,60 +311,23 @@ if (T) {
     )
     # load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter_SCT.Rdata")
 
-    pc <- pc_num(seu_obj_data)
-    pc.num <- 1:pc
-
+    pc.num <- 1:pc_num(seu_obj_data)
     seu_obj_data <- seu_obj_data %>% RunUMAP(dims = pc.num) # %>% RunTSNE(dims=pc.num) #'tsne' compute is too slow
-
     seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 0.3)
-
     save(seu_obj_data,
       file = paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter_SCT_PCA.Rdata")
     )
     # load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter_SCT_PCA.Rdata"))
-    
 
     if (F) {
       seu_obj_data <- annotation_celltype(seu_obj_data, method = "singleR") # method = "celltypist" or "singleR"
       levels(seu_obj_data$seurat_clusters)
     }
-    
 
     if (F) {
       ITG.suj <- RunUMAP(ITG.spj, reduction = "pca", dims = 1:10) # ???
     }
-
-
     # saveRDS(seu_obj_filter, "seu_obj_filter.rds")
-
-    # ElbowPlot(seu_obj_data, ndims = 50)
-
-    ### plot_tsne
-
-    # DimPlot(seu_obj_data,
-    #         reduction = "tsne",
-    #         #group.by = "orig.ident",
-    #         label = T,
-    #         cols = colP,
-    #         repel = T
-    #         #pt.size = 0.2
-    # )+theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid")) +NoLegend()
-    # ggsave2("fig2.clusters_raw_tsne.png", path = "/data/mengxu/results/figure", width = 12, height = 12, units = "cm")
-    #
-    # DimPlot(seu_obj_filter,
-    #         reduction = "tsne",
-    #         group.by = "orig.ident",
-    #         #label = T,
-    #         repel = T , cols = colP
-    #         #pt.size = 0.2
-    # ) +theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))
-    # ggsave2("fig2.samples_raw_tsne.png", path = "/data/mengxu/results/figure", width = 30, height = 15, units = "cm")
-    #
-    # DimPlot(seu_obj_filter, reduction = "tsne",group.by = "platform", label = TRUE, pt.size = 0.5, cols = colP)+
-    #   theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))#+NoLegend()
-    # ggsave2("fig2.platform_raw_tsne.png", path = "/data/mengxu/results/figure", width = 14, height = 11, units = "cm")
-
-    ### plot_umap
 
     DimPlot(seu_obj_data,
       reduction = "umap",
@@ -362,54 +381,28 @@ if (T) {
     #         path = paste0("/data/mengxu/results/figure/stage-", s),
     #         width = 14, height = 11, units = "cm")
 
-    ################################################################################
-    #  _    _
-    # | |  | |
-    # | |__| | __ _ _ __ _ __ ___   ___  _ __  _   _
-    # |  __  |/ _` | '__| '_ ` _ \ / _ \| '_ \| | | |
-    # | |  | | (_| | |  | | | | | | (_) | | | | |_| |
-    # |_|  |_|\__,_|_|  |_| |_| |_|\___/|_| |_|\__, |
-    #                                           __/ |
-    #                                          |___/
-    ################################################################################
-
-    # rm(list=ls())
     # seu_obj_filter <- readRDS("seu_obj_filter.rds")
     # cellinfo <- subset(seu_obj_data@meta.data, select = c("nFeature_RNA", "nCount_RNA", "pMT", "pHB", "pRP"))
     # scRNA_harmony <- CreateSeuratObject(seu_obj_filter@assays$RNA@counts, meta.data = cellinfo)
 
-    ### SCT标准化数据
     # scRNA_harmony <- SCTransform(scRNA_harmony, method = "glmGamPoi") #通过'glmGamPoi'加速
-
-    ### PCA
-    # scRNA_harmony <- RunPCA(scRNA_harmony, npcs=50, verbose=FALSE)
-
-    ### 整合方法1：单个样本间进行整合（推荐，效果更好）
+    # The Seurat integration method --------------------------------------------------
     if (F) {
       Anchors <- FindIntegrationAnchors(object.list = dataset.list, dims = 1:30)
-
-      ### Part B. Integration
       ITG.sbj <- IntegrateData(anchorset = Anchors, dims = 1:30)
       DefaultAssay(ITG.sbj) <- "integrated"
     }
-
-
+    ### PCA
+    # scRNA_harmony <- RunPCA(scRNA_harmony, npcs=50, verbose=FALSE)
     scRNA_harmony <- seu_obj_data
     scRNA_harmony <- RunHarmony(scRNA_harmony,
       group.by.vars = "orig.ident",
       assay.use = "SCT",
+      # lambda = 1, # [0.5-2] The more smaller lambda value, the bigger integration efforts.
       max.iter.harmony = 20
     )
 
-    # scRNA_harmony <- RunHarmony(scRNA_harmony, group.by.vars="orig.ident", max.iter.harmony = 20)
-    # group.by.vars参数是设置按哪个分组来整合
-    # max.iter.harmony设置迭代次数，默认是10。运行RunHarmony结果会提示在迭代多少次后完成了收敛。
-    # ⚠️RunHarmony函数中lambda参数，默认值是1，决定了Harmony整合的力度。
-    # lambda值调小，整合力度变大，反之。（只有这个参数影响整合力度，调整范围一般在0.5-2之间）
-
-    ElbowPlot(scRNA_harmony, ndims = 50)
-    pc <- pc_num(scRNA_harmony)
-    pc.num <- 1:pc
+    pc.num <- 1:pc_num(scRNA_harmony)
     scRNA_harmony <- RunUMAP(scRNA_harmony, reduction = "harmony", dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
 
     save(seu_obj_data,
@@ -419,33 +412,6 @@ if (T) {
 
     scRNA_harmony <- FindNeighbors(scRNA_harmony, dims = pc.num) %>% FindClusters(resolution = 1)
 
-    ### plot_tsne
-
-    # DimPlot(scRNA_harmony,
-    #         reduction = "tsne",
-    #         #group.by = "orig.ident",
-    #         label = T,
-    #         cols = colP,
-    #         repel = T
-    #         #pt.size = 0.2
-    # )+theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid")) +NoLegend()
-    # ggsave2("fig3.clusters_harmony_tsne.png", path = "/data/mengxu/results/figure", width = 12, height = 12, units = "cm")
-    #
-    # DimPlot(scRNA_harmony,
-    #         reduction = "tsne",
-    #         group.by = "orig.ident",
-    #         #label = T,
-    #         repel = T , cols = colP
-    #         #pt.size = 0.2
-    # ) +theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))
-    # ggsave2("fig3.samples_harmony_tsne.png", path = "/data/mengxu/results/figure", width = 30, height = 15, units = "cm")
-    #
-    # DimPlot(scRNA_harmony, reduction = "tsne",group.by = "platform", label = TRUE, pt.size = 0.5, cols = colP)+
-    #   theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))#+NoLegend()
-    # ggsave2("fig3.platform_harmony_tsne.png", path = "/data/mengxu/results/figure", width = 14, height = 11, units = "cm")
-
-    ### plot_umap
-    ###
     DimPlot(scRNA_harmony,
       reduction = "umap",
       # group.by = "orig.ident",
@@ -482,11 +448,8 @@ if (T) {
     #         width = 14, height = 11, units = "cm")
 
     #----------------------------------------------------------------------------#
-
     sce.merged <- as.SingleCellExperiment(scRNA_harmony)
-
     # LISI index
-
     lisi.pca <- lisi::compute_lisi(
       reducedDim(sce.merged, "PCA"),
       colData(sce.merged), c("orig.ident", "platform")
@@ -524,18 +487,12 @@ if (T) {
       stat_compare_means(comparisons = list(c("raw", "harmony"))) +
       ylab("LISI") +
       theme(legend.position = "right") + scale_fill_tron()
-
     print(p)
-
     ggsave2(paste0("/data/mengxu/results/figure/stage-", s, "/SuppFig4.LISI.dataset.merge.png"),
       width = 3.2, height = 4
     )
 
-    # ggsave2("SuppFig4.LISI.dataset.merge.png",
-    #         path = paste0("/data/mengxu/results/figure/stage-", s),
-    #         width = 10, height = 10, units = "cm")
-    #-----------------------------------------------------------------------#
-
+    # --------------------------------------------------
     mainmarkers <- c( # Nature Medicine-Phenotype molding of stromal cells in the lung  tumor microenvironment
       # "ACAT2",
       "CLDN18", # Alveolar
@@ -604,11 +561,8 @@ if (T) {
           width = 10, height = 10, units = "cm"
         )
       }
-      ###
     }
-    ###
   }
-  ###
 }
 
 

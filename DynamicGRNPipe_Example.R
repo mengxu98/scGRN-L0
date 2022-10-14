@@ -94,7 +94,7 @@ names(Dynnet_active1) <- paste0("W", 1:length(Dynnet_active1))
 
 source("ground-truth.R")
 source("framework_main.R")
-ground_truth_T(lineage1dynet[[2]], dorothea_regulon_human)
+ground_truth_T(lineage1dynet[[3]], dorothea_regulon_human)
 evaluationObject <- prepareEval("ground_pred.txt",
   paste0("ground_truth.tsv"),
   totalPredictionsAccepted = 100000
@@ -104,12 +104,26 @@ GENIE3_AUROC <- calcAUROC(evaluationObject)
 GENIE3_AUPR <- calcAUPR(evaluationObject)
 
 weightofWindows_L0 <- DynNet_L0(
-  Windows = Windows1,
+  Windows = Windows1[3],
   CD8TCellExp.trajectory = CD8TCellExp.trajectory,
   DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
   allTFs = allTFs[1:200], # set regulators
   detectNum = 10, detectPro = 0.05, meanExp = 1 # Noise filtering threshold
 )
+
+ground_truth_T(weightofWindows_L0[[1]], dorothea_regulon_human)
+evaluationObject_L0 <- prepareEval("ground_pred.txt",
+                                   paste0("ground_truth.tsv"),
+                                   totalPredictionsAccepted = 100000
+)
+
+L0_AUROC <- calcAUROC(evaluationObject_L0)
+L0_AUPR <- calcAUPR(evaluationObject_L0)
+
+GENIE3_AUROC
+GENIE3_AUPR
+L0_AUROC
+L0_AUPR
 
 # Filter the edges for each window
 lineage1dynet_L0 <- DynNet_filter(
@@ -146,17 +160,3 @@ GENIE3_AUPR
 L0_AUROC
 L0_AUPR
 
-# > GENIE3_AUROC
-# [1] 0.5063358
-# > GENIE3_AUPR
-# [1] 0.03106107
-
-# > GENIE3_AUROC
-# [1] 0.5088422
-# > GENIE3_AUPR
-# [1] 0.03273731
-
-# > GENIE3_AUROC
-# [1] 0.5377069
-# > GENIE3_AUPR
-# [1] 0.03951815

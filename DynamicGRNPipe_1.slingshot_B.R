@@ -47,7 +47,7 @@ slingshot_run <- function(scRNAseq.Exp,
         reducedDims(sim) <- SimpleList(PCA = pca$x[, 1:30]) ##### revise
         # top 30 PCs
         sds <- slingshot(sim, clusterLabels = clusterLabels, start.clus = start.cluster, end.clus = end.cluster, stretch = stretch, reducedDim = "PCA") ##### revise
-        sds <- slingshot(sim, clusterLabels = "majorCluster", reducedDim = "UMAP")
+        # sds <- slingshot(sim, clusterLabels = "majorCluster", reducedDim = "UMAP")
         # sds <- slingshot(pca$x[,1:30], clusterLabels = clusterLabels, start.clus = start.cluster, end.clus=end.cluster, stretch=stretch)
     }
 
@@ -68,16 +68,16 @@ slingshot_run <- function(scRNAseq.Exp,
                 # ncomponents = 4,
                 colour_by = "majorCluster"
         )
-        plotUMAP(sds,
-                # ncomponents = 4,
-                colour_by = "majorCluster"
-        )
+        # plotUMAP(sds,
+        #         # ncomponents = 4,
+        #         colour_by = "majorCluster"
+        # )
         png("Results/Slingshot1.png")
-        plot(reducedDims(sds)$UMAP, col = plotcol, pch = 16, asp = 1,xlab="UMAP_1",ylab="UMAP_2")
+        plot(reducedDims(sds)$PCA, col = plotcol, pch = 16, asp = 1,xlab="UMAP_1",ylab="UMAP_2")
         lines(SlingshotDataSet(sds), lwd = 2, col = "black")
         dev.off()
         png("Results/Slingshot2.png")
-        plot(reducedDims(sds)$UMAP, col = brewer.pal(9, "Set1"), pch = 16, asp = 1 ,xlab="UMAP_1",ylab="UMAP_2")
+        plot(reducedDims(sds)$PCA, col = brewer.pal(9, "Set1"), pch = 16, asp = 1 ,xlab="UMAP_1",ylab="UMAP_2")
         # plot(reducedDims(sds)$UMAP, col = brewer.pal(9, "Set1")[sds$majorCluster], pch = 16, asp = 1)
         lines(SlingshotDataSet(sds), lwd = 2, type = "lineages", col = "black")
         dev.off()
@@ -88,17 +88,17 @@ slingshot_run <- function(scRNAseq.Exp,
         #             other_fields="majorCluster") + facet_wrap(~majorCluster)
         
         # plotHighestExprs(sds, exprs_values = "counts")
-        p <- plotUMAP(sds,
+        p <- plotPCA(sds,
                       # ncomponents = 4,
                       colour_by = "Patient"
         )+theme_bw()
         ggsave(p, filename = "Results/Patient.png")
-        p <- plotUMAP(sds,
+        p <- plotPCA(sds,
                       # ncomponents = 4,
                       colour_by = "majorCluster"
         )+theme_bw()
         ggsave(p, filename = "Results/Cluster.png")
-        p <- plotUMAP(sds,
+        p <- plotPCA(sds,
                 # ncomponents = 4,
                 colour_by = "sampleType"
         )+theme_bw()

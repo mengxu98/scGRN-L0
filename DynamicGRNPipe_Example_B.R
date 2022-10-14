@@ -1,5 +1,14 @@
 
 
+saveRDS(seu_obj_data_B_samples, file ="../scGRN-L0_data/seu_obj_data_B_samples.rds")
+data <- readRDS("../scGRN-L0_data/seu_obj_data_B_samples.rds")
+meta <- data@meta.data
+CellInfor_B <- data.frame(UniqueCell_ID = colnames(data),
+                        Patient = meta$orig.ident,
+                        majorCluster= meta$celltype,
+                        sampleType="stage-1")
+table(CellInfor_B$majorCluster)
+GSE131907_B <- as.matrix(data@assays$SCT@counts) %>% as.data.frame()
 # Example
 # The example data can be downloaded at https://www.jianguoyun.com/p/DeYtp_AQ1bXiCRjXvYwE
 # ====0.input====
@@ -11,11 +20,11 @@ library(slingshot)
 source("DynamicGRNPipe_1.slingshot_B.R")
 source("DynamicGRNPipe_Function.R")
 GSE131907_B <- as.matrix(GSE131907_B)
-t.slingshot <- slingshot_run(scRNAseq.Exp = GSE131907_B, # 
+t.slingshot <- slingshot_run(scRNAseq.Exp = GSE131907_B,
   clusterLabels = CellInfor_B$majorCluster,
   ordergene = unlist(clusterSig),
   RMmethod = "pca",
-  plot_output = FALSE
+  plot_output = TRUE
   #start.cluster = "GrB-secreting B cells" # cannot determine what type of cell types as the first type
 )
 CellInfor.trajectory <- cbind.data.frame(CellInfor_B, t.slingshot$data)
@@ -30,37 +39,31 @@ table(CellInfor_B$majorCluster)
 
 # Calculate all intersections of pseudo-time density curves of cells in different states
 C1_C2_cross <- densityintersection(
-  a = cellInfor[cellInfor$majorCluster == "MALT B cells", "PseTime.Lineage1"],
-  b = cellInfor[cellInfor$majorCluster == "Plasma cells", "PseTime.Lineage1"],
+  a = cellInfor[cellInfor$majorCluster == "B_naive", "PseTime.Lineage1"],
+  b = cellInfor[cellInfor$majorCluster == "B_mature", "PseTime.Lineage1"],
   filename = "Results/C1_C2.png"
 )
 C2_C3_cross <- densityintersection(
-  a = cellInfor[cellInfor$majorCluster == "Plasma cells", "PseTime.Lineage1"],
-  b = cellInfor[cellInfor$majorCluster == "GrB-secreting B cells", "PseTime.Lineage1"],
+  a = cellInfor[cellInfor$majorCluster == "B_mature", "PseTime.Lineage1"],
+  b = cellInfor[cellInfor$majorCluster == "B_plasma", "PseTime.Lineage1"],
   filename = "Results/C2_C3.png"
 )
 C3_C4_cross <- densityintersection(
-  a = cellInfor[cellInfor$majorCluster == "GrB-secreting B cells", "PseTime.Lineage1"],
-  b = cellInfor[cellInfor$majorCluster == "Follicular B cells", "PseTime.Lineage1"],
+  a = cellInfor[cellInfor$majorCluster == "B_plasma", "PseTime.Lineage1"],
+  b = cellInfor[cellInfor$majorCluster == "B_plasmablast", "PseTime.Lineage1"],
   filename = "Results/C3_C4.png"
 )
 C4_C5_cross <- densityintersection(
-  a = cellInfor[cellInfor$majorCluster == "Follicular B cells", "PseTime.Lineage1"],
+  a = cellInfor[cellInfor$majorCluster == "B_plasmablast", "PseTime.Lineage1"],
   b = cellInfor[cellInfor$majorCluster == "GC B cells in the DZ", "PseTime.Lineage1"],
   filename = "Results/C4_C5.png"
 )
-C5_C6_cross <- densityintersection(
-  a = cellInfor[cellInfor$majorCluster == "GC B cells in the DZ", "PseTime.Lineage1"],
-  b = cellInfor[cellInfor$majorCluster == "GC B cells in the LZ", "PseTime.Lineage1"],
-  filename = "Results/C5_C6.png"
-)
+
 C5_C61_cross <- densityintersections(
-  a = cellInfor[cellInfor$majorCluster == "MALT B cells", "PseTime.Lineage1"],
-  b = cellInfor[cellInfor$majorCluster == "GrB-secreting B cells", "PseTime.Lineage1"],
-  c = cellInfor[cellInfor$majorCluster == "Plasma cells", "PseTime.Lineage1"],
-  d = cellInfor[cellInfor$majorCluster == "Follicular B cells", "PseTime.Lineage1"],
-  e = cellInfor[cellInfor$majorCluster == "GC B cells in the DZ", "PseTime.Lineage1"],
-  f = cellInfor[cellInfor$majorCluster == "GC B cells in the LZ", "PseTime.Lineage1"],
+  a = cellInfor[cellInfor$majorCluster == "B_mature", "PseTime.Lineage1"],
+  b = cellInfor[cellInfor$majorCluster == "B_naive", "PseTime.Lineage1"],
+  c = cellInfor[cellInfor$majorCluster == "B_plasma", "PseTime.Lineage1"],
+  d = cellInfor[cellInfor$majorCluster == "B_plasmablast", "PseTime.Lineage1"],
   filename = "Results/C5_C61.png"
 )
 # Manually select the intersection point according to the density plot

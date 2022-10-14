@@ -3,23 +3,15 @@
 if (T) {
   rm(list = ls())
   gc()
-  # devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
-  library(DoubletFinder)
   library(tidyverse)
-  library(scDblFinder)
   library(patchwork)
   library(scuttle)
   library(Seurat)
   library(scran)
   # BiocManager::install("celldex")
   # BiocManager::install("SingleR")
-
-  library(SingleR)
   library(celldex)
-  library(Seurat)
   library(pheatmap)
-  load("/data/mengxu/data/SingleR_data/HumanPrimaryCellAtlas_hpca.se_human.RData")
-  load("/data/mengxu/data/SingleR_data/BlueprintEncode_bpe.se_human.RData")
 }
 
 samples <- c(

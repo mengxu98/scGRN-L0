@@ -215,9 +215,7 @@ ground_truth_simulation <- function(intput, output, dataset_dir, file) {
   }
 }
 
-
 # For T cell dynamic regulation
-
 ground_truth_T <- function(input, dataset,output=NULL) {
     if (!exists("input")) {
       message("----- Regulatory network does not exist! Please check input or dataset! -----")

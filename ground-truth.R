@@ -36,7 +36,7 @@ data_filetr <- function(data, dataset_dir, database = "ALL") {
   }
 }
 
-
+# 是否应该以参考网络作为标准去比对输入
 ground_truth_h <- function(intput, output, dataset_dir, database = "STRING") {
   if (database %in% c("STRING", "ChIP-seq", "HepG2-ChIP-se", "hESC-ChIP-seq", "All")) {
     if (database == "STRING") {

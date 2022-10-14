@@ -59,7 +59,6 @@ ElVariableEnsembleSolve <- function(expressionMatrix,
     ind <- sample(dim(expressionMatrix)[1], sampleSize)
     sampleMatrix <- expressionMatrix[ind, ]
 
-
     # report on progress
     if (trace) {
       print(paste("Sample: ", i, " of size: ", sampleSize, " out of ", ensembleSize, " iterations and a rank threshold of ", rankThreshold))

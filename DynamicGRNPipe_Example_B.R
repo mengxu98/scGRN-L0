@@ -1,6 +1,7 @@
 
 
-saveRDS(seu_obj_data_B_samples, file ="../scGRN-L0_data/seu_obj_data_B_samples.rds")
+library(Seurat)
+library(tidyr)
 data <- readRDS("../scGRN-L0_data/seu_obj_data_B_samples.rds")
 meta <- data@meta.data
 CellInfor_B <- data.frame(UniqueCell_ID = colnames(data),
@@ -8,18 +9,17 @@ CellInfor_B <- data.frame(UniqueCell_ID = colnames(data),
                         majorCluster= meta$celltype,
                         sampleType="stage-1")
 table(CellInfor_B$majorCluster)
-GSE131907_B <- as.matrix(data@assays$SCT@counts) %>% as.data.frame()
+GSE131907_B <- as.matrix(data@assays$SCT@counts)
 # Example
 # The example data can be downloaded at https://www.jianguoyun.com/p/DeYtp_AQ1bXiCRjXvYwE
 # ====0.input====
 load(file = "DynamicGRNPipe_ExampleData/clusterSig.RData") # genes used to construct cell trajectories
-load(file = "../scGRN-L0_data/GSE131907_B.RData") # expression profile and cell annotation #from GSE99254
+# load(file = "../scGRN-L0_data/GSE131907_B.RData") # expression profile and cell annotation #from GSE99254
 
 # ==== 1. Construction of cell state transformation trajectory (slingshot) ====
 library(slingshot)
 source("DynamicGRNPipe_1.slingshot_B.R")
 source("DynamicGRNPipe_Function.R")
-GSE131907_B <- as.matrix(GSE131907_B)
 t.slingshot <- slingshot_run(scRNAseq.Exp = GSE131907_B,
   clusterLabels = CellInfor_B$majorCluster,
   ordergene = unlist(clusterSig),
@@ -81,15 +81,15 @@ Windows1 <- list(W1 = W1, W2 = W2, W3 = W3, W4 = W4)
 
 
 # ====3.constructing dynamic networks (GENIE3)======
-source("DynamicGRNPipe_3.constructionNetwork.R")
+source("DynamicGRNPipe_3.constructionNetwork_L0.R")
 load("DynamicGRNPipe_ExampleData/DynamicGene1.RData")
 load("DynamicGRNPipe_ExampleData/dorothea.RData")
 # Construct a control network and calculate the control weight of each edge
 weightofWindows <- DynNet_RF(
-  Windows = Windows1,
+  Windows = Windows1[3],
   CD8TCellExp.trajectory = CD8TCellExp.trajectory,
   DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
-  allTFs = allTFs, # set regulators
+  allTFs = allTFs[100:200], # set regulators
   detectNum = 10, detectPro = 0.05, meanExp = 1 # Noise filtering threshold
 )
 
@@ -104,6 +104,7 @@ lineage1dynet <- DynNet_filter(
   #confidence = NULL
 )
 lineage1dynet1 <- lineage1dynet[1:2]
+length(lineage1dynet1[[4]])
 # extract active edges for each window
 Dynnet_active1 <- lapply(lineage1dynet, function(x) {
   rownames(x) <- paste0(x[, 1], "_", x[, 2])
@@ -114,7 +115,7 @@ names(Dynnet_active1) <- paste0("W", 1:length(Dynnet_active1))
 
 source("ground-truth.R")
 source("framework_main.R")
-ground_truth_T(lineage1dynet[[3]], dorothea_regulon_human)
+ground_truth_T(weightofWindows[[1]], dorothea_regulon_human)
 evaluationObject <- prepareEval("ground_pred.txt",
   paste0("ground_truth.tsv"),
   totalPredictionsAccepted = 100000
@@ -122,12 +123,13 @@ evaluationObject <- prepareEval("ground_pred.txt",
 
 GENIE3_AUROC <- calcAUROC(evaluationObject)
 GENIE3_AUPR <- calcAUPR(evaluationObject)
+GENIE3_AUROC
 
 weightofWindows_L0 <- DynNet_L0(
   Windows = Windows1[3],
   CD8TCellExp.trajectory = CD8TCellExp.trajectory,
   DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
-  allTFs = allTFs[1:200], # set regulators
+  allTFs = allTFs[100:200], # set regulators
   detectNum = 10, detectPro = 0.05, meanExp = 1 # Noise filtering threshold
 )
 
@@ -139,11 +141,11 @@ evaluationObject_L0 <- prepareEval("ground_pred.txt",
 
 L0_AUROC <- calcAUROC(evaluationObject_L0)
 L0_AUPR <- calcAUPR(evaluationObject_L0)
+L0_AUROC # 0.4601513 no parallel
+L0_AUPR
 
 GENIE3_AUROC
 GENIE3_AUPR
-L0_AUROC
-L0_AUPR
 
 # Filter the edges for each window
 lineage1dynet_L0 <- DynNet_filter(
@@ -156,17 +158,7 @@ lineage1dynet_L0 <- DynNet_filter(
   # confidence = NULL
 )
 
-# extract active edges for each window
-Dynnet_active1_L0 <- lapply(lineage1dynet_L0, function(x) {
-  rownames(x) <- paste0(x[, 1], "_", x[, 2])
-  x <- x[x[, "spearmanCor"] > 0, ]
-  return(x)
-})
-names(Dynnet_active1_L0) <- paste0("W", 1:length(Dynnet_active1_L0))
-
-source("ground-truth.R")
-source("framework_main.R")
-ground_truth_T(weightofWindows_L0[[2]], dorothea_regulon_human)
+ground_truth_T(weightofWindows_L0[[3]], dorothea_regulon_human)
 evaluationObject_L0 <- prepareEval("ground_pred.txt",
   paste0("ground_truth.tsv"),
   totalPredictionsAccepted = 100000

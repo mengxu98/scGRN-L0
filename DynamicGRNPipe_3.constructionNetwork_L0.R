@@ -44,25 +44,44 @@ DynNet_L0 <- function(Windows, CD8TCellExp.trajectory, DynamicGene, allTFs, dete
     return(windExp)
   })
 
-  # 2. run GENIE3
-  library(GENIE3)
+  # 2. run L0-Dynamic
   weightofWindows <- lapply(ExpofWindows, function(matrix) {
-    # weightdf <- L0REG(
-    #   matrix = matrix,
-    #   penalty = "L0",
-    #   regulators = intersect(allTFs, rownames(matrix)),
-    #   targets = rownames(matrix)
-    # )
-    NIMEFI(t(matrix),
-           GENIE = F, SVM = F, EL = T, penalty = "L0",
-           outputFileName = paste0("output_NIMEFI_L0"),
-           outputFileFormat = "txt",
-           SVMRankThreshold = 5, SVMEnsembleSize = 100,
-           ELPredSampleMin = 20, ELPredSampleMax = 80,
-           ELExpSampleMin = 20, ELExpSampleMax = 80,
-           ELRankThreshold = 5, ELEnsembleSize = dim(matrix)[1]
-    )
-    weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
+    if (T) {
+      weightdf <- L0REG(
+        matrix = matrix,
+        penalty = "L0",
+        regulators = intersect(allTFs, rownames(matrix)),
+        targets = rownames(matrix)
+      )
+    } else {
+      source("Function.R")
+      package.check("parallel")
+      NIMEFI(t(matrix),
+        GENIE = F, SVM = F, EL = T, penalty = "L0",
+        outputFileName = paste0("output_NIMEFI_L0"),
+        outputFileFormat = "txt",
+        SVMRankThreshold = 5, SVMEnsembleSize = 100,
+        ELPredSampleMin = 20, ELPredSampleMax = 80,
+        ELExpSampleMin = 20, ELExpSampleMax = 80,
+        ELRankThreshold = 5, ELEnsembleSize = 5 # dim(t(matrix))[1]
+      )
+
+      # fun <- NIMEFI(t(matrix),
+      #   GENIE = F, SVM = F, EL = T, penalty = "L0",
+      #   outputFileName = paste0("output_NIMEFI_L0"),
+      #   outputFileFormat = "txt",
+      #   SVMRankThreshold = 5, SVMEnsembleSize = 100,
+      #   ELPredSampleMin = 20, ELPredSampleMax = 80,
+      #   ELExpSampleMin = 20, ELExpSampleMax = 80,
+      #   ELRankThreshold = 5, ELEnsembleSize = 5 # dim(t(matrix))[1]
+      # )
+      # test <- makeCluster(detectCores())
+      # parLapply(test, matrix, fun)
+      # stopCluster(test)
+
+      weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
+      names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
+    }
     # weightdf <- getLinkList(weightMat)
     return(weightdf)
   })
@@ -97,20 +116,22 @@ L0REG <- function(matrix,
       )
       temp <- as.vector(temp)
       wghts <- temp[-1]
-      wghts <- wghts / max(wghts)
-      #   wghts <- abs(wghts)
-      #   # Now sort the wghts
+
+      # wghts <- abs(wghts)
+      if (F) {
+        wghts <- wghts / max(wghts)
+
+        # Now sort the wghts
         indices <- sort.list(wghts, decreasing = TRUE)
-      
         # Check for zero entries
         zeros <- which(wghts == 0)
-      
         # Now replace by ones that are in the top and are non-zero
         wghts[1:length(wghts)] <- 0
-        wghts[indices[1:(0.25*length(wghts))]] <- 1
-      
+        wghts[indices[1:(0.25 * length(wghts))]] <- 1
+        # wghts[indices[1:5]] <- 1
         # Set the ones that were zero to zero anyway
         wghts[zeros] <- 0
+      }
       weightd <- data.frame(regulatoryGene = regulators[i], colnames(X), weight = wghts)
       weightdf <- rbind.data.frame(weightdf, weightd)
       if (i == length(regulators)) {
@@ -130,7 +151,6 @@ L0REG <- function(matrix,
         penalty = penalty,
         maxSuppSize = dim(matrix)[2]
       )
-
       L0_Model_Information <- as.data.frame(print(L0_Model))
       L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$suppSize, decreasing = TRUE), ]
       lambda_L0 <- L0_Model_Information$lambda[1]
@@ -142,14 +162,12 @@ L0REG <- function(matrix,
       temp <- as.vector(temp)
       wghts <- temp[-1]
       wghts <- wghts / max(abs(wghts))
-
       # if (F) {
       #   wghts <- abs(wghts)
       # } else {
       #   wghts <- abs(wghts)
       #   # Now sort the wghts
       #   indices <- sort.list(wghts, decreasing = TRUE)
-      #
       #   # Check for zero entries
       #   zeros <- which(wghts == 0)
       #
@@ -163,10 +181,9 @@ L0REG <- function(matrix,
       # write result to matrix
       weightdf[colnames(matrix)[-i], colnames(matrix)[i]] <- wghts
       rownames(weightdf) <- colnames(matrix)
-    colnames(weightdf) <- colnames(matrix)
+      colnames(weightdf) <- colnames(matrix)
     }
   }
-
   # max(resultMatrix)
   return(weightdf)
 }

@@ -175,9 +175,9 @@ if (T) {
       reduction = "umap",
       group.by = "platform"
     ) + theme_bw() + NoLegend()
-    
+
     p1 + p2 + p3
-    ggsave2("Fig1.harmony_umap.png",
+    ggsave2("Fig1.raw_umap.png",
       path = paste0("Results/stage-", s),
       width = 27, height = 9, units = "cm"
     )
@@ -269,7 +269,8 @@ if (T) {
 
     # --------------------------------------------------
     if (F) {
-      mainmarkers <- c( # Nature Medicine-Phenotype molding of stromal cells in the lung  tumor microenvironment
+      mainmarkers <- c( 
+        # Nature Medicine-Phenotype molding of stromal cells in the lung  tumor microenvironment
         # "ACAT2",
         "CLDN18", # Alveolar
         "CLDN5", # Endothelial
@@ -279,7 +280,7 @@ if (T) {
         "CD79A", # B cell
         "LYZ", # Myeloid
         "CD3D", # T cell
-        "EPCAM" # , #Cancer
+        "EPCAM" # , # Cancer cell
         # 2022-Cancer cell-Intratumoral plasma cells predict outcomes to PD-L1 blockade in non-small cell lung cancer
         # Follicular B cells
         # "BANK1",

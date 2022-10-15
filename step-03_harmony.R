@@ -13,7 +13,6 @@ if (T) {
   library(ggplot2)
   library(dplyr)
   library(sctransform)
-  library(viridis)
   library(tidyr)
   library(magrittr)
   library(reshape2)
@@ -54,152 +53,17 @@ if (T) {
   }
 }
 
-load(paste0("/data/mengxu/data/all/lung_stage-", 1, "_seu.Rdata"))
-dim(seu_obj_filter)
-seu_obj_data <- seu_obj_filter
-
-# seu_obj_data <- NormalizeData(seu_obj_data)
-# seu_obj_data <- FindVariableFeatures(seu_obj_data)
-# seu_obj_data <- ScaleData(seu_obj_data)
-seu_obj_data <- SCTransform(seu_obj_data)
-seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
-pc.num <- 1:pc_num(seu_obj_data)
-seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
-seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 1)
-p1 <- DimPlot(seu_obj_data,
-        reduction = "umap",
-        group.by = "orig.ident"
-) +
-  theme_bw()+
-  NoLegend()
-
-p2 <- DimPlot(seu_obj_data,
-        reduction = "umap",
-        group.by = "celltype"
-) +
-  theme_bw()+
-  NoLegend()
-p1+p2
-
-obj_cells <- c("B_mature","B_naive","B_plasma","B_plasmablast")
-seu_obj_data_obj_cells <- list()
-for (i in 1:length(obj_cells)) {
-  obj_cell <- obj_cells[i]
-  seu_obj_data_obj_cell <- seu_obj_data[, (seu_obj_data$celltype == obj_cell)]
-  seu_obj_data_obj_cells[[i]] <- seu_obj_data_obj_cell
-}
-seu_obj_data_B <- merge(seu_obj_data_obj_cells[[1]],seu_obj_data_obj_cells[2:length(seu_obj_data_obj_cells)])
-
-dim(seu_obj_data_B)
-table(seu_obj_data_B$celltype)
-seu_obj_data_B <- SCTransform(seu_obj_data_B)
-# seu_obj_data <- NormalizeData(seu_obj_data)
-# seu_obj_data <- FindVariableFeatures(seu_obj_data)
-# seu_obj_data <- ScaleData(seu_obj_data)
-seu_obj_data_B <- RunPCA(seu_obj_data_B, verbose = T)
-pc <- pc_num(seu_obj_data_B)
-pc.num <- 1:pc
-
-seu_obj_data_B <- RunUMAP(seu_obj_data_B, dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
-seu_obj_data_B <- FindNeighbors(seu_obj_data_B, dims = pc.num) %>% FindClusters(resolution = 1)
-DimPlot(
-  seu_obj_data_B,
-  group.by = "celltype",
-  label = T,
-  repel = T,
-  pt.size = 0.2
-) + 
-  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
-  theme_bw()
-
-DimPlot(
-  seu_obj_data_B,
-  group.by = "orig.ident",
-  label = T,
-  repel = T,
-  pt.size = 0.2
-) + 
-  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
-  theme_bw()
-
-
-
-# Filter
-if (T) {
-  stage <- c("normal", "1", "2", "3", "4")
-  dataset_information <- c()
-  for (s in stage) {
-    if (file.exists(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu.Rdata")) == T) {
-      load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu.Rdata"))
-
-      # calculate mitochondrial, hemoglobin and ribosomal gene counts
-      seu_obj_filter <- PercentageFeatureSet(seu_obj_filter, pattern = "^MT-", col.name = "pMT")
-      seu_obj_filter <- PercentageFeatureSet(seu_obj_filter, pattern = "^HBA|^HBB", col.name = "pHB")
-      seu_obj_filter <- PercentageFeatureSet(seu_obj_filter, pattern = "^RPS|^RPL", col.name = "pRP")
-
-      ###
-      # qcparams <- c("nFeature_RNA", "nCount_RNA", "pMT", "pHB", "pRP")
-      # for (i in seq_along(qcparams)){
-      #   print(VlnPlot(object = seu_obj_filter, features = qcparams[i], group.by = "orig.ident", pt.size = 0))
-      # }
-      # for (i in seq_along(qcparams)){
-      #   print(RidgePlot(object = seu_obj_filter, features = qcparams[i], group.by = "orig.ident"))
-      # }
-      #
-      # VlnPlot(seu_obj_filter, features = c("nFeature_RNA", "nCount_RNA", "pMT"), pt.size = 0, group.by = "orig.ident", ncol = 1, log = T)
-      # ggsave2("SuppFig1.pdf", path = "../results", width = 30, height = 25, units = "cm")
-      ###
-
-      seu_obj <- subset(seu_obj_filter,
-        subset = nFeature_RNA > nFeature_lower &
-          nFeature_RNA < nFeature_upper &
-          nCount_RNA > nCount_lower &
-          nCount_RNA < nCount_upper &
-          pMT < pMT_upper &
-          pHB < pHB_upper
-      )
-      ###
-      dim(seu_obj_filter)
-      dim(seu_obj)
-      # qc_std_plot_nf(seu_obj_filter)
-      qc_std_plot(seu_obj_filter)
-      ggsave2(paste0("SuppFig.1_stage-", s, ".png"),
-        path = paste0("/data/mengxu/results/figure/stage-", s),
-        width = 30, height = 30, units = "cm"
-      )
-
-      # VlnPlot(seu_obj, features = c("nFeature_RNA", "nCount_RNA", "pMT"), pt.size = 0, group.by = "orig.ident", ncol = 1, log = T)
-      ###
-      save(seu_obj_filter, samples, file = paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter.Rdata"))
-
-      dataset_information_one <- c(paste0("Stage-", s), length(colnames(seu_obj_filter)), length(colnames(seu_obj)), length(rownames(seu_obj)))
-
-      rm(seu_obj_filter)
-      gc()
-    }
-
-    dataset_information <- rbind.data.frame(
-      dataset_information,
-      dataset_information_one
-    )
-
-    names(dataset_information) <- c("Stage", "No. of cells(raw)", "No. of cells(filter)", "No. of genes")
-  }
-
-  write.csv(dataset_information, file = paste0("/data/mengxu/data/all/dataset_information.csv"), row.names = F)
-}
-
-
 # harmony -----------------------------------------------------------------
-
 if (T) {
   stage <- c("normal", "1", "2", "3", "4")
   for (s in stage) {
-    # load('/data/mengxu/data/all/lung_stage-normal_seu_filter.Rdata')
-    load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter.Rdata"))
+    load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu.Rdata"))
     seu_obj_data <- seu_obj_filter
     rm(seu_obj_filter)
     gc()
+    seu_obj_data <- PercentageFeatureSet(seu_obj_data, pattern = "^MT-", col.name = "pMT")
+    seu_obj_data <- PercentageFeatureSet(seu_obj_data, pattern = "^HBA|^HBB", col.name = "pHB")
+    seu_obj_data <- PercentageFeatureSet(seu_obj_data, pattern = "^RPS|^RPL", col.name = "pRP")
     # Normalize
     if (F) {
       seu_obj_data1 <- NormalizeData(seu_obj_data, normalization.method = "LogNormalize", scale.factor = 10000)
@@ -225,6 +89,7 @@ if (T) {
         conserve.memory = T
       )
     }
+
     seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
     seu_obj_data <- CellCycleScoring(seu_obj_data,
       s.features = s.genes,
@@ -233,7 +98,7 @@ if (T) {
     )
     DimPlot(seu_obj_data)
     # ggsave2(paste0("SuppFig.2_stage-", s, "_CellCycleScoring_raw.png"),
-    #   path = paste0("/data/mengxu/results/figure/stage-", s),
+    #   path = paste0("Results/stage-", s),
     #   width = 10, height = 8, units = "cm"
     # )
 
@@ -246,35 +111,16 @@ if (T) {
     )
     seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
     DimPlot(seu_obj_data)
-    ggsave2(paste0("SuppFig.2_stage-", s, "_CellCycleScoring_SCT.png"),
-      path = paste0("/data/mengxu/results/figure/stage-", s),
-      width = 10, height = 8, units = "cm"
-    )
-    # seu_obj_data <- ScaleData(seu_obj_data,
-    #                           vars.to.regress = "CC.Difference",
-    #                           features = rownames(seu_obj_data))
+    # ggsave2(paste0("SuppFig.2_stage-", s, "_CellCycleScoring_SCT.png"),
+    #   path = paste0("Results/stage-", s),
+    #   width = 10, height = 8, units = "cm"
+    # )
     # 观察细胞周期基因的表达情况
     # RidgePlot(seu_obj_data, features = c("PCNA", "TOP2A", "MCM6", "MKI67"), ncol = 2)
     # RidgePlot(seu_obj_data, features = c(s.genes[1:25], g2m.genes[1:25]), ncol = 8)
     # RidgePlot(seu_obj_data, features = c(s.genes[26:length(s.genes)], g2m.genes[26:length(g2m.genes)]), ncol = 8)
     if (F) {
-
       # Cell cycle scoring
-
-      ### add cell cycle, cc.genes loaded with Seurat
-
-      # score_cc <- function(seu_obj) {
-      #   seu_obj <- CellCycleScoring(seu_obj, s.genes, g2m.genes)
-      #   seu_obj@meta.data$CC.Diff <- seu_obj@meta.data$S.Score - seu_obj@meta.data$G2M.Score
-      #   return(seu_obj)
-      # }
-      #
-      # seu_obj <- score_cc(seu_obj)
-      #
-      # FeatureScatter(scRNA_harmony, "G2M.Score", "S.Score", group.by = "Phase", pt.size = .1) +
-      #   coord_fixed(ratio = 1)
-
-
       seu_obj_data <- RunPCA(seu_obj_data,
         features = c(s.genes, g2m.genes)
       )
@@ -285,20 +131,14 @@ if (T) {
       )
       # FeatureScatter(scRNA_harmony, "G2M.Score", "S.Score", group.by = "Phase", pt.size = .1) +
       #   coord_fixed(ratio = 1)
-      DimPlot(seu_obj_data, reduction = "Phase") #+
-      # scale_color_viridis(discrete = T, option = "C")
-      # 计算并移除分数差异
+      DimPlot(seu_obj_data, reduction = "Phase")
       if (T) {
-        # A
         seu_obj_data <- ScaleData(seu_obj_data,
           vars.to.regress = c("S.Score", "G2M.Score"),
           features = rownames(seu_obj_data)
         )
-      } else if (F) {
-        # B
-        # 计算并移除分数差异
+      } else {
         seu_obj_data$CC.Difference <- seu_obj_data$S.Score - seu_obj_data$G2M.Score
-
         seu_obj_data <- ScaleData(seu_obj_data,
           vars.to.regress = "CC.Difference",
           features = rownames(seu_obj_data)
@@ -306,96 +146,48 @@ if (T) {
       }
     }
     # ElbowPlot(seu_obj_data)
-    save(seu_obj_data,
-      file = paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter_SCT.Rdata")
-    )
+    # save(seu_obj_data,
+    #   file = paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter_SCT.Rdata")
+    # )
     # load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter_SCT.Rdata")
-
     pc.num <- 1:pc_num(seu_obj_data)
-    seu_obj_data <- seu_obj_data %>% RunUMAP(dims = pc.num) # %>% RunTSNE(dims=pc.num) #'tsne' compute is too slow
-    seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 0.3)
-    save(seu_obj_data,
-      file = paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter_SCT_PCA.Rdata")
-    )
-    # load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter_SCT_PCA.Rdata"))
+    seu_obj_data <- seu_obj_data %>%
+      RunUMAP(dims = pc.num) %>%
+      FindNeighbors(dims = pc.num) %>%
+      FindClusters(resolution = 0.3)
 
     if (F) {
       seu_obj_data <- annotation_celltype(seu_obj_data, method = "singleR") # method = "celltypist" or "singleR"
       levels(seu_obj_data$seurat_clusters)
     }
 
-    if (F) {
-      ITG.suj <- RunUMAP(ITG.spj, reduction = "pca", dims = 1:10) # ???
-    }
-    # saveRDS(seu_obj_filter, "seu_obj_filter.rds")
-
-    DimPlot(seu_obj_data,
+    p1 <- DimPlot(seu_obj_data,
       reduction = "umap",
-      group.by = "seurat_clusters",
-      label = T,
-      cols = colP,
-      repel = T
-      # pt.size = 0.2
-    ) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) + # NoLegend() +
-      scale_colour_viridis_d(option = "inferno")
-    ggsave2("SuppFig.3.clusters_raw_umap.png",
-      path = paste0("/data/mengxu/results/figure/stage-", s),
-      width = 13, height = 12, units = "cm"
+      group.by = "celltype"
+    ) + theme_bw() + NoLegend()
+
+    p2 <- DimPlot(seu_obj_data,
+      reduction = "umap",
+      group.by = "orig.ident"
+    ) + theme_bw() + NoLegend()
+
+    p3 <- DimPlot(seu_obj_data,
+      reduction = "umap",
+      group.by = "platform"
+    ) + theme_bw() + NoLegend()
+    
+    p1 + p2 + p3
+    ggsave2("Fig1.harmony_umap.png",
+      path = paste0("Results/stage-", s),
+      width = 27, height = 9, units = "cm"
     )
 
-    DimPlot(seu_obj_data,
-      reduction = "umap",
-      group.by = "orig.ident",
-      # label = T,
-      repel = T,
-      cols = colP
-      # pt.size = 0.2
-    ) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) + # NoLegend() +
-      scale_colour_viridis_d(option = "inferno")
-    if (length(samples) <= 10) {
-      ggsave2("SuppFig.3.samples_raw_umap.png",
-        path = paste0("/data/mengxu/results/figure/stage-", s),
-        width = 18, height = 12, units = "cm"
-      )
-    } else if (length(samples) > 10 && length(samples) <= 20) {
-      ggsave2("SuppFig.3.samples_raw_umap.png",
-        path = paste0("/data/mengxu/results/figure/stage-", s),
-        width = 20, height = 12, units = "cm"
-      )
-    } else if (length(samples) > 30 && length(samples) <= 40) {
-      ggsave2("SuppFig.3.samples_raw_umap.png",
-        path = paste0("/data/mengxu/results/figure/stage-", s),
-        width = 25, height = 12, units = "cm"
-      )
-    } else if (length(samples) > 40) {
-      ggsave2("SuppFig.3.samples_raw_umap.png",
-        path = paste0("/data/mengxu/results/figure/stage-", s),
-        width = 30, height = 12, units = "cm"
-      )
-    }
-
-
-    # DimPlot(seu_obj_data, reduction = "umap",group.by = "platform", label = TRUE, pt.size = 0.5, cols = colP)+
-    #   theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))#+NoLegend()
-    # ggsave2("fig2.platform_raw_umap.png",
-    #         path = paste0("/data/mengxu/results/figure/stage-", s),
-    #         width = 14, height = 11, units = "cm")
-
-    # seu_obj_filter <- readRDS("seu_obj_filter.rds")
-    # cellinfo <- subset(seu_obj_data@meta.data, select = c("nFeature_RNA", "nCount_RNA", "pMT", "pHB", "pRP"))
-    # scRNA_harmony <- CreateSeuratObject(seu_obj_filter@assays$RNA@counts, meta.data = cellinfo)
-
-    # scRNA_harmony <- SCTransform(scRNA_harmony, method = "glmGamPoi") #通过'glmGamPoi'加速
-    # The Seurat integration method --------------------------------------------------
     if (F) {
       Anchors <- FindIntegrationAnchors(object.list = dataset.list, dims = 1:30)
       ITG.sbj <- IntegrateData(anchorset = Anchors, dims = 1:30)
       DefaultAssay(ITG.sbj) <- "integrated"
     }
-    ### PCA
-    # scRNA_harmony <- RunPCA(scRNA_harmony, npcs=50, verbose=FALSE)
-    scRNA_harmony <- seu_obj_data
-    scRNA_harmony <- RunHarmony(scRNA_harmony,
+    scRNA_harmony <- RunHarmony(seu_obj_data,
       group.by.vars = "orig.ident",
       assay.use = "SCT",
       # lambda = 1, # [0.5-2] The more smaller lambda value, the bigger integration efforts.
@@ -403,49 +195,34 @@ if (T) {
     )
 
     pc.num <- 1:pc_num(scRNA_harmony)
-    scRNA_harmony <- RunUMAP(scRNA_harmony, reduction = "harmony", dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
+    scRNA_harmony <- RunUMAP(scRNA_harmony, reduction = "harmony", dims = pc.num) %>%
+      FindNeighbors(dims = pc.num) %>%
+      FindClusters(resolution = 1)
 
-    save(seu_obj_data,
-      file = paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_SCT_harmony_PCA.Rdata")
+    save(scRNA_harmony,
+      file = paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_harmony.Rdata")
     )
-    # load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_SCT_harmony_PCA.Rdata"))
+    # load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter_SCT.Rdata")
 
-    scRNA_harmony <- FindNeighbors(scRNA_harmony, dims = pc.num) %>% FindClusters(resolution = 1)
-
-    DimPlot(scRNA_harmony,
+    p1 <- DimPlot(scRNA_harmony,
       reduction = "umap",
-      # group.by = "orig.ident",
-      label = T,
-      cols = colP,
-      repel = T
-      # pt.size = 0.2
-    ) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) + # NoLegend() +
-      scale_colour_viridis_d(option = "inferno")
-    ggsave2("SuppFig3.clusters_harmony_umap.png",
-      path = paste0("/data/mengxu/results/figure/stage-", s),
-      width = 12, height = 12, units = "cm"
-    )
-    ###
-    DimPlot(scRNA_harmony,
+      group.by = "celltype"
+    ) + theme_bw() + NoLegend()
+
+    p2 <- DimPlot(scRNA_harmony,
       reduction = "umap",
-      group.by = "orig.ident",
-      # label = T,
-      repel = T,
-      # cols = viridis(72)
-      cols = colP
-      # pt.size = 0.2
-    ) + theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
-      scale_colour_viridis_d(option = "inferno")
-    ggsave2("SuppFig3.samples_harmony_umap.png",
-      path = paste0("/data/mengxu/results/figure/stage-", s),
-      width = 20, height = 15, units = "cm"
+      group.by = "orig.ident"
+    ) + theme_bw() + NoLegend()
+
+    p3 <- DimPlot(scRNA_harmony,
+      reduction = "umap",
+      group.by = "platform"
+    ) + theme_bw() + NoLegend()
+    p1 + p2 + p3
+    ggsave2("Fig2.harmony_umap.png",
+      path = paste0("Results/stage-", s),
+      width = 27, height = 9, units = "cm"
     )
-    ###
-    # DimPlot(scRNA_harmony, reduction = "umap",group.by = "platform", label = TRUE, pt.size = 0.5, cols = colP)+
-    #   theme(panel.border = element_rect(fill=NA,color= "black", size=1, linetype= "solid"))#+NoLegend()
-    # ggsave2("SuppFig3.platform_harmony_umap.png",
-    #         path = paste0("/data/mengxu/results/figure/stage-", s),
-    #         width = 14, height = 11, units = "cm")
 
     #----------------------------------------------------------------------------#
     sce.merged <- as.SingleCellExperiment(scRNA_harmony)
@@ -453,12 +230,12 @@ if (T) {
     lisi.pca <- lisi::compute_lisi(
       reducedDim(sce.merged, "PCA"),
       colData(sce.merged), c("orig.ident", "platform")
-    ) # "dataset","dataset.tech","ClusterID.pca" ,"RNA_snn_res.0.3"
+    ) # "dataset","dataset.tech","ClusterID.pca"
 
     lisi.harmony <- lisi::compute_lisi(
       reducedDim(sce.merged, "HARMONY"),
       colData(sce.merged), c("orig.ident", "platform")
-    ) # c("dataset","dataset.tech","ClusterID.harmony") ,"RNA_snn_res.0.3"
+    ) # c("dataset","dataset.tech","ClusterID.harmony")
 
     lisi.pca.tb <- cbind(
       data.table(
@@ -478,97 +255,159 @@ if (T) {
     lisi.merge.tb[, .(mean(orig.ident)), by = "method"]
     lisi.merge.tb[, .(median(orig.ident)), by = "method"]
 
-    # plot
-    p <-
-      ggboxplot(lisi.merge.tb,
-        x = "method", y = "orig.ident",
-        fill = "method", alpha = 0.8
-      ) +
+    p <- ggboxplot(lisi.merge.tb,
+      x = "method", y = "orig.ident",
+      fill = "method", alpha = 0.8
+    ) +
       stat_compare_means(comparisons = list(c("raw", "harmony"))) +
       ylab("LISI") +
       theme(legend.position = "right") + scale_fill_tron()
     print(p)
-    ggsave2(paste0("/data/mengxu/results/figure/stage-", s, "/SuppFig4.LISI.dataset.merge.png"),
+    ggsave2(paste0("Results/stage-", s, "/Fig3.LISI.png"),
       width = 3.2, height = 4
     )
 
     # --------------------------------------------------
-    mainmarkers <- c( # Nature Medicine-Phenotype molding of stromal cells in the lung  tumor microenvironment
-      # "ACAT2",
-      "CLDN18", # Alveolar
-      "CLDN5", # Endothelial
-      "CAPS", # Epithelial
-      "ALB", # Hepatocytes
-      "COL1A1", # Fibroblast
-      "CD79A", # B cell
-      "LYZ", # Myeloid
-      "CD3D", # T cell
-      "EPCAM" # , #Cancer
-      # 2022-Cancer cell-Intratumoral plasma cells predict outcomes to PD-L1 blockade in non-small cell lung cancer
-      # Follicular B cells
-      # "BANK1",
-      # "LINC00926",
-      # "MARCH1",
-      # "FCER2",
-      # "GAPT",
-      # "HVCN1",
-      # #Germinal center B cells
-      # "AICDA",
-      # "GCSAM",
-      # "LRMP",
-      # "AC023590.1",
-      # "SUSD3",
-      # #Plasma cell
-      # "MZB1",
-      # "DERL3",
-      # "JSRP1",
-      # "TNFRSF17",
-      # "SLAMF7",
-      # "IGHG2",
-      # "IGHGP",
-      # "IGLV3-1",
-      # "IGLV6-57",
-      # "IGHA2",
-      # "IGKV4-1",
-      # "IGKV1-12",
-      # "IGLC7",
-      # "IGLL5"
-    )
+    if (F) {
+      mainmarkers <- c( # Nature Medicine-Phenotype molding of stromal cells in the lung  tumor microenvironment
+        # "ACAT2",
+        "CLDN18", # Alveolar
+        "CLDN5", # Endothelial
+        "CAPS", # Epithelial
+        "ALB", # Hepatocytes
+        "COL1A1", # Fibroblast
+        "CD79A", # B cell
+        "LYZ", # Myeloid
+        "CD3D", # T cell
+        "EPCAM" # , #Cancer
+        # 2022-Cancer cell-Intratumoral plasma cells predict outcomes to PD-L1 blockade in non-small cell lung cancer
+        # Follicular B cells
+        # "BANK1",
+        # "LINC00926",
+        # "MARCH1",
+        # "FCER2",
+        # "GAPT",
+        # "HVCN1",
+        # #Germinal center B cells
+        # "AICDA",
+        # "GCSAM",
+        # "LRMP",
+        # "AC023590.1",
+        # "SUSD3",
+        # #Plasma cell
+        # "MZB1",
+        # "DERL3",
+        # "JSRP1",
+        # "TNFRSF17",
+        # "SLAMF7",
+        # "IGHG2",
+        # "IGHGP",
+        # "IGLV3-1",
+        # "IGLV6-57",
+        # "IGHA2",
+        # "IGKV4-1",
+        # "IGKV1-12",
+        # "IGLC7",
+        # "IGLL5"
+      )
 
-    DotPlot(scRNA_harmony, features = unique(mainmarkers), group.by = "seurat_clusters") +
-      RotatedAxis() +
-      scale_x_discrete("") +
-      scale_y_discrete("") +
-      # coord_flip() +
-      scale_color_viridis(discrete = F, option = "C")
+      DotPlot(scRNA_harmony, features = unique(mainmarkers), group.by = "seurat_clusters") +
+        RotatedAxis() +
+        scale_x_discrete("") +
+        scale_y_discrete("") +
+        # coord_flip() +
+        scale_color_viridis(discrete = F, option = "C")
 
-    ggsave2(paste0("SuppFig5.FeaturePlot_mainmarkers_", s, ".pdf"),
-      path = paste0("/data/mengxu/results/figure/stage-", s),
-      width = 15, height = 20, units = "cm"
-    )
+      ggsave2(paste0("SuppFig5.FeaturePlot_mainmarkers_", s, ".pdf"),
+        path = paste0("Results/stage-", s),
+        width = 15, height = 20, units = "cm"
+      )
 
-    for (i in seq_along(mainmarkers)) {
-      if (mainmarkers[i] %in% rownames(scRNA_harmony)) {
-        FeaturePlot(scRNA_harmony,
-          features = mainmarkers[i],
-          coord.fixed = T,
-          order = T,
-          cols = viridis(10)
-        ) +
-          scale_color_viridis(discrete = F, option = "inferno")
-        ggsave2(paste0("FeaturePlot_mainmarkers_", mainmarkers[i], ".png"),
-          path = paste0("/data/mengxu/results/figure/stage-", s, "/marker/"),
-          width = 10, height = 10, units = "cm"
-        )
+      for (i in seq_along(mainmarkers)) {
+        if (mainmarkers[i] %in% rownames(scRNA_harmony)) {
+          FeaturePlot(scRNA_harmony,
+            features = mainmarkers[i],
+            coord.fixed = T,
+            order = T,
+            cols = viridis(10)
+          ) +
+            scale_color_viridis(discrete = F, option = "inferno")
+          ggsave2(paste0("FeaturePlot_mainmarkers_", mainmarkers[i], ".png"),
+            path = paste0("Results/stage-", s, "/marker/"),
+            width = 10, height = 10, units = "cm"
+          )
+        }
       }
     }
   }
 }
 
+# Select samples and cells --------------------------------------------------
+load(paste0("/data/mengxu/data/all/lung_stage-", 2, "_seu.Rdata"))
+dim(seu_obj_filter)
+seu_obj_data <- seu_obj_filter
+seu_obj_data <- SCTransform(seu_obj_data)
+seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
+pc.num <- 1:pc_num(seu_obj_data)
+seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
+seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 1)
+p1 <- DimPlot(seu_obj_data,
+  reduction = "umap",
+  group.by = "orig.ident"
+) +
+  theme_bw() +
+  NoLegend()
+
+p2 <- DimPlot(seu_obj_data,
+  reduction = "umap",
+  group.by = "celltype"
+) +
+  theme_bw() +
+  NoLegend()
+p1 + p2
+
+obj_cells <- c("B_mature", "B_naive", "B_plasma", "B_plasmablast")
+seu_obj_data_obj_cells <- list()
+for (i in 1:length(obj_cells)) {
+  obj_cell <- obj_cells[i]
+  seu_obj_data_obj_cell <- seu_obj_data[, (seu_obj_data$celltype == obj_cell)]
+  seu_obj_data_obj_cells[[i]] <- seu_obj_data_obj_cell
+}
+seu_obj_data_B <- merge(seu_obj_data_obj_cells[[1]], seu_obj_data_obj_cells[2:length(seu_obj_data_obj_cells)])
+
+dim(seu_obj_data_B)
+table(seu_obj_data_B$celltype)
+seu_obj_data_B <- SCTransform(seu_obj_data_B)
+# seu_obj_data <- NormalizeData(seu_obj_data)
+# seu_obj_data <- FindVariableFeatures(seu_obj_data)
+# seu_obj_data <- ScaleData(seu_obj_data)
+seu_obj_data_B <- RunPCA(seu_obj_data_B, verbose = T)
+pc <- pc_num(seu_obj_data_B)
+pc.num <- 1:pc
+
+seu_obj_data_B <- RunUMAP(seu_obj_data_B, dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
+seu_obj_data_B <- FindNeighbors(seu_obj_data_B, dims = pc.num) %>% FindClusters(resolution = 1)
+DimPlot(
+  seu_obj_data_B,
+  group.by = "celltype",
+  label = T,
+  repel = T,
+  pt.size = 0.2
+) +
+  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+  theme_bw()
+
+DimPlot(
+  seu_obj_data_B,
+  group.by = "orig.ident",
+  label = T,
+  repel = T,
+  pt.size = 0.2
+) +
+  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+  theme_bw()
 
 # annotation --------------------------------------------------------------
-
-###
 if (F) {
   # VlnPlot(scRNA_harmony,marker)
   # VlnPlot(scRNA_harmony,'CD79A')

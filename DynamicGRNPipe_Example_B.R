@@ -126,12 +126,33 @@ GENIE3_AUPR <- calcAUPR(evaluationObject)
 GENIE3_AUROC
 
 weightofWindows_L0 <- DynNet_L0(
-  Windows = Windows1[3],
+  Windows = Windows1,
   CD8TCellExp.trajectory = CD8TCellExp.trajectory,
   DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
-  allTFs = allTFs[100:200], # set regulators
+  allTFs = allTFs, # set regulators
   detectNum = 10, detectPro = 0.05, meanExp = 1 # Noise filtering threshold
 )
+
+# Filter the edges for each window
+lineage1dynet_L0 <- DynNet_filter(
+  Windows = Windows1,
+  CD8TCellExp.trajectory = CD8TCellExp.trajectory,
+  weightofWindows = weightofWindows_L0,
+  weightThr = 0.02,
+  nsd = 2,
+  positivecor = 0#,
+  #confidence = NULL
+)
+lineage1dynet_L0[[4]]
+lineage1dynet1_L0 <- lineage1dynet_L0[1:2]
+length(lineage1dynet1_L0[[4]])
+# extract active edges for each window
+Dynnet_active1_L0 <- lapply(lineage1dynet_L0, function(x) {
+  rownames(x) <- paste0(x[, 1], "_", x[, 2])
+  x <- x[x[, "spearmanCor"] > 0, ]
+  return(x)
+})
+names(Dynnet_active1_L0) <- paste0("W", 1:length(Dynnet_active1_L0))
 
 ground_truth_T(weightofWindows_L0[[1]], dorothea_regulon_human)
 evaluationObject_L0 <- prepareEval("ground_pred.txt",

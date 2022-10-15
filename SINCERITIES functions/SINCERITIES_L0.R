@@ -1,4 +1,5 @@
-###############################################################################
+
+
 # SINCERITIES is a novel computational method for inferring
 # gene regulatory network (GRN) from time-stamped cross-sectional
 # single-cell expression data.

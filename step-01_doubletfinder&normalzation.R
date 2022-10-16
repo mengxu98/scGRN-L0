@@ -3,20 +3,17 @@
 if (T) {
   rm(list = ls())
   gc()
-  # R
   library(tidyverse)
   library(patchwork)
   library(scuttle)
   library(Seurat)
   library(scran)
   library(celldex)
-  library(pheatmap)
   source("Function.R")
   s.genes <- cc.genes$s.genes
   g2m.genes <- cc.genes$g2m.genes
 }
 
-#------------------------------------------------------------------------------#
 stage <- c("normal", "1", "2", "3", "4")
 for (s in stage) {
   seu_obj_list_filter <- list()
@@ -25,8 +22,10 @@ for (s in stage) {
   if (file.exists(paste0("/data/mengxu/data/all/lung_stage-", s, "_list_raw.Rdata")) == T) {
     load(paste0("/data/mengxu/data/all/lung_stage-", s, "_list_raw.Rdata"))
     for (i in 1:length(seu_obj_list)) {
-      message("[", Sys.time(), "] -----: Now ", samples[i], " data normalization!")
       seu_obj_data <- seu_obj_list[[i]]
+      sample <- levels(seu_obj_data$orig.ident)
+      samples[i] <- sample
+      message("[", Sys.time(), "] -----: Now sample ", samples[i], " data normalization!")
       if (length(samples) == length(seu_obj_list_filter)) {
         print("END")
       } else if (length(colnames(seu_obj_data)) > 100) {
@@ -37,7 +36,7 @@ for (s in stage) {
           set.ident = TRUE
         )
         seu_obj_data$CC.Difference <- seu_obj_data$S.Score - seu_obj_data$G2M.Score
-        # 观察细胞周期基因的表达情况？是否会影响轨迹推断和拟时间分析呢？
+        # 观察细胞周期基因的表达情况？是否会影响轨迹推断和拟时间分析呢？如果有影响，是否应该去除呢？
         # RidgePlot(seu_obj_data, features = c("PCNA", "TOP2A", "MCM6", "MKI67"), ncol = 2)
         # RidgePlot(seu_obj_data, features = c(s.genes[1:25], g2m.genes[1:25]), ncol = 8)
         # RidgePlot(seu_obj_data, features = c(s.genes[26:length(s.genes)], g2m.genes[26:length(g2m.genes)]), ncol = 8)
@@ -52,7 +51,6 @@ for (s in stage) {
             nfeatures.print = 10
           )
           DimPlot(seu_obj_data)
-          # 计算并移除分数差异
           if (T) {
             seu_obj_data <- ScaleData(seu_obj_data,
               vars.to.regress = c("S.Score", "G2M.Score"),
@@ -65,8 +63,6 @@ for (s in stage) {
               features = rownames(seu_obj_data)
             )
           }
-
-          # 在PCA中不再出现大量的细胞周期相关的基因
           seu_obj_data <- RunPCA(seu_obj_data,
             features = VariableFeatures(seu_obj_data),
             nfeatures.print = 10
@@ -103,8 +99,7 @@ for (s in stage) {
           RunUMAP(dims = pc.num)
 
         seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 0.5)
-        seu_obj_data <- annotation_celltype(seu_obj_data, method = "celltypist") # method = "celltypist" or "singleR"
-        seu_obj_data$celltype <- seu_obj_data$predicted_labels
+        seu_obj_data <- annotation_celltype(seu_obj_data, method = "celltypist") # method = "celltypist" or "SingleR"
 
         raw_cell_num <- length(colnames(seu_obj_data))
         seu_obj_data <- doublets_filter(seu_obj_data, doublet_rate = 0.05)
@@ -143,8 +138,7 @@ for (s in stage) {
         
         seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
         seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 0.5)
-        seu_obj_data <- annotation_celltype(seu_obj_data, method = "celltypist") # method = "celltypist" or "singleR"
-        seu_obj_data$celltype <- seu_obj_data$predicted_labels
+        seu_obj_data <- annotation_celltype(seu_obj_data, method = "celltypist") # method = "celltypist" or "SingleR"
         
         seu_obj_list_filter[[i]] <- seu_obj_data
         # saveRDS(seu_obj_data, paste0("/data/mengxu/data/all/samples/",samples[i], ".rds")) #Save every sample

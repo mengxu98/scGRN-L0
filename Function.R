@@ -117,36 +117,68 @@ pc_num <- function(sce) {
 }
 
 # Normalization for sample --------------------------------------------------
-normalize_data <- function(seu_obj) {
-  if (seu_obj$platform[1] == "10X") {
-    message("[", Sys.time(), "] -----: Platform 10x Genomics")
-    seu_obj <- NormalizeData(object = seu_obj, normalization.method = "LogNormalize", scale.factor = 1e4)
-  } else if (seu_obj$platform[1] == "IndropSeq") {
-    message("[", Sys.time(), "] -----: Platform IndropSeq")
-    seu_obj <- NormalizeData(object = seu_obj, normalization.method = "LogNormalize", scale.factor = 1e4)
-  } else if (seu_obj$platform[1] == "SmartSeq2") {
-    message("[", Sys.time(), "] -----: Platform Smart-seq2")
-    project.name <- seu_obj@project.name
-    seu_obj <- as.SingleCellExperiment(seu_obj)
-    # QC
-    qcstats <- perCellQCMetrics(seu_obj)
-    qcfilter <- quickPerCellQC(qcstats)
-    summary(qcfilter$discard)
-    seu_obj <- seu_obj[, !qcfilter$discard]
-    clusters <- quickCluster(seu_obj)
-    # Normalization
-    seu_obj <- computeSumFactors(seu_obj, clusters = clusters)
-    summary(sizeFactors(seu_obj))
-    seu_obj <- logNormCounts(seu_obj)
-    seu_obj <- CreateSeuratObject(
-      counts = seu_obj@assays@data$logcounts,
-      project = project.name,
-      min.features = 200,
-      min.cells = 3
-    )
-    seu_obj$platform <- "SmartSeq2"
+normalize_data <- function(seu_obj, platform = NULL) {
+  if (length(table(seu_obj$platform)) == 1) {
+    if (is.null(platform)) {
+      tryCatch(
+        {
+          is.null(seu_obj$platform)
+        },
+        # warning = function(w) {
+        # },
+        error = function(e) {
+          platform <- "10X"
+          seu_obj$platform <- platform
+          message("[", Sys.time(), "] -----: There is no platform information, the default setting is \"10X\"!")
+        },
+        finally = {
+          platform <- seu_obj$platform[1]
+        }
+      )
+    }
+    if (platform == "10X") {
+      message("[", Sys.time(), "] -----: Platform 10x Genomics")
+      seu_obj <- NormalizeData(object = seu_obj, normalization.method = "LogNormalize", scale.factor = 1e4)
+      seu_obj <- CreateSeuratObject(
+        counts = seu_obj[["RNA"]]@data,
+        project = project.name,
+        min.features = 200,
+        min.cells = 3
+      )
+    } else if (platform == "IndropSeq") {
+      message("[", Sys.time(), "] -----: Platform IndropSeq")
+      seu_obj <- NormalizeData(object = seu_obj, normalization.method = "LogNormalize", scale.factor = 1e4)
+      seu_obj <- CreateSeuratObject(
+        counts = seu_obj[["RNA"]]@data,
+        project = project.name,
+        min.features = 200,
+        min.cells = 3
+      )
+    } else if (platform == "SmartSeq2") {
+      message("[", Sys.time(), "] -----: Platform Smart-seq2")
+      project.name <- seu_obj@project.name
+      sce_obj <- as.SingleCellExperiment(seu_obj)
+      # QC
+      qcstats <- perCellQCMetrics(sce_obj)
+      qcfilter <- quickPerCellQC(qcstats)
+      sce_obj <- sce_obj[, !qcfilter$discard]
+      clusters <- quickCluster(sce_obj)
+      # Normalization
+      sce_obj <- computeSumFactors(sce_obj, clusters = clusters)
+      summary(sizeFactors(sce_obj))
+      sce_obj <- logNormCounts(sce_obj)
+      seu_obj <- CreateSeuratObject(
+        counts = seu_obj@assays@data$logcounts,
+        project = project.name,
+        min.features = 200,
+        min.cells = 3
+      )
+    }
+    seu_obj$platform <- platform
+    return(seu_obj)
+  } else {
+    message("[", Sys.time(), "] -----: There are multiple platform information, please consider removing batch effect!")
   }
-  return(seu_obj)
 }
 
 # Seurat object to 10x files --------------------------------------------------
@@ -174,9 +206,7 @@ doublets_filter <- function(seu_obj, doublet_rate = 0.039, plot = FALSE, filenam
   homotypic.prop <- modelHomotypic(seu_obj$celltype)
   nExp_poi <- round(doublet_rate * ncol(seu_obj))
   nExp_poi.adj <- round(nExp_poi * (1 - homotypic.prop))
-  seu_obj <- doubletFinder_v3(seu_obj,
-    PCs = pc.num, pN = 0.25, pK = pK_bcmvn, nExp = nExp_poi.adj, reuse.pANN = F, sct = T
-  )
+  seu_obj <- doubletFinder_v3(seu_obj, PCs = pc.num, pN = 0.25, pK = pK_bcmvn, nExp = nExp_poi.adj, reuse.pANN = F, sct = T)
   seu_obj$doubFind.class <- seu_obj@meta.data %>% select(contains("DF.classifications"))
   seu_obj$doubFind.score <- seu_obj@meta.data %>% select(contains("pANN"))
   # table(seu_obj$doubFind.class)
@@ -188,20 +218,23 @@ doublets_filter <- function(seu_obj, doublet_rate = 0.039, plot = FALSE, filenam
     ) +
       theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
       theme_bw()
-    print(p)
-    if (filename == NULL) filename <- "Doublets.pdf"
+    # print(p)
+    p
+    if (filename == NULL) {
+      filename <- "Doublets.pdf"
+    }
     ggsave(p, filename = filename)
   }
 
-  seu_obj_sce <- as.SingleCellExperiment(seu_obj)
-  seu_obj_sce <- scDblFinder(seu_obj_sce, dbr = 0.1)
-  plotDoubletMap(seu_obj_sce)
-  # table(truth = seu_obj_sce$scDblFinder.class, call = seu_obj_sce$scDblFinder.class)
-  # table(seu_obj_sce$scDblFinder.class)
-  seu_obj_sce <- as.Seurat(seu_obj_sce)
+  sce_obj <- as.SingleCellExperiment(seu_obj)
+  sce_obj <- scDblFinder(sce_obj, dbr = 0.1)
+  # plotDoubletMap(sce_obj)
+  # table(truth = sce_obj$scDblFinder.class, call = sce_obj$scDblFinder.class)
+  # table(sce_obj$scDblFinder.class)
+  sce_obj <- as.Seurat(sce_obj)
   intersection_doublet <- intersect(
     colnames(seu_obj[, which(seu_obj@meta.data$doubFind.class == "Doublet")]), # Singlet
-    colnames(seu_obj_sce[, which(seu_obj_sce@meta.data$scDblFinder.class == "doublet")])
+    colnames(sce_obj[, which(sce_obj@meta.data$scDblFinder.class == "doublet")])
   )
   if (length(intersection_doublet) == 0) {
     seu_obj <- seu_obj_raw[, colnames(seu_obj_raw[, which(seu_obj@meta.data$doubFind.class == "Singlet")])]
@@ -232,7 +265,7 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
     if (length(colnames(seu_obj)) < 100000) {
       adata <- scanpy$AnnData(
         # X = numpy$array(t(as.matrix(seu_obj[["RNA"]]@counts))),
-        X = numpy$array(t(as.matrix(seu_obj[["RNA"]]@data))),
+        X = numpy$array(t(as.matrix(seu_obj[["RNA"]]@counts))),
         obs = pandas$DataFrame(seu_obj@meta.data),
         var = pandas$DataFrame(data.frame(
           gene = rownames(seu_obj[["RNA"]]@counts),
@@ -256,22 +289,20 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
     scanpy$pp$log1p(adata)
     predictions <- celltypist$annotate(adata, model = "Cells_Lung_Airway.pkl", majority_voting = FALSE)
     seu_obj <- AddMetaData(seu_obj, predictions$predicted_labels)
-    # names(seu_obj@meta.data)[names(seu_obj@meta.data) == 'predicted_labels'] <- 'celltype'
+    seu_obj$celltype <- seu_obj$predicted_labels
     return(seu_obj)
-  } else if (method == "singleR") {
+  } else if (method == "SingleR") {
     package.check("SingleR")
     # hpca.se <- HumanPrimaryCellAtlasData()
     load("/data/mengxu/data/SingleR_data/HumanPrimaryCellAtlas_hpca.se_human.RData")
-    load("/data/mengxu/data/SingleR_data/BlueprintEncode_bpe.se_human.RData")
+    # load("/data/mengxu/data/SingleR_data/BlueprintEncode_bpe.se_human.RData")
     message("[", Sys.time(), "] -----: Run 'singleR'!")
-    # SingleR_obj <- GetAssayData(scRNA_harmony, slot= "data")
-    # SingleR_obj <- scRNA_harmony@assays$SCT@counts
-    SingleR_obj <- seu_obj@assays$RNA@counts
-    scRNA.hesc <- SingleR(test = SingleR_obj, ref = hpca.se, labels = hpca.se$label.main)
-    seu_obj@meta.data$celltype <- scRNA.hesc$labels
+    matrix <- seu_obj@assays$RNA@counts
+    singler_obj <- SingleR(test = matrix, ref = hpca.se, labels = hpca.se$label.main)
+    seu_obj$celltype <- singler_obj$labels
     return(seu_obj)
-  } else if (T) {
-    message("[", Sys.time(), "] -----: Please choose one of methods: 'celltypist' or 'singleR!'")
+  } else if (!(method %in% c("celltypist", "SingleR"))) {
+    message("[", Sys.time(), "] -----: Please choose one of methods: 'celltypist' or 'SingleR!'")
   }
 }
 

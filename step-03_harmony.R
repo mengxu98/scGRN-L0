@@ -157,7 +157,7 @@ if (T) {
       FindClusters(resolution = 0.3)
 
     if (F) {
-      seu_obj_data <- annotation_celltype(seu_obj_data, method = "singleR") # method = "celltypist" or "singleR"
+      seu_obj_data <- annotation_celltype(seu_obj_data, method = "celltypist") # method = "celltypist" or "singleR"
       levels(seu_obj_data$seurat_clusters)
     }
 
@@ -269,7 +269,7 @@ if (T) {
 
     # --------------------------------------------------
     if (F) {
-      mainmarkers <- c( 
+      mainmarkers <- c(
         # Nature Medicine-Phenotype molding of stromal cells in the lung  tumor microenvironment
         # "ACAT2",
         "CLDN18", # Alveolar

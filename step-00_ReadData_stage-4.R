@@ -471,13 +471,13 @@ if (T) {
   ######
   if (Sys.info()[1] == "Windows") {
     # Metadata
-    neo_osi_metadata <- read.csv("/\\192.168.0.109/data/mengxu/data/AshleyMaynard2020/Data_input/csv_files/neo-osi_metadata.csv")
-    S01_metacells <- read.csv("/\\192.168.0.109/data/mengxu/data/AshleyMaynard2020/Data_input/csv_files/S01_metacells.csv")
+    neo_osi_metadata <- read.csv("/\\192.168.0.109/data/mengxu/data/AshleyMaynard2020(PRJNA591860)/Data_input/csv_files/neo-osi_metadata.csv")
+    S01_metacells <- read.csv("/\\192.168.0.109/data/mengxu/data/AshleyMaynard2020(PRJNA591860)/Data_input/csv_files/S01_metacells.csv")
     # Dataset
     # load("/data/mengxu/data/AshleyMaynard2020/Data_input/objects/S02.1_Main_Seurat_object_filtered_neo_osi.RData")
     # AshleyMaynard2020 <- read.csv('/data/mengxu/data/AshleyMaynard2020/Data_input/csv_files/S01_datafinal.csv')
     neo_osi_rawdata <- fread(
-      file = "/\\192.168.0.109/data/mengxu/data/AshleyMaynard2020/Data_input/csv_files/neo-osi_rawdata.csv",
+      file = "/\\192.168.0.109/data/mengxu/data/AshleyMaynard2020(PRJNA591860)/Data_input/csv_files/neo-osi_rawdata.csv",
       sep = ",",
       header = T,
       check.names = F
@@ -486,7 +486,7 @@ if (T) {
     rownames(neo_osi_rawdata) <- neo_osi_rawdata$gene
     ###
     S01_datafinal <- fread(
-      file = "/\\192.168.0.109/data/mengxu/data/AshleyMaynard2020/Data_input/csv_files/S01_datafinal.csv",
+      file = "/\\192.168.0.109/data/mengxu/data/AshleyMaynard2020(PRJNA591860)/Data_input/csv_files/S01_datafinal.csv",
       sep = ",",
       header = T,
       check.names = F
@@ -495,11 +495,11 @@ if (T) {
     rownames(S01_datafinal) <- S01_datafinal$V1
   } else {
     # Metadata
-    neo_osi_metadata <- read.csv("/data/mengxu/data/AshleyMaynard2020/Data_input/csv_files/neo-osi_metadata.csv")
-    S01_metacells <- read.csv("/data/mengxu/data/AshleyMaynard2020/Data_input/csv_files/S01_metacells.csv")
+    neo_osi_metadata <- read.csv("/data/mengxu/data/AshleyMaynard2020(PRJNA591860)/Data_input/csv_files/neo-osi_metadata.csv")
+    S01_metacells <- read.csv("/data/mengxu/data/AshleyMaynard2020(PRJNA591860)/Data_input/csv_files/S01_metacells.csv")
     # Dataset
     neo_osi_rawdata <- fread(
-      file = "/data/mengxu/data/AshleyMaynard2020/Data_input/csv_files/neo-osi_rawdata.csv",
+      file = "/data/mengxu/data/AshleyMaynard2020(PRJNA591860)/Data_input/csv_files/neo-osi_rawdata.csv",
       sep = ",",
       header = T,
       check.names = F
@@ -508,7 +508,7 @@ if (T) {
     rownames(neo_osi_rawdata) <- neo_osi_rawdata$gene
     ###
     S01_datafinal <- fread(
-      file = "/data/mengxu/data/AshleyMaynard2020/Data_input/csv_files/S01_datafinal.csv",
+      file = "/data/mengxu/data/AshleyMaynard2020(PRJNA591860)/Data_input/csv_files/S01_datafinal.csv",
       sep = ",",
       header = T,
       check.names = F

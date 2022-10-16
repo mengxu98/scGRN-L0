@@ -72,7 +72,7 @@ package.check <- function(packages) {
         message("[", Sys.time(), "] -----: Now install package: ", package, " from BioConductor!")
         BiocManager::install(package)
         library(package, character.only = T)
-      } else {
+      } else { # Bug
         if (!requireNamespace("githubinstall", quietly = TRUE)) {
           install.packages("githubinstall")
         }

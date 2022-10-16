@@ -23,7 +23,8 @@ for (s in stage) {
     load(paste0("/data/mengxu/data/all/lung_stage-", s, "_list_raw.Rdata"))
     for (i in 1:length(seu_obj_list)) {
       seu_obj_data <- seu_obj_list[[i]]
-      sample <- levels(seu_obj_data$orig.ident)
+      seu_obj_data$orig.ident <- as.factor(seu_obj_data$orig.ident)
+      sample <- levels(seu_obj_data$orig.ident)[1]
       samples[i] <- sample
       message("[", Sys.time(), "] -----: Now sample ", samples[i], " data normalization!")
       if (length(samples) == length(seu_obj_list_filter)) {

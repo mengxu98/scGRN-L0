@@ -133,6 +133,7 @@ normalize_data <- function(seu_obj, platform = NULL) {
         },
         finally = {
           platform <- seu_obj$platform[1]
+          project.name <- seu_obj@project.name
         }
       )
     }
@@ -156,7 +157,6 @@ normalize_data <- function(seu_obj, platform = NULL) {
       )
     } else if (platform == "SmartSeq2") {
       message("[", Sys.time(), "] -----: Platform Smart-seq2")
-      project.name <- seu_obj@project.name
       sce_obj <- as.SingleCellExperiment(seu_obj)
       # QC
       qcstats <- perCellQCMetrics(sce_obj)
@@ -213,10 +213,9 @@ doublets_filter <- function(seu_obj, doublet_rate = 0.039, plot = FALSE, filenam
   if (plot) {
     p <- DimPlot(seu_obj,
       reduction = "umap",
-      group.by = "doubFind.class",
-      cols = colP
+      group.by = "doubFind.class"
     ) +
-      theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+      # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
       theme_bw()
     # print(p)
     p

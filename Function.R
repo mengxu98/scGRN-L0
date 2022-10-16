@@ -168,7 +168,7 @@ normalize_data <- function(seu_obj, platform = NULL) {
       summary(sizeFactors(sce_obj))
       sce_obj <- logNormCounts(sce_obj)
       seu_obj <- CreateSeuratObject(
-        counts = seu_obj@assays@data$logcounts,
+        counts = sce_obj@assays@data$logcounts,
         project = project.name,
         min.features = 200,
         min.cells = 3

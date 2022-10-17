@@ -260,28 +260,28 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
     numpy <- import("numpy")
     scanpy <- import("scanpy")
     celltypist <- import("celltypist")
+    tryCatch(
+      {
+        matrix <- t(as.matrix(seu_obj[["RNA"]]@counts))
+      },
+      warning = function(w) {
+        source("Function-as_matrix_cpp.R")
+        matrix <- t(as_matrix(seu_obj[["RNA"]]@counts))
+      },
+      error = function(e) {
+        source("Function-as_matrix_cpp.R")
+        matrix <- t(as_matrix(seu_obj[["RNA"]]@counts))
+      }
+    )
     message("[", Sys.time(), "] -----: Run 'celltypist'!")
-    if (length(colnames(seu_obj)) < 100000) {
-      adata <- scanpy$AnnData(
-        # X = numpy$array(t(as.matrix(seu_obj[["RNA"]]@counts))),
-        X = numpy$array(t(as.matrix(seu_obj[["RNA"]]@counts))),
-        obs = pandas$DataFrame(seu_obj@meta.data),
-        var = pandas$DataFrame(data.frame(
-          gene = rownames(seu_obj[["RNA"]]@counts),
-          row.names = rownames(seu_obj[["RNA"]]@counts)
-        ))
-      )
-    } else {
-      source("Function-as_matrix_cpp.R")
-      adata <- scanpy$AnnData(
-        X = numpy$array(t(as_matrix(seu_obj[["RNA"]]@counts))),
-        obs = pandas$DataFrame(seu_obj@meta.data),
-        var = pandas$DataFrame(data.frame(
-          gene = rownames(seu_obj[["RNA"]]@counts),
-          row.names = rownames(seu_obj[["RNA"]]@counts)
-        ))
-      )
-    }
+    adata <- scanpy$AnnData(
+      X = numpy$array(matrix),
+      obs = pandas$DataFrame(seu_obj@meta.data),
+      var = pandas$DataFrame(data.frame(
+        gene = rownames(seu_obj[["RNA"]]@counts),
+        row.names = rownames(seu_obj[["RNA"]]@counts)
+      ))
+    )
     model <- celltypist$models$Model$load(model = "Cells_Lung_Airway.pkl")
     model$cell_types
     scanpy$pp$normalize_total(adata, target_sum = 1e4)
@@ -292,7 +292,7 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
     return(seu_obj)
   } else if (method == "SingleR") {
     package.check("SingleR")
-    # hpca.se <- HumanPrimaryCellAtlasData()
+    # hpca.se <- HumanPrimaryCellAtlasData() # Bug
     load("/data/mengxu/data/SingleR_data/HumanPrimaryCellAtlas_hpca.se_human.RData")
     # load("/data/mengxu/data/SingleR_data/BlueprintEncode_bpe.se_human.RData")
     message("[", Sys.time(), "] -----: Run 'singleR'!")
@@ -315,6 +315,7 @@ merge_seu_obj <- function(seu_obj_list, samples, stage) {
     add.cell.ids = samples,
     project = paste0("NSCLC-stage-", stage)
   )
+  seu_obj$stage <- paste0("stage-", stage)
   return(seu_obj)
 }
 

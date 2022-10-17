@@ -53,6 +53,103 @@ if (T) {
   }
 }
 
+# Merge all samples --------------------------------------------------
+if (T) {
+  stage <- c("normal", "1", "2", "3", "4")
+  seu_obj_filter_list <- list()
+  samples_list <- c()
+  i <- 0
+  for (s in stage) {
+    i <- i + 1
+    if (file.exists(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu.Rdata")) == T) {
+      load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu.Rdata")) # From 'step-01_doubletfinder&normalzation'
+      seu_obj_filter$stage <- paste0("stage-", s)
+      seu_obj_filter_list[[i]] <- seu_obj_filter
+      samples_list <- rbind.data.frame(samples_list, samples)
+      rm(seu_obj_filter)
+      rm(samples)
+      gc()
+    }
+  }
+  seu_obj_data <- merge(seu_obj_filter_list[[1]],
+    y = c(
+      seu_obj_filter_list[2:length(seu_obj_filter_list)]
+    ),
+    # add.cell.ids = samples_list,
+    project = "NSCLC"
+  )
+  dim(seu_obj_data)
+  table(seu_obj_data$orig.ident)
+  table(seu_obj_data$celltype)
+  save(seu_obj_data, samples_list, file = paste0("/data/mengxu/data/all/lung_seu.Rdata"))
+}
+
+# Select samples and cells --------------------------------------------------
+if (T) {
+  load(paste0("/data/mengxu/data/all/lung_stage-", 4, "_seu.Rdata"))
+  dim(seu_obj_filter)
+  seu_obj_data <- seu_obj_filter
+  seu_obj_data <- SCTransform(seu_obj_data)
+  seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
+  pc.num <- 1:pc_num(seu_obj_data)
+  seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
+  seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 1)
+  p1 <- DimPlot(seu_obj_data,
+    reduction = "umap",
+    group.by = "orig.ident"
+  ) +
+    theme_bw() +
+    NoLegend()
+  p2 <- DimPlot(seu_obj_data,
+    reduction = "umap",
+    group.by = "celltype"
+  ) +
+    theme_bw() +
+    NoLegend()
+  p1 + p2
+
+  obj_cells <- c("B_mature", "B_naive", "B_plasma", "B_plasmablast")
+  seu_obj_data_obj_cells <- list()
+  for (i in 1:length(obj_cells)) {
+    obj_cell <- obj_cells[i]
+    seu_obj_data_obj_cell <- seu_obj_data[, (seu_obj_data$celltype == obj_cell)]
+    seu_obj_data_obj_cells[[i]] <- seu_obj_data_obj_cell
+  }
+  seu_obj_data_B <- merge(seu_obj_data_obj_cells[[1]], seu_obj_data_obj_cells[2:length(seu_obj_data_obj_cells)])
+
+  dim(seu_obj_data_B)
+  table(seu_obj_data_B$celltype)
+  seu_obj_data_B <- SCTransform(seu_obj_data_B)
+  # seu_obj_data <- NormalizeData(seu_obj_data)
+  # seu_obj_data <- FindVariableFeatures(seu_obj_data)
+  # seu_obj_data <- ScaleData(seu_obj_data)
+  seu_obj_data_B <- RunPCA(seu_obj_data_B, verbose = T)
+  pc <- pc_num(seu_obj_data_B)
+  pc.num <- 1:pc
+
+  seu_obj_data_B <- RunUMAP(seu_obj_data_B, dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
+  seu_obj_data_B <- FindNeighbors(seu_obj_data_B, dims = pc.num) %>% FindClusters(resolution = 1)
+  DimPlot(
+    seu_obj_data_B,
+    group.by = "celltype",
+    label = T,
+    repel = T,
+    pt.size = 0.2
+  ) +
+    # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+    theme_bw()
+
+  DimPlot(
+    seu_obj_data_B,
+    group.by = "orig.ident",
+    label = T,
+    repel = T,
+    pt.size = 0.2
+  ) +
+    # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
+    theme_bw()
+}
+
 # harmony -----------------------------------------------------------------
 if (T) {
   stage <- c("normal", "1", "2", "3", "4")
@@ -342,71 +439,6 @@ if (T) {
     }
   }
 }
-
-# Select samples and cells --------------------------------------------------
-load(paste0("/data/mengxu/data/all/lung_stage-", 2, "_seu.Rdata"))
-dim(seu_obj_filter)
-seu_obj_data <- seu_obj_filter
-seu_obj_data <- SCTransform(seu_obj_data)
-seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
-pc.num <- 1:pc_num(seu_obj_data)
-seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
-seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 1)
-p1 <- DimPlot(seu_obj_data,
-  reduction = "umap",
-  group.by = "orig.ident"
-) +
-  theme_bw() +
-  NoLegend()
-
-p2 <- DimPlot(seu_obj_data,
-  reduction = "umap",
-  group.by = "celltype"
-) +
-  theme_bw() +
-  NoLegend()
-p1 + p2
-
-obj_cells <- c("B_mature", "B_naive", "B_plasma", "B_plasmablast")
-seu_obj_data_obj_cells <- list()
-for (i in 1:length(obj_cells)) {
-  obj_cell <- obj_cells[i]
-  seu_obj_data_obj_cell <- seu_obj_data[, (seu_obj_data$celltype == obj_cell)]
-  seu_obj_data_obj_cells[[i]] <- seu_obj_data_obj_cell
-}
-seu_obj_data_B <- merge(seu_obj_data_obj_cells[[1]], seu_obj_data_obj_cells[2:length(seu_obj_data_obj_cells)])
-
-dim(seu_obj_data_B)
-table(seu_obj_data_B$celltype)
-seu_obj_data_B <- SCTransform(seu_obj_data_B)
-# seu_obj_data <- NormalizeData(seu_obj_data)
-# seu_obj_data <- FindVariableFeatures(seu_obj_data)
-# seu_obj_data <- ScaleData(seu_obj_data)
-seu_obj_data_B <- RunPCA(seu_obj_data_B, verbose = T)
-pc <- pc_num(seu_obj_data_B)
-pc.num <- 1:pc
-
-seu_obj_data_B <- RunUMAP(seu_obj_data_B, dims = pc.num) # %>% RunTSNE(reduction="harmony", dims=pc.num)
-seu_obj_data_B <- FindNeighbors(seu_obj_data_B, dims = pc.num) %>% FindClusters(resolution = 1)
-DimPlot(
-  seu_obj_data_B,
-  group.by = "celltype",
-  label = T,
-  repel = T,
-  pt.size = 0.2
-) +
-  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
-  theme_bw()
-
-DimPlot(
-  seu_obj_data_B,
-  group.by = "orig.ident",
-  label = T,
-  repel = T,
-  pt.size = 0.2
-) +
-  # theme(panel.border = element_rect(fill = NA, color = "black", size = 1, linetype = "solid")) +
-  theme_bw()
 
 # annotation --------------------------------------------------------------
 if (F) {

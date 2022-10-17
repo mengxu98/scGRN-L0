@@ -219,7 +219,7 @@ doublets_filter <- function(seu_obj, doublet_rate = 0.039, plot = FALSE, filenam
       theme_bw()
     # print(p)
     p
-    if (filename == NULL) {
+    if (is.null(filename)) {
       filename <- "Doublets.pdf"
     }
     ggsave(p, filename = filename)
@@ -263,11 +263,12 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
     tryCatch(
       {
         matrix <- t(as.matrix(seu_obj[["RNA"]]@counts))
+        # matrix <- t(as.matrix(seu_obj@assays$SCT@counts))
       },
-      warning = function(w) {
-        source("Function-as_matrix_cpp.R")
-        matrix <- t(as_matrix(seu_obj[["RNA"]]@counts))
-      },
+      # warning = function(w) {
+      #   source("Function-as_matrix_cpp.R")
+      #   matrix <- t(as_matrix(seu_obj[["RNA"]]@counts))
+      # },
       error = function(e) {
         source("Function-as_matrix_cpp.R")
         matrix <- t(as_matrix(seu_obj[["RNA"]]@counts))

@@ -92,15 +92,44 @@ if (T) {
   seu_obj_data <- PercentageFeatureSet(seu_obj_data, pattern = "^MT-", col.name = "pMT")
   seu_obj_data <- PercentageFeatureSet(seu_obj_data, pattern = "^HBA|^HBB", col.name = "pHB")
   seu_obj_data <- PercentageFeatureSet(seu_obj_data, pattern = "^RPS|^RPL", col.name = "pRP")
-  # Normalize
-  if (F) {
-    seu_obj_data1 <- NormalizeData(seu_obj_data, normalization.method = "LogNormalize", scale.factor = 10000)
-    seu_obj_data1 <- ScaleData(seu_obj_data1,
-                               # vars.to.regress = c("nCount_RNA", "pMT"),
-                               features = rownames(seu_obj_data)
-    )
+  dim(seu_obj_data)
+  obj_cells <- c("B_mature", "B_naive", "B_plasma", "B_plasmablast")
+  seu_obj_data_obj_cells <- list()
+  for (i in 1:length(obj_cells)) {
+    obj_cell <- obj_cells[i]
+    seu_obj_data_obj_cell <- seu_obj_data[, (seu_obj_data$celltype == obj_cell)]
+    seu_obj_data_obj_cells[[i]] <- seu_obj_data_obj_cell
   }
+  seu_obj_data <- merge(seu_obj_data_obj_cells[[1]], seu_obj_data_obj_cells[2:length(seu_obj_data_obj_cells)])
+  dim(seu_obj_data)
   
+  seu_obj_data <- SCTransform(seu_obj_data,
+                              method = "glmGamPoi")
+  seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
+  pc.num <- 1:pc_num(seu_obj_data)
+  seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
+  seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 1)
+  p1 <- DimPlot(seu_obj_data,
+                reduction = "umap",
+                group.by = "orig.ident"
+  ) +
+    theme_bw() +
+    NoLegend()
+  p2 <- DimPlot(seu_obj_data,
+                reduction = "umap",
+                group.by = "stage"
+  ) +
+    theme_bw()
+  p3 <- DimPlot(seu_obj_data,
+                reduction = "umap",
+                group.by = "platform"
+  ) +
+    theme_bw()
+  p1 + p2 + p3
+  ggsave2("Fig1.raw_umap.png",
+          path = paste0("Results/"),
+          width = 30, height = 9, units = "cm"
+  )
   if (length(table(seu_obj_data$platform)) > 1) {
     # Pre-process Seurat object (sctransform)
     seu_obj_data <- SCTransform(seu_obj_data,
@@ -117,6 +146,32 @@ if (T) {
                                 conserve.memory = T
     )
   }
+  
+  seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
+  pc.num <- 1:pc_num(seu_obj_data)
+  seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
+  seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 1)
+  p1 <- DimPlot(seu_obj_data,
+                reduction = "umap",
+                group.by = "orig.ident"
+  ) +
+    theme_bw() +
+    NoLegend()
+  p2 <- DimPlot(seu_obj_data,
+                reduction = "umap",
+                group.by = "stage"
+  ) +
+    theme_bw()
+  p3 <- DimPlot(seu_obj_data,
+                reduction = "umap",
+                group.by = "platform"
+  ) +
+    theme_bw()
+  p1 + p2 + p3
+  ggsave2("Fig2.sct_umap.png",
+          path = paste0("Results/"),
+          width = 30, height = 9, units = "cm"
+  )
   
   seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
   seu_obj_data <- CellCycleScoring(seu_obj_data,
@@ -182,33 +237,28 @@ if (T) {
   seu_obj_data <- seu_obj_data %>%
     RunUMAP(dims = pc.num) %>%
     FindNeighbors(dims = pc.num) %>%
-    FindClusters(resolution = 0.3)
+    FindClusters(resolution = 0.5)
   
-  if (F) {
-    seu_obj_data <- annotation_celltype(seu_obj_data, method = "celltypist") # method = "celltypist" or "singleR"
-    levels(seu_obj_data$seurat_clusters)
-  }
-  
-  p1 <- DimPlot(seu_obj_data,
-                reduction = "umap",
-                group.by = "celltype"
-  ) + theme_bw() + NoLegend()
-  
-  p2 <- DimPlot(seu_obj_data,
-                reduction = "umap",
-                group.by = "orig.ident"
-  ) + theme_bw() + NoLegend()
-  
-  p3 <- DimPlot(seu_obj_data,
-                reduction = "umap",
-                group.by = "platform"
-  ) + theme_bw() + NoLegend()
-  
-  p1 + p2 + p3
-  ggsave2("Fig1.raw_umap.png",
-          path = paste0("Results/stage-", s),
-          width = 27, height = 9, units = "cm"
-  )
+  # p1 <- DimPlot(seu_obj_data,
+  #               reduction = "umap",
+  #               group.by = "celltype"
+  # ) + theme_bw() + NoLegend()
+  # 
+  # p2 <- DimPlot(seu_obj_data,
+  #               reduction = "umap",
+  #               group.by = "orig.ident"
+  # ) + theme_bw() + NoLegend()
+  # 
+  # p3 <- DimPlot(seu_obj_data,
+  #               reduction = "umap",
+  #               group.by = "platform"
+  # ) + theme_bw() + NoLegend()
+  # 
+  # p1 + p2 + p3
+  # ggsave2("Fig1.raw_umap.png",
+  #         path = paste0("Results/stage-", s),
+  #         width = 27, height = 9, units = "cm"
+  # )
   
   if (F) {
     Anchors <- FindIntegrationAnchors(object.list = dataset.list, dims = 1:30)
@@ -230,16 +280,16 @@ if (T) {
   save(scRNA_harmony,
        file = paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_harmony.Rdata")
   )
-  # load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_filter_SCT.Rdata")
+  # load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_harmony.Rdata")
   
   p1 <- DimPlot(scRNA_harmony,
                 reduction = "umap",
-                group.by = "celltype"
+                group.by = "orig.ident"
   ) + theme_bw() + NoLegend()
   
   p2 <- DimPlot(scRNA_harmony,
                 reduction = "umap",
-                group.by = "orig.ident"
+                group.by = "stage"
   ) + theme_bw() + NoLegend()
   
   p3 <- DimPlot(scRNA_harmony,
@@ -247,9 +297,9 @@ if (T) {
                 group.by = "platform"
   ) + theme_bw() + NoLegend()
   p1 + p2 + p3
-  ggsave2("Fig2.harmony_umap.png",
-          path = paste0("Results/stage-", s),
-          width = 27, height = 9, units = "cm"
+  ggsave2("Fig3.harmony_umap.png",
+          path = paste0("Results/"),
+          width = 30, height = 9, units = "cm"
   )
   
   #----------------------------------------------------------------------------#
@@ -257,7 +307,7 @@ if (T) {
   # LISI index
   lisi.pca <- lisi::compute_lisi(
     reducedDim(sce.merged, "PCA"),
-    colData(sce.merged), c("orig.ident", "platform")
+    colData(sce.merged), c("orig.ident", "platform") #stage
   ) # "dataset","dataset.tech","ClusterID.pca"
   
   lisi.harmony <- lisi::compute_lisi(
@@ -291,11 +341,28 @@ if (T) {
     ylab("LISI") +
     theme(legend.position = "right") + scale_fill_tron()
   print(p)
-  ggsave2(paste0("Results/stage-", s, "/Fig3.LISI.png"),
-          width = 3.2, height = 4
+  ggsave2(paste0("Results/Fig4.LISI.png"),
+          width = 3.2, height = 4,
+          dpi = 600
   )
   
-  # --------------------------------------------------
+  if (T) {
+    scRNA_harmony <- annotation_celltype(scRNA_harmony, method = "celltypist") # method = "celltypist" or "singleR"
+    levels(seu_obj_data$celltype)
+    table(scRNA_harmony$celltype)
+  }
+  obj_cells <- c("B_mature", "B_naive", "B_plasma", "B_plasmablast")
+  seu_obj_data_obj_cells <- list()
+  for (i in 1:length(obj_cells)) {
+    obj_cell <- obj_cells[i]
+    seu_obj_data_obj_cell <- scRNA_harmony[, (scRNA_harmony$celltype == obj_cell)]
+    seu_obj_data_obj_cells[[i]] <- seu_obj_data_obj_cell
+  }
+  seu_obj_data <- merge(seu_obj_data_obj_cells[[1]], seu_obj_data_obj_cells[2:length(seu_obj_data_obj_cells)])
+  dim(seu_obj_data)
+  
+  
+  
   if (F) {
     mainmarkers <- c(
       # Nature Medicine-Phenotype molding of stromal cells in the lung  tumor microenvironment
@@ -308,48 +375,48 @@ if (T) {
       "CD79A", # B cell
       "LYZ", # Myeloid
       "CD3D", # T cell
-      "EPCAM" # , # Cancer cell
+      "EPCAM", # Cancer cell
       # 2022-Cancer cell-Intratumoral plasma cells predict outcomes to PD-L1 blockade in non-small cell lung cancer
       # Follicular B cells
-      # "BANK1",
-      # "LINC00926",
-      # "MARCH1",
-      # "FCER2",
-      # "GAPT",
-      # "HVCN1",
-      # #Germinal center B cells
-      # "AICDA",
-      # "GCSAM",
-      # "LRMP",
-      # "AC023590.1",
-      # "SUSD3",
-      # #Plasma cell
-      # "MZB1",
-      # "DERL3",
-      # "JSRP1",
-      # "TNFRSF17",
-      # "SLAMF7",
-      # "IGHG2",
-      # "IGHGP",
-      # "IGLV3-1",
-      # "IGLV6-57",
-      # "IGHA2",
-      # "IGKV4-1",
-      # "IGKV1-12",
-      # "IGLC7",
-      # "IGLL5"
+      "BANK1",
+      "LINC00926",
+      "MARCH1",
+      "FCER2",
+      "GAPT",
+      "HVCN1",
+      #Germinal center B cells
+      "AICDA",
+      "GCSAM",
+      "LRMP",
+      "AC023590.1",
+      "SUSD3",
+      #Plasma cell
+      "MZB1",
+      "DERL3",
+      "JSRP1",
+      "TNFRSF17",
+      "SLAMF7",
+      "IGHG2",
+      "IGHGP",
+      "IGLV3-1",
+      "IGLV6-57",
+      "IGHA2",
+      "IGKV4-1",
+      "IGKV1-12",
+      "IGLC7",
+      "IGLL5"
     )
     
-    DotPlot(scRNA_harmony, features = unique(mainmarkers), group.by = "seurat_clusters") +
+    DotPlot(scRNA_harmony, features = unique(mainmarkers), group.by = "seurat_clusters") +theme_bw()+
       RotatedAxis() +
       scale_x_discrete("") +
       scale_y_discrete("") +
       # coord_flip() +
       scale_color_viridis(discrete = F, option = "C")
     
-    ggsave2(paste0("SuppFig5.FeaturePlot_mainmarkers_", s, ".pdf"),
-            path = paste0("Results/stage-", s),
-            width = 15, height = 20, units = "cm"
+    ggsave2(paste0("Fig5.FeaturePlot_mainmarkers_", s, ".png"),
+            path = paste0("Results/"),
+            width = 20, height = 12, units = "cm"
     )
     
     for (i in seq_along(mainmarkers)) {
@@ -362,13 +429,74 @@ if (T) {
         ) +
           scale_color_viridis(discrete = F, option = "inferno")
         ggsave2(paste0("FeaturePlot_mainmarkers_", mainmarkers[i], ".png"),
-                path = paste0("Results/stage-", s, "/marker/"),
+                path = paste0("Results/marker/"),
                 width = 10, height = 10, units = "cm"
         )
       }
     }
   }
   
+  new.cluster.ids <- c(
+    "B", "B","Follicular B cells",
+    "Follicular B cells",  "B", "B", "Plasma",
+    "Plasma", "Plasma", "Plasma", "B", "B", "B",
+    "Cancer", "Plasma", "Myeloid",
+    "Plasma", "Myeloid", "B",
+   "B", "Plasma", "Plasma", "B", "Follicular B cells"
+  )
+  
+  
+  scRNA_harmony@meta.data$new.cluster.ids <- NA
+  
+  for (i in 1:length(scRNA_harmony@meta.data$new.cluster.ids)) {
+    # if (scRNA_harmony@meta.data$seurat_clusters[i]%in%c(5,8,12,13,19,20,22)) {
+    #   print('1')
+    #   scRNA_harmony@meta.data$new.cluster.ids[i] <- "Plasma_B_cell"
+    # }else{
+    #   scRNA_harmony@meta.data$new.cluster.ids[i] <- "UnDef"
+    # }
+    scRNA_harmony@meta.data$new.cluster.ids[i] <- new.cluster.ids[scRNA_harmony@meta.data$seurat_clusters[i]]
+  }
+  # 获取当前用的Idents
+  Idents(object = scRNA_harmony)
+  levels(scRNA_harmony)
+  Idents(scRNA_harmony) <- "seurat_clusters"
+  new.cluster.ids <- as.character(new.cluster.ids)
+  names(new.cluster.ids) <- levels(scRNA_harmony)
+  scRNA_harmony <- RenameIdents(scRNA_harmony, new.cluster.ids)
+  
+  scRNA_harmony@meta.data$new.cluster.ids
+  
+  scRNA_harmony <- RenameIdents(scRNA_harmony,
+                                `0` = "B", `1` = "B", `2` = "Follicular B cells",
+                                `3` = "Follicular B cells", `4` = "B", `5` = "B", `6` = "Plasma",
+                                `7` = "Plasma", `8` = "Plasma", `9` = "Plasma",`10` = "B", `11` = "B",`12` = "B",
+                                `13` = "Cancer", `14` = "Plasma", `15` = "Myeloid",
+                                `16` = "Plasma", `17` = "Myeloid", `18` = "B",
+                                `19` = "B", `20` = "Plasma", `21` = "Plasma",`22` = "B",`23` = "Follicular B cells"
+  )
+  
+  DimPlot(scRNA_harmony, label = T) + NoLegend()+theme_bw()
+  DimPlot(scRNA_harmony, group.by = "orig.ident") +theme_bw()+ NoLegend()
+  DotPlot(scRNA_harmony, features = unique(mainmarkers), group.by = "new.cluster.ids") + RotatedAxis() +
+    scale_x_discrete("") + scale_y_discrete("")
+  
+  print(DimPlot(scRNA_harmony, reduction = "umap", group.by = c("new.cluster.ids")))
+  
+  p <- FeaturePlot(scRNA_harmony, features = markers, ncol = 8)
+  p
+  
+  obj_cells <- c("B", "Plasma", "Follicular B cells")
+  seu_obj_data_obj_cells <- list()
+  for (i in 1:length(obj_cells)) {
+    obj_cell <- obj_cells[i]
+    seu_obj_data_obj_cell <- scRNA_harmony[, (scRNA_harmony$new.cluster.ids == obj_cell)]
+    seu_obj_data_obj_cells[[i]] <- seu_obj_data_obj_cell
+  }
+  seu_obj_data <- merge(seu_obj_data_obj_cells[[1]], seu_obj_data_obj_cells[2:length(seu_obj_data_obj_cells)])
+  dim(seu_obj_data)
+  table(seu_obj_data$new.cluster.ids)
+  save(seu_obj_data, file="../scGRN-L0_data/seu_obj_data_B_samples.Rdata")
 }
 
 # Select samples and cells --------------------------------------------------

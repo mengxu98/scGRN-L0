@@ -4,12 +4,16 @@ library(Seurat)
 library(tidyr)
 data <- readRDS("../scGRN-L0_data/seu_obj_data_B_samples.rds")
 meta <- data@meta.data
-CellInfor_B <- data.frame(UniqueCell_ID = colnames(data),
+
+load("../scGRN-L0_data/seu_obj_data_B_samples.Rdata")
+meta <- seu_obj_data@meta.data
+
+CellInfor_B <- data.frame(UniqueCell_ID = colnames(seu_obj_data),
                         Patient = meta$orig.ident,
-                        majorCluster= meta$celltype,
-                        sampleType="stage-1")
+                        majorCluster= meta$new.cluster.ids,
+                        sampleType=meta$stage)
 table(CellInfor_B$majorCluster)
-GSE131907_B <- as.matrix(data@assays$SCT@counts)
+GSE131907_B <- as.matrix(seu_obj_data@assays$SCT@counts)
 # Example
 # The example data can be downloaded at https://www.jianguoyun.com/p/DeYtp_AQ1bXiCRjXvYwE
 # ====0.input====
@@ -60,11 +64,11 @@ C4_C5_cross <- densityintersection(
 )
 
 C5_C61_cross <- densityintersections(
-  a = cellInfor[cellInfor$majorCluster == "B_mature", "PseTime.Lineage1"],
-  b = cellInfor[cellInfor$majorCluster == "B_naive", "PseTime.Lineage1"],
-  c = cellInfor[cellInfor$majorCluster == "B_plasma", "PseTime.Lineage1"],
-  d = cellInfor[cellInfor$majorCluster == "B_plasmablast", "PseTime.Lineage1"],
-  filename = "Results/C5_C61.png"
+  a = cellInfor[cellInfor$majorCluster == "B", "PseTime.Lineage1"],
+  b = cellInfor[cellInfor$majorCluster == "Follicular B cells", "PseTime.Lineage1"],
+  c = cellInfor[cellInfor$majorCluster == "Plasma", "PseTime.Lineage1"],
+  # d = cellInfor[cellInfor$majorCluster == "B_plasmablast", "PseTime.Lineage1"],
+  filename = "Results/all.png"
 )
 # Manually select the intersection point according to the density plot
 binpoint <- c(0, 16.4, 26.29, 35.14, 43.51, max(cellInfor$PseTime.Lineage1))
@@ -86,7 +90,7 @@ load("DynamicGRNPipe_ExampleData/DynamicGene1.RData")
 load("DynamicGRNPipe_ExampleData/dorothea.RData")
 # Construct a control network and calculate the control weight of each edge
 weightofWindows <- DynNet_RF(
-  Windows = Windows1[3],
+  Windows = Windows1[1],
   CD8TCellExp.trajectory = CD8TCellExp.trajectory,
   DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
   allTFs = allTFs[100:200], # set regulators
@@ -126,7 +130,7 @@ GENIE3_AUPR <- calcAUPR(evaluationObject)
 GENIE3_AUROC
 
 weightofWindows_L0 <- DynNet_L0(
-  Windows = Windows1,
+  Windows = Windows1[1],
   CD8TCellExp.trajectory = CD8TCellExp.trajectory,
   DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
   allTFs = allTFs, # set regulators
@@ -163,6 +167,7 @@ evaluationObject_L0 <- prepareEval("ground_pred.txt",
 L0_AUROC <- calcAUROC(evaluationObject_L0)
 L0_AUPR <- calcAUPR(evaluationObject_L0)
 L0_AUROC # 0.4601513 no parallel
+L0_AUPR
 
 GENIE3_AUROC
 GENIE3_AUPR

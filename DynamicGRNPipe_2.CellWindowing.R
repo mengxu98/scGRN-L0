@@ -27,7 +27,7 @@ densityintersection <- function(a, b, filename){
   return(intersection.point)
 }
 
-densityintersections <- function(a, b,c,d, filename){
+densityintersections <- function(a, b,c, filename){
   # xlim = c(min(c(a, b,c,d)), max(c(a, b,c,d))) 
   # df <- merge(
   #   as.data.frame(density(a, from = xlim[1], to = xlim[2])[c("x", "y")]), 
@@ -54,8 +54,7 @@ densityintersections <- function(a, b,c,d, filename){
   library(ggplot2)
   plotdata <- rbind.data.frame(data.frame(lines=rep("a",length(a)), time=a), 
                                data.frame(lines=rep("b",length(b)),time=b), 
-                               data.frame(lines=rep("c",length(c)),time=c), 
-                               data.frame(lines=rep("d",length(d)),time=d))
+                               data.frame(lines=rep("c",length(c)),time=c))
   p <- ggplot(data=plotdata, aes(x=time))+
     geom_density(aes(color=lines))+
     # geom_vline(xintercept = intersection.point, color = "red")+

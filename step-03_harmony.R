@@ -276,11 +276,7 @@ if (T) {
   scRNA_harmony <- RunUMAP(scRNA_harmony, reduction = "harmony", dims = pc.num) %>%
     FindNeighbors(dims = pc.num) %>%
     FindClusters(resolution = 1)
-  
-  save(scRNA_harmony,
-       file = paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_harmony.Rdata")
-  )
-  # load(paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_harmony.Rdata")
+
   
   p1 <- DimPlot(scRNA_harmony,
                 reduction = "umap",
@@ -362,50 +358,77 @@ if (T) {
   dim(seu_obj_data)
   
   
-  
   if (F) {
     mainmarkers <- c(
       # Nature Medicine-Phenotype molding of stromal cells in the lung  tumor microenvironment
       # "ACAT2",
-      "CLDN18", # Alveolar
-      "CLDN5", # Endothelial
-      "CAPS", # Epithelial
-      "ALB", # Hepatocytes
-      "COL1A1", # Fibroblast
+      # "CLDN18", # Alveolar
+      # "CLDN5", # Endothelial
+      # "CAPS", # Epithelial
+      # "ALB", # Hepatocytes
+      # "COL1A1", # Fibroblast
       "CD79A", # B cell
-      "LYZ", # Myeloid
-      "CD3D", # T cell
-      "EPCAM", # Cancer cell
+      # "LYZ", # Myeloid
+      # "CD3D", # T cell
+      # "EPCAM", # Cancer cell
       # 2022-Cancer cell-Intratumoral plasma cells predict outcomes to PD-L1 blockade in non-small cell lung cancer
       # Follicular B cells
       "BANK1",
-      "LINC00926",
-      "MARCH1",
-      "FCER2",
-      "GAPT",
-      "HVCN1",
+      "CD83",
+      "CD69",
+      "SELL",
+      # "LINC00926",
+      # "MARCH1",
+      # "FCER2",
+      # "GAPT",
+      # "HVCN1",
       #Germinal center B cells
       "AICDA",
-      "GCSAM",
-      "LRMP",
-      "AC023590.1",
-      "SUSD3",
+      "HMGA1",
+      "RGS13",
+      # "GCSAM",
+      # "LRMP",
+      # "AC023590.1",
+      # "SUSD3",
       #Plasma cell
       "MZB1",
       "DERL3",
-      "JSRP1",
-      "TNFRSF17",
-      "SLAMF7",
+      "XBP1",
       "IGHG2",
       "IGHGP",
-      "IGLV3-1",
-      "IGLV6-57",
-      "IGHA2",
-      "IGKV4-1",
-      "IGKV1-12",
-      "IGLC7",
-      "IGLL5"
+      "IGHA2"
+      # "SDC1",
+      # "DERL3",
+      # "JSRP1",
+      # "TNFRSF17",
+      # "SLAMF7",
+      # "IGLV3-1",
+      # "IGLV6-57",
+      # "IGKV4-1",
+      # "IGKV1-12",
+      # "IGLC7",
+      # "IGLL5"
     )
+    library(ggplot2)
+    seu_obj_data <- SCTransform(seu_obj_data)
+    seu_obj_data <- RunPCA(seu_obj_data)
+    seu_obj_data <- RunUMAP(seu_obj_data, dims = 1:15) %>%
+      FindNeighbors(dims = 1:15) %>%
+      FindClusters(resolution = 1)
+    FeaturePlot(seu_obj_data,
+                features = "CD14",
+                reduction = "umap",
+                coord.fixed = T,
+                order = T,
+                cols = viridis(10)
+    ) +
+      scale_color_viridis(discrete = F, option = "inferno")
+    DotPlot(seu_obj_data, features = unique(mainmarkers), group.by = "seurat_clusters") +theme_bw()+
+      RotatedAxis() +
+      scale_x_discrete("") +
+      scale_y_discrete("") +
+      # coord_flip() +
+      scale_color_viridis(discrete = F, option = "C")
     
     DotPlot(scRNA_harmony, features = unique(mainmarkers), group.by = "seurat_clusters") +theme_bw()+
       RotatedAxis() +
@@ -710,7 +733,6 @@ if (T) {
     scRNA_harmony <- RunUMAP(scRNA_harmony, reduction = "harmony", dims = pc.num) %>%
       FindNeighbors(dims = pc.num) %>%
       FindClusters(resolution = 1)
-    
     save(scRNA_harmony,
          file = paste0("/data/mengxu/data/all/lung_stage-", s, "_seu_harmony.Rdata")
     )
@@ -735,6 +757,102 @@ if (T) {
             path = paste0("Results/stage-", s),
             width = 27, height = 9, units = "cm"
     )
+    
+    scRNA_harmony <- RunTSNE(scRNA_harmony, reduction = "harmony", dims = pc.num)
+    DimPlot(scRNA_harmony,
+            reduction = "umap",
+            group.by = "orig.ident"
+    ) + theme_bw() + NoLegend()
+    DimPlot(scRNA_harmony,
+            reduction = "tsne",
+            group.by = "celltype"
+    ) + theme_bw() + NoLegend()
+    
+    
+    if (F) {
+      
+      Cellratio <- prop.table(table(Idents(scRNA_harmony), scRNA_harmony$orig.ident), margin = 2)#计算各组样本不同细胞群比例
+      Cellratio
+      #BM1        BM2        BM3        GM1        GM2        GM3
+      #  Endothelial 0.27305737 0.32663989 0.28683967 0.40820981 0.59293194 0.54664650
+      #  Fibroblast  0.20733479 0.18072289 0.24096386 0.37115165 0.20418848 0.14422592
+      #  Immune      0.44299201 0.19410977 0.24976830 0.15393387 0.09751309 0.18406455
+      #  Epithelial  0.02505447 0.08299866 0.13253012 0.03534778 0.05366492 0.05698437
+      #  Other       0.05156137 0.21552878 0.08989805 0.03135690 0.05170157 0.06807867
+      Cellratio <- as.data.frame(Cellratio)
+      colourCount = length(unique(Cellratio$Var1))
+      library(ggplot2)
+      ggplot(Cellratio) + 
+        geom_bar(aes(x =Var2, y= Freq, fill = Var1),stat = "identity",width = 0.7,size = 0.5,colour = '#222222')+ 
+        theme_classic() +
+        labs(x='Sample',y = 'Ratio')+
+        coord_flip()+
+        theme(panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"))
+      
+      table(scRNA_harmony$orig.ident)#查看各组细胞数
+      prop.table(table(Idents(scRNA_harmony)))
+      table(Idents(scRNA_harmony), scRNA_harmony$orig.ident)#各组不同细胞群细胞数 colnames(scRNA_harmony)
+      Cellratio <- prop.table(table(Idents(scRNA_harmony), scRNA_harmony$orig.ident), margin = 2)#计算各组样本不同细胞群比例
+      Cellratio <- data.frame(Cellratio)
+      library(reshape2)
+      cellper <- dcast(Cellratio,Var2~Var1, value.var = "Freq")#长数据转为宽数据
+      rownames(cellper) <- cellper[,1]
+      cellper <- cellper[,-1]
+      
+      ###添加分组信息
+      sample <- scRNA_harmony$orig.ident
+      group <-scRNA_harmony$stage
+      samples <- data.frame(sample, group)#创建数据框
+      
+      rownames(samples)=samples$sample
+      
+      # cellper$sample <- samples[rownames(cellper),'sample']#R添加列
+      cellper$sample <- rownames(cellper)#R添加列
+      # cellper$group <- samples[rownames(cellper),'group']#R添加列
+      cellper$group <- samples[rownames(cellper),'group']#R添加列
+      
+      ###作图展示
+      pplist = list()
+      sce_groups = c("B","Follicular B cells","Plasma","Cancer","Myeloid")
+      library(ggplot2)
+      library(dplyr)
+      library(ggpubr)
+      for(group_ in sce_groups){
+        cellper_  = cellper %>% select(one_of(c('sample','group',group_)))#选择一组数据
+        colnames(cellper_) = c('sample','group','percent')#对选择数据列命名
+        cellper_$percent = as.numeric(cellper_$percent)#数值型数据
+        cellper_ <- cellper_ %>% group_by(group) %>% mutate(upper =  quantile(percent, 0.75), 
+                                                            lower = quantile(percent, 0.25),
+                                                            mean = mean(percent),
+                                                            median = median(percent))#上下分位数
+        print(group_)
+        print(cellper_$median)
+        
+        pp1 = ggplot(cellper_,aes(x=group,y=percent)) + #ggplot作图
+          geom_jitter(shape = 21,aes(fill=group),width = 0.25) + 
+          stat_summary(fun=mean, geom="point", color="grey60") +
+          theme_cowplot() +
+          theme(axis.text = element_text(size = 10),axis.title = element_text(size = 10),legend.text = element_text(size = 10),
+                legend.title = element_text(size = 10),plot.title = element_text(size = 10,face = 'plain'),legend.position = 'none') + 
+          labs(title = group_,y='Percentage') +
+          geom_errorbar(aes(ymin = lower, ymax = upper),col = "grey60",width =  1)
+        
+        ###组间t检验分析
+        labely = max(cellper_$percent)
+        compare_means(percent ~ group,  data = cellper_)
+        my_comparisons <- list( c("stage-1", "stage-2") )
+        pp1 = pp1 + stat_compare_means(comparisons = my_comparisons,size = 3,method = "t.test")
+        pplist[[group_]] = pp1
+      }
+      
+      library(cowplot)
+      plot_grid(pplist[['B']],
+                pplist[['Follicular B cells']],
+                pplist[['Plasma']],
+                pplist[['Cancer']],
+                pplist[['Myeloid']])
+      
+    }
     
     #----------------------------------------------------------------------------#
     sce.merged <- as.SingleCellExperiment(scRNA_harmony)

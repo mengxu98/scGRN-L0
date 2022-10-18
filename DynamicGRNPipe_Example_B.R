@@ -2,10 +2,102 @@
 
 library(Seurat)
 library(tidyr)
-data <- readRDS("../scGRN-L0_data/seu_obj_data_B_samples.rds")
-meta <- data@meta.data
+# data <- readRDS("../scGRN-L0_data/seu_obj_data_B_samples.rds")
+# meta <- data@meta.data
 
 load("../scGRN-L0_data/seu_obj_data_B_samples.Rdata")
+
+if (F) {
+  
+  Cellratio <- prop.table(table(Idents(seu_obj_data), seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
+  Cellratio
+  #BM1        BM2        BM3        GM1        GM2        GM3
+  #  Endothelial 0.27305737 0.32663989 0.28683967 0.40820981 0.59293194 0.54664650
+  #  Fibroblast  0.20733479 0.18072289 0.24096386 0.37115165 0.20418848 0.14422592
+  #  Immune      0.44299201 0.19410977 0.24976830 0.15393387 0.09751309 0.18406455
+  #  Epithelial  0.02505447 0.08299866 0.13253012 0.03534778 0.05366492 0.05698437
+  #  Other       0.05156137 0.21552878 0.08989805 0.03135690 0.05170157 0.06807867
+  Cellratio <- as.data.frame(Cellratio)
+  colourCount = length(unique(Cellratio$Var1))
+  library(ggplot2)
+  ggplot(Cellratio) + 
+    geom_bar(aes(x =Var2, y= Freq, fill = Var1),stat = "identity",width = 0.7,size = 0.5,colour = '#222222')+ 
+    theme_classic() +
+    labs(x='Sample',y = 'Ratio')+
+    coord_flip()+
+    theme(panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"))
+  
+  table(seu_obj_data$orig.ident)#查看各组细胞数
+  prop.table(table(Idents(seu_obj_data)))
+  table(Idents(seu_obj_data), seu_obj_data$orig.ident)#各组不同细胞群细胞数 colnames(scRNA_harmony)
+  Cellratio <- prop.table(table(Idents(seu_obj_data), seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
+  Cellratio <- data.frame(Cellratio)
+  library(reshape2)
+  cellper <- dcast(Cellratio,Var2~Var1, value.var = "Freq")#长数据转为宽数据
+  rownames(cellper) <- cellper[,1]
+  cellper <- cellper[,-1]
+  
+  ###添加分组信息
+  sample <- seu_obj_data$orig.ident
+  group <-seu_obj_data$stage
+  samples <- data.frame(sample, group)#创建数据框
+  
+  rownames(samples)=samples$sample
+  
+  # cellper$sample <- samples[rownames(cellper),'sample']#R添加列
+  cellper$sample <- rownames(cellper)#R添加列
+  # cellper$group <- samples[rownames(cellper),'group']#R添加列
+  cellper$group <- samples[rownames(cellper),'group']#R添加列
+  cellper$group <- ""
+  for (i in 1:nrow(cellper)) {
+    stage <- samples[which(samples$sample== cellper$sample[i])[1] , "group"]
+    cellper$group[i] <- stage
+  }
+  
+  ###作图展示
+  pplist = list()
+  sce_groups = c("B","Follicular B cells","Plasma")
+  library(ggplot2)
+  library(dplyr)
+  library(ggpubr)
+  for(group_ in sce_groups){
+    cellper_  = cellper %>% select(one_of(c('sample','group',group_)))#选择一组数据
+    colnames(cellper_) = c('sample','group','percent')#对选择数据列命名
+    cellper_$percent = as.numeric(cellper_$percent)#数值型数据
+    cellper_ <- cellper_ %>% group_by(group) %>% mutate(upper =  quantile(percent, 0.75), 
+                                                        lower = quantile(percent, 0.25),
+                                                        mean = mean(percent),
+                                                        median = median(percent))#上下分位数
+    print(group_)
+    print(cellper_$median)
+    
+    pp1 = ggplot(cellper_,aes(x=group,y=percent)) + #ggplot作图
+      geom_jitter(shape = 21,aes(fill=group),width = 0.25) + 
+      stat_summary(fun=mean, geom="point", color="grey60") +
+      theme_cowplot() +
+      theme(axis.text = element_text(size = 10),axis.title = element_text(size = 10),legend.text = element_text(size = 10),
+            legend.title = element_text(size = 10),plot.title = element_text(size = 10,face = 'plain'),legend.position = 'none') + 
+      labs(title = group_,y='Percentage') +
+      geom_errorbar(aes(ymin = lower, ymax = upper),col = "grey60",width =  1)
+    
+    ###组间t检验分析
+    labely = max(cellper_$percent)
+    compare_means(percent ~ group,  data = cellper_)
+    my_comparisons <- list( c("stage-1", "stage-normal"),
+                            c("stage-2", "stage-normal"),
+                            c("stage-3", "stage-normal"),
+                            c("stage-4", "stage-normal") )
+    pp1 = pp1 + stat_compare_means(comparisons = my_comparisons,size = 3,method = "t.test")
+    pplist[[group_]] = pp1
+  }
+  
+  library(cowplot)
+  plot_grid(pplist[['B']],
+            pplist[['Follicular B cells']],
+            pplist[['Plasma']])
+  
+}
+
 meta <- seu_obj_data@meta.data
 
 CellInfor_B <- data.frame(UniqueCell_ID = colnames(seu_obj_data),

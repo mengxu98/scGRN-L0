@@ -62,5 +62,5 @@ densityintersections <- function(a, b,c, filename){
   p
   ggsave(p, filename = filename)
   
-  return(intersection.point)
+  # return(intersection.point)
 }

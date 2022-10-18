@@ -280,13 +280,13 @@ for (j in 1:length(data_path)) {
       AUPR_L0REG_L0_N <- calcAUPR(evaluationObject)
       AUROC_L0REG_L0_N
 
-      L0REG_L0 <- L0REG(t(data_GENIE3),
-        # regulators = colnames(data_GENIE3),
-        targets = colnames(data_GENIE3), penalty = "L0"
-      )
-      AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0, truth_network, 1000)
-      AUROC_L0REG_L0_S <- AUCresult_L0REG$AUROC
-      AUROC_L0REG_L0_S
+      # L0REG_L0 <- L0REG(t(data_GENIE3),
+      #   regulators = colnames(data_GENIE3),
+      #   targets = colnames(data_GENIE3), penalty = "L0"
+      # )
+      # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0, truth_network, 1000)
+      # AUROC_L0REG_L0_S <- AUCresult_L0REG$AUROC
+      # AUROC_L0REG_L0_S
       # --------------------------------------------------
       L0REG_L0L2 <- L0REG(t(data_GENIE3),
         regulators = colnames(data_GENIE3),
@@ -308,13 +308,14 @@ for (j in 1:length(data_path)) {
       AUPR_L0REG_L0L2_N <- calcAUPR(evaluationObject)
       AUROC_L0REG_L0L2_N
 
-      L0REG_L0L2 <- L0REG(t(data_GENIE3),
-        # regulators = colnames(data_GENIE3),
-        targets = colnames(data_GENIE3), penalty = "L0L2"
-      )
-      AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0L2, truth_network, 1000)
-      AUROC_L0REG_L0L2_S <- AUCresult_L0REG$AUROC
-      AUROC_L0REG_L0L2_S
+      # L0REG_L0L2 <- L0REG(t(data_GENIE3),
+      #   # regulators = colnames(data_GENIE3),
+      #   targets = colnames(data_GENIE3), penalty = "L0L2"
+      # )
+      # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0L2, truth_network, 1000)
+      # AUROC_L0REG_L0L2_S <- AUCresult_L0REG$AUROC
+      # AUROC_L0REG_L0L2_S
+
     }
 
     # --------------------------------------------------
@@ -369,8 +370,8 @@ if (T) {
   for (i in 1:length(data_path)) {
     dataset <- data_path[i]
     evaluation_infromations_GSD <- evaluation_infromations_all[grep(dataset, evaluation_infromations_all$datasets), ]
-    evaluation_infromations_GSD <- evaluation_infromations_GSD[, c("datasets", "AUROC_NIMEFI_L0", "AUROC_GENIE3", "AUROC_SINCERITITES")]
-    names(evaluation_infromations_GSD) <- c("Dataset", "L0-Dynamic", "GENIE3", "SINCERITITES")
+    evaluation_infromations_GSD <- evaluation_infromations_GSD[, c("datasets", "AUROC_L0REG_L0_N","AUROC_L0REG_L0L2_N", "AUROC_GENIE3", "AUROC_SINCERITITES")]
+    names(evaluation_infromations_GSD) <- c("Dataset", "L0-Dynamic", "L0-Dynamic2","GENIE3", "SINCERITITES")
     methods_barplot_all <- evaluation_infromations_GSD %>%
       as.data.frame() %>%
       pivot_longer(
@@ -476,8 +477,8 @@ if (T) {
     )
     df_res10 <- melt(results_10nets, id = "Dataset", variable.name = "Method", value.name = "AUROC")
     df_res10$Method <- factor(df_res10$Method,
-      levels = c("L0-Dynamic", "GENIE3", "SINCERITITES"),
-      labels = c("L0-Dynamic", "GENIE3", "SINCERITITES")
+      levels = c("L0-Dynamic","L0-Dynamic2", "GENIE3", "SINCERITITES"),
+      labels = c("L0-Dynamic","L0-Dynamic2", "GENIE3", "SINCERITITES")
     )
 
     p2 <- ggplot(df_res10, aes(x = Dataset, y = AUROC, fill = Method)) +

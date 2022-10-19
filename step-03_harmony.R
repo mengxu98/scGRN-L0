@@ -93,6 +93,7 @@ if (T) {
   seu_obj_data <- PercentageFeatureSet(seu_obj_data, pattern = "^HBA|^HBB", col.name = "pHB")
   seu_obj_data <- PercentageFeatureSet(seu_obj_data, pattern = "^RPS|^RPL", col.name = "pRP")
   dim(seu_obj_data)
+  table(seu_obj_data$platform)
   obj_cells <- c("B_mature", "B_naive", "B_plasma", "B_plasmablast")
   seu_obj_data_obj_cells <- list()
   for (i in 1:length(obj_cells)) {

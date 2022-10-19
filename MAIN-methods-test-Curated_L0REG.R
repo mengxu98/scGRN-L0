@@ -40,7 +40,6 @@ cell_drop <- c(
   "10", "10-50", "10-70"
 )
 output <- "output_Curated/"
-
 evaluation_infromations_all <- c()
 for (j in 1:length(data_path)) {
   # evaluation_infromations2 <- c()
@@ -212,11 +211,33 @@ for (j in 1:length(data_path)) {
       GENIE3_AUPR <- calcAUPR(evaluationObject)
       GENIE3_AUROC
       GENIE3_AUPR
+      library(GENIE3)
+      weightMat <- GENIE3(
+        exprMatrix = t(data_GENIE3),
+        nCores = 32
+      )
 
+      AUCresult_GENIE3 <- auc_from_ranks_TC_sign(weightMat, truth_network, 1000)
+      GENIE3_AUROC_S <- AUCresult_GENIE3$AUROC
+      GENIE3_AUPR_S <- AUCresult_GENIE3$AUPR
+
+      weightdf <- getLinkList(weightMat)
+      # weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
+      names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
+      write.table(weightdf, file = paste0(output, "output_GENIE32.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
+      evaluationObject <- prepareEval(paste0(output, "output_GENIE32.txt"),
+        paste0(paste0(output, "ground_truth.tsv")),
+        totalPredictionsAccepted = 100000
+      )
+      GENIE3_AUROC2 <- calcAUROC(evaluationObject)
+      GENIE3_AUPR2 <- calcAUPR(evaluationObject)
+      GENIE3_AUROC
+      GENIE3_AUROC2
+      GENIE3_AUROC_S
       # AAA <- convertSortedRankTSVToAdjMatrix(paste0(output, "output_GENIE3.txt"))
     }
 
-    if (F) {
+    if (T) {
       NIMEFI(data_GENIE3,
         GENIE = F, SVM = F, EL = T, penalty = "L0",
         outputFileName = paste0(output, "output_NIMEFI_L0"),
@@ -315,7 +336,6 @@ for (j in 1:length(data_path)) {
       # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0L2, truth_network, 1000)
       # AUROC_L0REG_L0L2_S <- AUCresult_L0REG$AUROC
       # AUROC_L0REG_L0L2_S
-
     }
 
     # --------------------------------------------------
@@ -329,26 +349,24 @@ for (j in 1:length(data_path)) {
       # AUROC_L0REG_L0_S = AUROC_L0REG_L0_S,
       AUROC_L0REG_L0L2_N = AUROC_L0REG_L0L2_N,
       # AUROC_L0REG_L0L2_S = AUROC_L0REG_L0L2_S,
-      # AUROC_NIMEFI_L0L2 = AUROC_NIMEFI_L0L2,
-      # AUROC_NIMEFI_L0 = AUROC_NIMEFI_L0,
+      AUROC_NIMEFI_L0L2 = AUROC_NIMEFI_L0L2,
+      AUROC_NIMEFI_L0 = AUROC_NIMEFI_L0,
       AUROC_GENIE3 = GENIE3_AUROC,
+      AUROC2_GENIE3 = GENIE3_AUROC2,
       AUROC_SINCERITITES = SINCERITITES_AUROC_N # ,
       # AUROC_SINCERITITES_S = SINCERITITES_AUROC_S
     )
 
     message(paste0("----- ", evaluation_infromation, " -----"))
     evaluation_infromations <- rbind.data.frame(evaluation_infromations, evaluation_infromation)
-    # }
-    # evaluation_infromations2 <- rbind.data.frame(evaluation_infromations2, evaluation_infromations)
   }
   evaluation_infromations_all <- rbind.data.frame(evaluation_infromations_all, evaluation_infromations)
 }
-# evaluation_infromations_all
 evaluation_infromations_all[evaluation_infromations_all == 0] <- NA
 na.omit(evaluation_infromations_all)
 write.csv(evaluation_infromations_all, "Results/evaluation_infromations_Curated_L0REG.csv")
 
-if (T) {
+if (F) {
   library(patchwork)
   library(ggplot2)
   library(reshape2)
@@ -370,8 +388,8 @@ if (T) {
   for (i in 1:length(data_path)) {
     dataset <- data_path[i]
     evaluation_infromations_GSD <- evaluation_infromations_all[grep(dataset, evaluation_infromations_all$datasets), ]
-    evaluation_infromations_GSD <- evaluation_infromations_GSD[, c("datasets", "AUROC_L0REG_L0_N","AUROC_L0REG_L0L2_N", "AUROC_GENIE3", "AUROC_SINCERITITES")]
-    names(evaluation_infromations_GSD) <- c("Dataset", "L0-Dynamic", "L0-Dynamic2","GENIE3", "SINCERITITES")
+    evaluation_infromations_GSD <- evaluation_infromations_GSD[, c("datasets", "AUROC_L0REG_L0_N", "AUROC_L0REG_L0L2_N", "AUROC_GENIE3", "AUROC_SINCERITITES")]
+    names(evaluation_infromations_GSD) <- c("Dataset", "L0-Dynamic", "L0-Dynamic2", "GENIE3", "SINCERITITES")
     methods_barplot_all <- evaluation_infromations_GSD %>%
       as.data.frame() %>%
       pivot_longer(
@@ -477,8 +495,8 @@ if (T) {
     )
     df_res10 <- melt(results_10nets, id = "Dataset", variable.name = "Method", value.name = "AUROC")
     df_res10$Method <- factor(df_res10$Method,
-      levels = c("L0-Dynamic","L0-Dynamic2", "GENIE3", "SINCERITITES"),
-      labels = c("L0-Dynamic","L0-Dynamic2", "GENIE3", "SINCERITITES")
+      levels = c("L0-Dynamic", "L0-Dynamic2", "GENIE3", "SINCERITITES"),
+      labels = c("L0-Dynamic", "L0-Dynamic2", "GENIE3", "SINCERITITES")
     )
 
     p2 <- ggplot(df_res10, aes(x = Dataset, y = AUROC, fill = Method)) +

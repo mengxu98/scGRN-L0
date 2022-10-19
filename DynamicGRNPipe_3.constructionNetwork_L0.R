@@ -90,9 +90,9 @@ DynNet_L0 <- function(Windows, CD8TCellExp.trajectory, DynamicGene, allTFs, dete
 }
 
 L0REG <- function(matrix,
+                  targets = rownames(matrix),
                   penalty = penalty,
-                  regulators = NULL,
-                  targets = rownames(matrix)) {
+                  regulators = NULL) {
   library(L0Learn)
   matrix <- as.data.frame(t(matrix))
   if (!is.null(regulators)) {

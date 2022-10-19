@@ -171,7 +171,6 @@ elasticNetRankedSolve <- function(expressionMatrix,
       # get the weights
       wghts <- abs(as.vector(bestModel$beta))
     } else {
-      # message("----- Run ", penalty, " model for ", colnames(target), "! -----")
       # L0_Model_cvfit <- L0Learn.cvfit(predictorsWithoutTarget,
       #                         target,
       #                         penalty = penalty,
@@ -193,20 +192,17 @@ elasticNetRankedSolve <- function(expressionMatrix,
       wghts <- temp[-1]
     }
 
-    if (F) {
+    if (T) {
       wghts <- abs(wghts)
     } else {
       wghts <- abs(wghts)
       # Now sort the wghts
       indices <- sort.list(wghts, decreasing = TRUE)
-
       # Check for zero entries
       zeros <- which(wghts == 0)
-
       # Now replace by ones that are in the top and are non-zero
       wghts[1:length(wghts)] <- 0
       wghts[indices[1:rankThreshold]] <- 1
-
       # Set the ones that were zero to zero anyway
       wghts[zeros] <- 0
     }

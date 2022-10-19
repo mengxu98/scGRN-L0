@@ -220,7 +220,23 @@ for (j in 1:length(data_path)) {
         GENIE3_AUPR <- calcAUPR(evaluationObject)
         GENIE3_AUROC
         GENIE3_AUPR
-
+        library(GENIE3)
+        weightMat <- GENIE3(
+          exprMatrix = t(data_GENIE3),
+          nCores = 32
+        )
+        weightdf <- getLinkList(weightMat)
+        # weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
+        names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
+        write.table(weightdf, file = paste0(output, "output_GENIE32.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
+        evaluationObject <- prepareEval(paste0(output, "output_GENIE32.txt"),
+          paste0(paste0(output, "ground_truth.tsv")),
+          totalPredictionsAccepted = 100000
+        )
+        GENIE3_AUROC2 <- calcAUROC(evaluationObject)
+        GENIE3_AUPR2 <- calcAUPR(evaluationObject)
+        GENIE3_AUROC2
+        GENIE3_AUPR2
         # AAA <- convertSortedRankTSVToAdjMatrix(paste0(output, "output_GENIE3.txt"))
       }
 
@@ -266,7 +282,7 @@ for (j in 1:length(data_path)) {
         AUROC_NIMEFI_L0
       }
 
-      if (T) {
+      if (F) {
         source("DynamicGRNPipe_3.constructionNetwork_L0.R")
         L0REG_L0 <- L0REG(t(data_GENIE3),
           regulators = colnames(data_GENIE3),
@@ -324,21 +340,80 @@ for (j in 1:length(data_path)) {
         AUROC_L0REG_L0L2_S <- AUCresult_L0REG$AUROC
         AUROC_L0REG_L0L2_S
       }
+      if (T) {
+        source("DynamicGRNPipe_3.constructionNetwork_L0.R")
+        L0REG_L0 <- L0REG(t(data_GENIE3),
+          regulators = colnames(data_GENIE3),
+          targets = colnames(data_GENIE3), penalty = "L0"
+        )
+        write.table(L0REG_L0,
+          paste0(output, "output_L0GRN.txt"),
+          sep = "\t",
+          quote = F,
+          row.names = F,
+          col.names = F
+        )
+        evaluationObject <- prepareEval(paste0(output, "output_L0GRN.txt"),
+          paste0(paste0(output, "ground_truth.tsv")),
+          totalPredictionsAccepted = 100000
+        )
+
+        AUROC_L0REG_L0_N <- calcAUROC(evaluationObject)
+        AUPR_L0REG_L0_N <- calcAUPR(evaluationObject)
+        AUROC_L0REG_L0_N
+
+        # L0REG_L0 <- L0REG(t(data_GENIE3),
+        #   regulators = colnames(data_GENIE3),
+        #   targets = colnames(data_GENIE3), penalty = "L0"
+        # )
+        # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0, truth_network, 1000)
+        # AUROC_L0REG_L0_S <- AUCresult_L0REG$AUROC
+        # AUROC_L0REG_L0_S
+        # --------------------------------------------------
+        L0REG_L0L2 <- L0REG(t(data_GENIE3),
+          regulators = colnames(data_GENIE3),
+          targets = colnames(data_GENIE3), penalty = "L0L2"
+        )
+        write.table(L0REG_L0L2,
+          paste0(output, "output_L0GRN.txt"),
+          sep = "\t",
+          quote = F,
+          row.names = F,
+          col.names = F
+        )
+        evaluationObject <- prepareEval(paste0(output, "output_L0GRN.txt"),
+          paste0(paste0(output, "ground_truth.tsv")),
+          totalPredictionsAccepted = 100000
+        )
+
+        AUROC_L0REG_L0L2_N <- calcAUROC(evaluationObject)
+        AUPR_L0REG_L0L2_N <- calcAUPR(evaluationObject)
+        AUROC_L0REG_L0L2_N
+
+        # L0REG_L0L2 <- L0REG(t(data_GENIE3),
+        #   # regulators = colnames(data_GENIE3),
+        #   targets = colnames(data_GENIE3), penalty = "L0L2"
+        # )
+        # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0L2, truth_network, 1000)
+        # AUROC_L0REG_L0L2_S <- AUCresult_L0REG$AUROC
+        # AUROC_L0REG_L0L2_S
+      }
 
       # --------------------------------------------------
       evaluation_infromation <- data.frame(
         datasets = paste0(data_path[j], "-", cell_num[k], "-", cell_drop[i]),
-        AUROC_SINCERITITES_L0 = AUROC_L0_N,
+        # AUROC_SINCERITITES_L0 = AUROC_L0_N,
         # AUROC_SINCERITITES_L0_S = AUROC_L0_S,
-        AUROC_SINCERITITES_L0L2 = AUROC_L0L2_N,
+        # AUROC_SINCERITITES_L0L2 = AUROC_L0L2_N,
         # AUROC_SINCERITITES_L0L2_S = AUROC_L0L2_S,
-        # AUROC_L0REG_L0_N = AUROC_L0REG_L0_N,
+        AUROC_L0REG_L0_N = AUROC_L0REG_L0_N,
         # AUROC_L0REG_L0_S = AUROC_L0REG_L0_S,
-        # AUROC_L0REG_L0L2_N = AUROC_L0REG_L0L2_N,
+        AUROC_L0REG_L0L2_N = AUROC_L0REG_L0L2_N,
         # AUROC_L0REG_L0L2_S = AUROC_L0REG_L0L2_S,
-        AUROC_NIMEFI_L0L2 = AUROC_NIMEFI_L0L2,
         AUROC_NIMEFI_L0 = AUROC_NIMEFI_L0,
+        AUROC_NIMEFI_L0L2 = AUROC_NIMEFI_L0L2,
         AUROC_GENIE3 = GENIE3_AUROC,
+        GENIE3_AUROC2 = GENIE3_AUROC2,
         AUROC_SINCERITITES = SINCERITITES_AUROC_N # ,
         # AUROC_SINCERITITES_S = SINCERITITES_AUROC_S
       )
@@ -352,10 +427,10 @@ for (j in 1:length(data_path)) {
 }
 # evaluation_infromations_all
 # evaluation_infromations_all[evaluation_infromations_all==0] <- NA
-na.omit(evaluation_infromations_all)
+evaluation_infromations_all <- na.omit(evaluation_infromations_all)
 write.csv(evaluation_infromations_all, "Results/evaluation_infromations.csv")
 
-if (T) {
+if (F) {
   library(patchwork)
   library(ggplot2)
   library(reshape2)
@@ -365,7 +440,7 @@ if (T) {
   library(pheatmap)
   library(tidyverse)
   library(RColorBrewer)
-  
+
   data_path <- c(
     "dyn-BF-",
     "dyn-BFC",
@@ -374,7 +449,7 @@ if (T) {
     "dyn-LL",
     "dyn-TF"
   )
-  
+mean(evaluation_infromations_all$AUROC_SINCERITITES)
   evaluation_infromations_all <- read.csv("Results/evaluation_infromations.csv")
   head(evaluation_infromations_all[1:3, 1:3])
   for (i in 1:length(data_path)) {
@@ -472,11 +547,11 @@ if (T) {
     mycol <- c("black", "gray", "white")
     results_10nets <- evaluation_infromations_GSD
     results_10nets$Dataset <- c(
-      "100-1", "100-2", "100-3","100-4", "100-5", "100-6","100-7", "100-8", "100-9","100-10",
-      "200-1", "200-2", "200-3","200-4", "200-5", "200-6","200-7", "200-8", "200-9","200-10",
-      "300-1", "300-2", "300-3","300-4", "300-5", "300-6","300-7", "300-8", "300-9","300-10",
-      "400-1", "400-2", "400-3","400-4", "400-5", "400-6","400-7", "400-8", "400-9","400-10",
-      "500-1", "500-2", "500-3","500-4", "500-5", "500-6","500-7", "500-8", "500-9","500-10"
+      "100-1", "100-2", "100-3", "100-4", "100-5", "100-6", "100-7", "100-8", "100-9", "100-10",
+      "200-1", "200-2", "200-3", "200-4", "200-5", "200-6", "200-7", "200-8", "200-9", "200-10",
+      "300-1", "300-2", "300-3", "300-4", "300-5", "300-6", "300-7", "300-8", "300-9", "300-10",
+      "400-1", "400-2", "400-3", "400-4", "400-5", "400-6", "400-7", "400-8", "400-9", "400-10",
+      "500-1", "500-2", "500-3", "500-4", "500-5", "500-6", "500-7", "500-8", "500-9", "500-10"
     )
     df_res10 <- melt(results_10nets, id = "Dataset", variable.name = "Method", value.name = "AUROC")
     df_res10$Method <- factor(df_res10$Method,

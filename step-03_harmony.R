@@ -90,9 +90,37 @@ if (T) {
   seu_obj_data <- ScaleData(seu_obj_data)
   seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
   pc.num <- 1:pc_num(seu_obj_data)
-  
   seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
-  seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 0.5)
+  seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 2)
+  p1 <- DimPlot(seu_obj_data,
+                reduction = "umap",
+                group.by = "orig.ident"
+  ) +
+    theme_bw() +
+    NoLegend()
+  p2 <- DimPlot(seu_obj_data,
+                reduction = "umap",
+                group.by = "stage"
+  ) +
+    theme_bw()
+  p3 <- DimPlot(seu_obj_data,
+                reduction = "umap",
+                group.by = "platform"
+  ) +
+    theme_bw()
+  p1 + p2 + p3
+  ggsave2("Fig1.raw_umap.png",
+          path = paste0("Results/"),
+          width = 30, height = 9, units = "cm"
+  )
+  
+  scRNA_harmony <- RunHarmony(seu_obj_data,
+                              group.by.vars = "orig.ident",
+                              assay.use = "SCT",
+                              # lambda = 1, # [0.5-2] The more smaller lambda value, the bigger integration efforts.
+                              max.iter.harmony = 20)
+  
+  
   seu_obj_data <- annotation_celltype(seu_obj_data, method = "celltypist") # method = "celltypist" or "SingleR"
 }
 

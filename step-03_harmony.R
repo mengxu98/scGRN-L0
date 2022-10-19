@@ -84,6 +84,18 @@ if (T) {
   save(seu_obj_data, samples_list, file = paste0("/data/mengxu/data/all/lung_seu.Rdata"))
 }
 
+if (T) {
+  seu_obj_data <- NormalizeData(seu_obj_data)
+  seu_obj_data <- FindVariableFeatures(seu_obj_data)
+  seu_obj_data <- ScaleData(seu_obj_data)
+  seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
+  pc.num <- 1:pc_num(seu_obj_data)
+  
+  seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
+  seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 0.5)
+  seu_obj_data <- annotation_celltype(seu_obj_data, method = "celltypist") # method = "celltypist" or "SingleR"
+}
+
 # harmony -----------------------------------------------------------------
 if (T) {
   

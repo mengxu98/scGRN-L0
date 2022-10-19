@@ -84,6 +84,8 @@ if (T) {
   save(seu_obj_data, samples_list, file = paste0("/data/mengxu/data/all/lung_seu.Rdata"))
 }
 
+# -------------------------------------------------------------------------
+
 if (T) {
   seu_obj_data <- NormalizeData(seu_obj_data)
   seu_obj_data <- FindVariableFeatures(seu_obj_data)
@@ -91,7 +93,7 @@ if (T) {
   seu_obj_data <- RunPCA(seu_obj_data, verbose = T)
   pc.num <- 1:pc_num(seu_obj_data)
   seu_obj_data <- RunUMAP(seu_obj_data, dims = pc.num)
-  seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 2)
+  seu_obj_data <- FindNeighbors(seu_obj_data, dims = pc.num) %>% FindClusters(resolution = 1)
   p1 <- DimPlot(seu_obj_data,
                 reduction = "umap",
                 group.by = "orig.ident"
@@ -115,8 +117,7 @@ if (T) {
   )
   
   scRNA_harmony <- RunHarmony(seu_obj_data,
-                              group.by.vars = "orig.ident",
-                              assay.use = "SCT",
+                              group.by.vars = c("orig.ident","stage"),
                               # lambda = 1, # [0.5-2] The more smaller lambda value, the bigger integration efforts.
                               max.iter.harmony = 20)
   

@@ -7,16 +7,29 @@ library(tidyr)
 
 load("../scGRN-L0_data/seu_obj_data_B_samples.Rdata")
 
+load(paste0("/data/mengxu/data/all/lung_seu.Rdata"))
+table(seu_obj_data$celltype)
+table(seu_obj_data$orig.ident)
+
+obj_cells <- c("B_mature", "B_naive", "B_plasma", "B_plasmablast")
+# subset(x = pbmc, idents = c("CD4 T cells", "CD8 T cells"), invert = TRUE)
+seu_obj_data_obj_cells <- list()
+for (i in 1:length(obj_cells)) {
+  obj_cell <- obj_cells[i]
+  seu_obj_data_obj_cell <- seu_obj_data[, (seu_obj_data$celltype == obj_cell)]
+  seu_obj_data_obj_cells[[i]] <- seu_obj_data_obj_cell
+  rm(seu_obj_data_obj_cell)
+}
+seu_obj_data <- merge(seu_obj_data_obj_cells[[1]], seu_obj_data_obj_cells[2:length(seu_obj_data_obj_cells)])
+rm(seu_obj_data_obj_cells)
+rm(samples_list)
+dim(seu_obj_data)
+
 if (F) {
   
-  Cellratio <- prop.table(table(Idents(seu_obj_data), seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
+  Cellratio <- prop.table(table(seu_obj_data$celltype, seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
   Cellratio
-  #BM1        BM2        BM3        GM1        GM2        GM3
-  #  Endothelial 0.27305737 0.32663989 0.28683967 0.40820981 0.59293194 0.54664650
-  #  Fibroblast  0.20733479 0.18072289 0.24096386 0.37115165 0.20418848 0.14422592
-  #  Immune      0.44299201 0.19410977 0.24976830 0.15393387 0.09751309 0.18406455
-  #  Epithelial  0.02505447 0.08299866 0.13253012 0.03534778 0.05366492 0.05698437
-  #  Other       0.05156137 0.21552878 0.08989805 0.03135690 0.05170157 0.06807867
+
   Cellratio <- as.data.frame(Cellratio)
   colourCount = length(unique(Cellratio$Var1))
   library(ggplot2)
@@ -30,10 +43,10 @@ if (F) {
   table(seu_obj_data$orig.ident)#查看各组细胞数
   prop.table(table(Idents(seu_obj_data)))
   table(Idents(seu_obj_data), seu_obj_data$orig.ident)#各组不同细胞群细胞数 colnames(scRNA_harmony)
-  Cellratio <- prop.table(table(Idents(seu_obj_data), seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
+  Cellratio <- prop.table(table(seu_obj_data$celltype, seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
   Cellratio <- data.frame(Cellratio)
   library(reshape2)
-  cellper <- dcast(Cellratio,Var2~Var1, value.var = "Freq")#长数据转为宽数据
+  cellper <- reshape2::dcast(Cellratio,Var2~Var1, value.var = "Freq")#长数据转为宽数据
   rownames(cellper) <- cellper[,1]
   cellper <- cellper[,-1]
   
@@ -42,24 +55,24 @@ if (F) {
   group <-seu_obj_data$stage
   samples <- data.frame(sample, group)#创建数据框
   
-  rownames(samples)=samples$sample
+  # rownames(samples)=samples$sample
   
   # cellper$sample <- samples[rownames(cellper),'sample']#R添加列
   cellper$sample <- rownames(cellper)#R添加列
   # cellper$group <- samples[rownames(cellper),'group']#R添加列
-  cellper$group <- samples[rownames(cellper),'group']#R添加列
   cellper$group <- ""
   for (i in 1:nrow(cellper)) {
     stage <- samples[which(samples$sample== cellper$sample[i])[1] , "group"]
     cellper$group[i] <- stage
   }
-  
+  table(seu_obj_data$celltype)
   ###作图展示
-  pplist = list()
-  sce_groups = c("B","Follicular B cells","Plasma")
+  
+  sce_groups = c("B_mature","B_naive","B_plasma", "B_plasmablast")
   library(ggplot2)
   library(dplyr)
   library(ggpubr)
+  pplist = list()
   for(group_ in sce_groups){
     cellper_  = cellper %>% select(one_of(c('sample','group',group_)))#选择一组数据
     colnames(cellper_) = c('sample','group','percent')#对选择数据列命名
@@ -77,8 +90,8 @@ if (F) {
       theme_cowplot() +
       theme(axis.text = element_text(size = 10),axis.title = element_text(size = 10),legend.text = element_text(size = 10),
             legend.title = element_text(size = 10),plot.title = element_text(size = 10,face = 'plain'),legend.position = 'none') + 
-      labs(title = group_,y='Percentage') +
-      geom_errorbar(aes(ymin = lower, ymax = upper),col = "grey60",width =  1)
+      labs(title = group_, y='Percentage') +
+      geom_errorbar(aes(ymin = lower, ymax = upper),col = "grey60",width =  0.5)
     
     ###组间t检验分析
     labely = max(cellper_$percent)
@@ -92,20 +105,21 @@ if (F) {
   }
   
   library(cowplot)
-  plot_grid(pplist[['B']],
-            pplist[['Follicular B cells']],
-            pplist[['Plasma']])
-  
+  plot_grid(pplist[["B_mature"]],
+            pplist[["B_naive"]],
+            pplist[["B_plasma"]],
+            pplist[["B_plasmablast"]])
+
 }
 
 meta <- seu_obj_data@meta.data
 
 CellInfor_B <- data.frame(UniqueCell_ID = colnames(seu_obj_data),
                         Patient = meta$orig.ident,
-                        majorCluster= meta$new.cluster.ids,
+                        majorCluster= meta$celltype,
                         sampleType=meta$stage)
 table(CellInfor_B$majorCluster)
-GSE131907_B <- as.matrix(seu_obj_data@assays$SCT@counts)
+GSE131907_B <- as.matrix(seu_obj_data@assays$RNA@counts)
 # Example
 # The example data can be downloaded at https://www.jianguoyun.com/p/DeYtp_AQ1bXiCRjXvYwE
 # ====0.input====
@@ -120,8 +134,8 @@ t.slingshot <- slingshot_run(scRNAseq.Exp = GSE131907_B,
   clusterLabels = CellInfor_B$majorCluster,
   ordergene = unlist(clusterSig),
   RMmethod = "pca",
-  plot_output = TRUE
-  #start.cluster = "GrB-secreting B cells" # cannot determine what type of cell types as the first type
+  plot_output = TRUE,
+  start.cluster = "B_naive" # cannot determine what type of cell types as the first type
 )
 CellInfor.trajectory <- cbind.data.frame(CellInfor_B, t.slingshot$data)
 CD8TCellExp.trajectory <- GSE131907_B
@@ -156,14 +170,19 @@ C4_C5_cross <- densityintersection(
 )
 
 C5_C61_cross <- densityintersections(
-  a = cellInfor[cellInfor$majorCluster == "B", "PseTime.Lineage1"],
-  b = cellInfor[cellInfor$majorCluster == "Follicular B cells", "PseTime.Lineage1"],
-  c = cellInfor[cellInfor$majorCluster == "Plasma", "PseTime.Lineage1"],
-  # d = cellInfor[cellInfor$majorCluster == "B_plasmablast", "PseTime.Lineage1"],
+  a = cellInfor[cellInfor$majorCluster == "B_mature", "PseTime.Lineage1"],
+  b = cellInfor[cellInfor$majorCluster == "B_naive", "PseTime.Lineage1"],
+  c = cellInfor[cellInfor$majorCluster == "B_plasma", "PseTime.Lineage1"],
+  d = cellInfor[cellInfor$majorCluster == "B_plasmablast", "PseTime.Lineage1"],
   filename = "Results/all.png"
 )
 # Manually select the intersection point according to the density plot
-binpoint <- c(0, 16.4, 26.29, 35.14, 43.51, max(cellInfor$PseTime.Lineage1))
+binpoint <- c(0, 
+              max(cellInfor$PseTime.Lineage1)/5, 
+              max(cellInfor$PseTime.Lineage1)*2/5, 
+              max(cellInfor$PseTime.Lineage1)*3/5, 
+              max(cellInfor$PseTime.Lineage1)*4/5, 
+              max(cellInfor$PseTime.Lineage1))
 
 # Two consecutive bins of cells as a window
 # extract cells for each window

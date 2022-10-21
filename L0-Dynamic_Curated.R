@@ -331,7 +331,7 @@ for (j in 1:length(data_path)) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE3)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE3)
-                for (t in 1:5) {
+                for (t in 1:10) {
                     s <- floor(nrow(data_GENIE3) * (t - 1) / 10) + 1
                     e <- floor(nrow(data_GENIE3) * t / 10)
                     data <- data_GENIE3[s:e, ]
@@ -376,7 +376,7 @@ for (j in 1:length(data_path)) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE3)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE3)
-                win <- 50
+                win <- 100
                 for (t in 1:(nrow(data_GENIE3) - win)) {
                     s <- t
                     e <- win + t
@@ -400,7 +400,6 @@ for (j in 1:length(data_path)) {
                     L0REG_L0_adjs <- L0REG_L0_adjs + as.numeric(L0REG_L0_adj)
                 }
                 L0REG_L0_adjs <- L0REG_L0_adjs / max(L0REG_L0_adjs)
-
                 AUCresult_L0REG_L0 <- auc_from_ranks_TC_sign(L0REG_L0_adjs, truth_network, 1000)
                 L0REG_L0Dynamic_AUROC_S <- AUCresult_L0REG_L0$AUROC
                 L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR
@@ -446,7 +445,6 @@ for (j in 1:length(data_path)) {
             # AUROC_SINCERITITES_S = SINCERITITES_AUROC_S,
             AUROC_SINCERITITES = SINCERITITES_AUROC_N
         )
-
         message(paste0("----- ", evaluation_infromation, " -----"))
         print(evaluation_infromation)
         evaluation_infromations <- rbind.data.frame(evaluation_infromations, evaluation_infromation)

@@ -1,50 +1,50 @@
 SourceGENES,TargetGENES,Interaction,Edges
-g3,g2,1,activation
-g6,g2,0.887620593516688,activation
-g8,g2,0.877857569126932,activation
-g8,g1,0.776386510287641,activation
-g6,g1,0.677547295858867,activation
-g3,g1,0.602636863536753,activation
-g8,g7,0.533769976413499,activation
-g6,g7,0.519606672976536,activation
-g8,g3,0.42642230275732,activation
-g3,g8,0.407933521875404,activation
-g6,g3,0.340692157520066,activation
-g6,g8,0.333935064349395,activation
-g3,g7,0.287012572060239,activation
-g6,g4,0.240816433878645,activation
-g8,g6,0.155232613205721,activation
-g8,g4,0.120792860276116,activation
-g3,g4,0.0314900958682853,activation
-g2,g1,3.193971640501e-36,activation
-g4,g2,2.56665805851815e-36,activation
+g6,g2,1,activation
+g6,g4,0.875081078656448,activation
+g8,g6,0.813023360479619,activation
+g1,g4,0.802700547952093,activation
+g7,g6,0.749096132475095,activation
+g4,g6,0.646895891346307,activation
+g2,g1,0.621385877626487,activation
+g8,g2,0.549956649058988,activation
+g3,g6,0.508752093856386,activation
+g2,g8,0.464189105695403,activation
+g7,g8,0.442867513170898,activation
+g1,g3,0.439077257428933,activation
+g8,g4,0.428708840504234,activation
+g4,g8,0.428268107500191,activation
+g4,g7,0.40773005213132,activation
+g8,g7,0.384389628089856,activation
+g1,g2,0.380004257146133,activation
+g7,g1,0.367221438664503,activation
+g3,g4,0.36395745651422,activation
+g2,g3,0.327077324888477,activation
+g6,g7,0.313616095156574,activation
+g7,g2,0.310107929180116,activation
+g7,g4,0.307986692206523,activation
+g3,g8,0.276007110456463,activation
+g2,g6,0.268554482239014,activation
+g8,g1,0.253591406040763,activation
+g3,g2,0.25233353421418,activation
+g3,g7,0.244993897248037,activation
+g4,g2,0.21676479655257,activation
+g4,g1,0.216592292486051,activation
+g2,g7,0.171624007792977,activation
+g8,g3,0.149613703569744,activation
+g3,g1,0.128001000214468,activation
+g6,g1,0.127346146935809,activation
 g1,g1,0,no regulation
-g1,g2,0,no regulation
-g1,g3,0,no regulation
-g1,g4,0,no regulation
 g1,g6,0,no regulation
 g1,g7,0,no regulation
 g1,g8,0,no regulation
 g2,g2,0,no regulation
-g2,g3,0,no regulation
 g2,g4,0,no regulation
-g2,g6,0,no regulation
-g2,g7,0,no regulation
-g2,g8,0,no regulation
 g3,g3,0,no regulation
-g3,g6,0,no regulation
-g4,g1,0,no regulation
 g4,g3,0,no regulation
 g4,g4,0,no regulation
-g4,g6,0,no regulation
-g4,g7,0,no regulation
-g4,g8,0,no regulation
+g6,g3,0,no regulation
 g6,g6,0,no regulation
-g7,g1,0,no regulation
-g7,g2,0,no regulation
+g6,g8,0,no regulation
 g7,g3,0,no regulation
-g7,g4,0,no regulation
-g7,g6,0,no regulation
 g7,g7,0,no regulation
-g7,g8,0,no regulation
 g8,g8,0,no regulation

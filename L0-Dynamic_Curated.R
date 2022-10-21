@@ -29,14 +29,14 @@ data_path <- c(
 
 cell_drop <- c(
     "1", "1-50", "1-70",
-    # "2", "2-50", "2-70",
-    # "3", "3-50", "3-70",
-    # "4", "4-50", "4-70",
+    "2", "2-50", "2-70",
+    "3", "3-50", "3-70",
+    "4", "4-50", "4-70",
     "5", "5-50", "5-70",
-    # "6", "6-50", "6-70",
-    # "7", "7-50", "7-70",
-    # "8", "8-50", "8-70",
-    # "9", "9-50", "9-70",
+    "6", "6-50", "6-70",
+    "7", "7-50", "7-70",
+    "8", "8-50", "8-70",
+    "9", "9-50", "9-70",
     "10", "10-50", "10-70"
 )
 output <- "output_Curated/"
@@ -171,36 +171,30 @@ for (j in 1:length(data_path)) {
             SINCERITITES_AUROC_S
         }
         # --------------------------------------------------
+        data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_1.csv"),
+            header = T
+        ) %>% as.matrix()
+        PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
+        data_GENIE3 <- data_GENIE3[, -ncol(data_GENIE3)]
         if (T) {
-            data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_1.csv"),
-                header = T
-            ) %>% as.matrix()
+            # NIMEFI(data_GENIE3,
+            #     GENIE = T, SVM = F, EL = F, penalty = "L0",
+            #     outputFileName = paste0(output, "output_GENIE3"),
+            #     outputFileFormat = "txt",
+            #     SVMRankThreshold = 5, SVMEnsembleSize = 100,
+            #     ELPredSampleMin = 20, ELPredSampleMax = 80,
+            #     ELExpSampleMin = 20, ELExpSampleMax = 80,
+            #     ELRankThreshold = 5, ELEnsembleSize = 500
+            # )
 
-            PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
-            # PseudoTime <- PseudoTime[order(PseudoTime), ] %>% as.data.frame()
-            # rownames(PseudoTime) <- PseudoTime$X
+            # evaluationObject <- prepareEval(paste0(output, "output_GENIE3.txt"),
+            #     paste0(paste0(output, "ground_truth.tsv")),
+            #     totalPredictionsAccepted = 100000
+            # )
 
-            data_GENIE3 <- data_GENIE3[, -ncol(data_GENIE3)]
+            # GENIE3_AUROC_NIMEFI <- calcAUROC(evaluationObject)
+            # GENIE3_AUPR_NIMEFI <- calcAUPR(evaluationObject)
 
-            NIMEFI(data_GENIE3,
-                GENIE = T, SVM = F, EL = F, penalty = "L0",
-                outputFileName = paste0(output, "output_GENIE3"),
-                outputFileFormat = "txt",
-                SVMRankThreshold = 5, SVMEnsembleSize = 100,
-                ELPredSampleMin = 20, ELPredSampleMax = 80,
-                ELExpSampleMin = 20, ELExpSampleMax = 80,
-                ELRankThreshold = 5, ELEnsembleSize = 500
-            )
-
-            evaluationObject <- prepareEval(paste0(output, "output_GENIE3.txt"),
-                paste0(paste0(output, "ground_truth.tsv")),
-                totalPredictionsAccepted = 100000
-            )
-
-            GENIE3_AUROC_NIMEFI <- calcAUROC(evaluationObject)
-            GENIE3_AUPR_NIMEFI <- calcAUPR(evaluationObject)
-            GENIE3_AUROC_NIMEFI
-            GENIE3_AUPR_NIMEFI
             library(GENIE3)
             weightMat <- GENIE3(
                 exprMatrix = t(data_GENIE3),
@@ -221,13 +215,9 @@ for (j in 1:length(data_path)) {
             )
             GENIE3_AUROC <- calcAUROC(evaluationObject)
             GENIE3_AUPR <- calcAUPR(evaluationObject)
-            GENIE3_AUROC
-            GENIE3_AUROC_S
-            GENIE3_AUROC_NIMEFI
-            # AAA <- convertSortedRankTSVToAdjMatrix(paste0(output, "output_GENIE3.txt"))
         }
 
-        if (T) {
+        if (F) {
             NIMEFI(data_GENIE3,
                 GENIE = F, SVM = F, EL = T, penalty = "L0",
                 outputFileName = paste0(output, "output_NIMEFI_L0"),
@@ -337,11 +327,11 @@ for (j in 1:length(data_path)) {
             # PseudoTime <- PseudoTime[order(PseudoTime), ] %>% as.data.frame()
             # rownames(PseudoTime) <- PseudoTime$X
             data_GENIE3 <- data_GENIE3[, -ncol(data_GENIE3)] %>% as.matrix()
-            if (T) {
+            if (F) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE3)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE3)
-                for (t in 1:10) {
+                for (t in 1:5) {
                     s <- floor(nrow(data_GENIE3) * (t - 1) / 10) + 1
                     e <- floor(nrow(data_GENIE3) * t / 10)
                     data <- data_GENIE3[s:e, ]
@@ -386,12 +376,17 @@ for (j in 1:length(data_path)) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE3)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE3)
-                win <- 20
-                for (t in 1:10) {
-                    s <- win+t
-                    s <- floor(nrow(data_GENIE3) * (t - 1) / 10) + 1
-                    e <- floor(nrow(data_GENIE3) * t / 10)
-                    data <- data_GENIE3[s:e, ]
+                win <- 50
+                for (t in 1:(nrow(data_GENIE3) - win)) {
+                    s <- t
+                    e <- win + t
+                    # s <- floor(nrow(data_GENIE3) * (t - 1) / 10) + 1
+                    # e <- floor(nrow(data_GENIE3) * t / 10)
+                    if (e < dim(data_GENIE3)[1]) {
+                        data <- data_GENIE3[s:e, ]
+                    } else {
+                        data <- data_GENIE3
+                    }
                     L0REG_L0_1 <- L0REG(t(data),
                         regulators = colnames(data),
                         targets = colnames(data), penalty = "L0"
@@ -438,18 +433,18 @@ for (j in 1:length(data_path)) {
             # AUROC_SINCERITITES_L0L2 = AUROC_L0L2_N,
             # AUROC_SINCERITITES_L0L2_S = AUROC_L0L2_S,
             AUROC_L0Dynamic = L0REG_L0Dynamic_AUROC,
-            AUROC_L0Dynamic_S = L0REG_L0Dynamic_AUROC_S,
+            # AUROC_L0Dynamic_S = L0REG_L0Dynamic_AUROC_S,
             AUROC_L0REG_L0 = AUROC_L0REG_L0_N,
             # AUROC_L0REG_L0_S = AUROC_L0REG_L0_S,
             AUROC_L0REG_L0L2 = AUROC_L0REG_L0L2_N,
             # AUROC_L0REG_L0L2_S = AUROC_L0REG_L0L2_S,
-            AUROC_NIMEFI_L0L2 = AUROC_NIMEFI_L0L2,
-            AUROC_NIMEFI_L0 = AUROC_NIMEFI_L0,
-            AUROC_GENIE3_NIMEFI = GENIE3_AUROC_NIMEFI,
+            # AUROC_NIMEFI_L0L2 = AUROC_NIMEFI_L0L2,
+            # AUROC_NIMEFI_L0 = AUROC_NIMEFI_L0,
+            # AUROC_GENIE3_NIMEFI = GENIE3_AUROC_NIMEFI,
             AUROC_GENIE3 = GENIE3_AUROC,
-            AUROC_GENIE3_S = GENIE3_AUROC_S,
-            AUROC_SINCERITITES = SINCERITITES_AUROC_N,
-            AUROC_SINCERITITES_S = SINCERITITES_AUROC_S
+            # AUROC_GENIE3_S = GENIE3_AUROC_S,
+            # AUROC_SINCERITITES_S = SINCERITITES_AUROC_S,
+            AUROC_SINCERITITES = SINCERITITES_AUROC_N
         )
 
         message(paste0("----- ", evaluation_infromation, " -----"))

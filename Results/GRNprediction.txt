@@ -1,65 +1,50 @@
 SourceGENES,TargetGENES,Interaction,Edges
-Nkx61,Nkx22,1,activation
-Olig2,Pax6,0.736815432221869,activation
-Nkx62,Dbx1,0.668932639516666,activation
-Olig2,Nkx61,0.536833580661491,activation
-Nkx62,Dbx2,0.448506359695553,activation
-Dbx1,Nkx62,0.321612071178379,activation
-Dbx1,Irx3,0.199408433098741,activation
-Pax6,Nkx22,0.0787841217547009,activation
-Pax6,Nkx62,0.0599393034161766,activation
-Pax6,Olig2,0.0504556648578725,activation
-Pax6,Dbx1,0.0496469922400547,activation
-Nkx62,Olig2,0.0304841790710156,activation
-Pax6,Dbx2,0.0245678738561351,activation
-Nkx22,Nkx61,5.53712388116993e-37,activation
-Dbx2,Dbx1,4.45227816053619e-37,activation
-Irx3,Dbx2,2.14109180135444e-37,activation
-Dbx2,Nkx62,1.20966597980085e-37,activation
-Nkx22,Pax6,1.04659103986787e-37,activation
-Nkx22,Olig2,1.00601035522122e-37,activation
-Dbx2,Pax6,9.56176714164735e-38,activation
-Nkx22,Nkx62,8.4219948004683e-38,activation
-Dbx1,Dbx1,0,no regulation
-Dbx1,Dbx2,0,no regulation
-Dbx1,Nkx22,0,no regulation
-Dbx1,Nkx61,0,no regulation
-Dbx1,Olig2,0,no regulation
-Dbx1,Pax6,0,no regulation
-Dbx2,Dbx2,0,no regulation
-Dbx2,Irx3,0,no regulation
-Dbx2,Nkx22,0,no regulation
-Dbx2,Nkx61,0,no regulation
-Dbx2,Olig2,0,no regulation
-Irx3,Dbx1,0,no regulation
-Irx3,Irx3,0,no regulation
-Irx3,Nkx22,0,no regulation
-Irx3,Nkx61,0,no regulation
-Irx3,Nkx62,0,no regulation
-Irx3,Olig2,0,no regulation
-Irx3,Pax6,0,no regulation
-Nkx22,Dbx1,0,no regulation
-Nkx22,Dbx2,0,no regulation
-Nkx22,Irx3,0,no regulation
-Nkx22,Nkx22,0,no regulation
-Nkx61,Dbx1,0,no regulation
-Nkx61,Dbx2,0,no regulation
-Nkx61,Irx3,0,no regulation
-Nkx61,Nkx61,0,no regulation
-Nkx61,Nkx62,0,no regulation
-Nkx61,Olig2,0,no regulation
-Nkx61,Pax6,0,no regulation
-Nkx62,Irx3,0,no regulation
-Nkx62,Nkx22,0,no regulation
-Nkx62,Nkx61,0,no regulation
-Nkx62,Nkx62,0,no regulation
-Nkx62,Pax6,0,no regulation
-Olig2,Dbx1,0,no regulation
-Olig2,Dbx2,0,no regulation
-Olig2,Irx3,0,no regulation
-Olig2,Nkx22,0,no regulation
-Olig2,Nkx62,0,no regulation
-Olig2,Olig2,0,no regulation
-Pax6,Irx3,0,no regulation
-Pax6,Nkx61,0,no regulation
-Pax6,Pax6,0,no regulation
+g3,g2,1,activation
+g6,g2,0.887620593516688,activation
+g8,g2,0.877857569126932,activation
+g8,g1,0.776386510287641,activation
+g6,g1,0.677547295858867,activation
+g3,g1,0.602636863536753,activation
+g8,g7,0.533769976413499,activation
+g6,g7,0.519606672976536,activation
+g8,g3,0.42642230275732,activation
+g3,g8,0.407933521875404,activation
+g6,g3,0.340692157520066,activation
+g6,g8,0.333935064349395,activation
+g3,g7,0.287012572060239,activation
+g6,g4,0.240816433878645,activation
+g8,g6,0.155232613205721,activation
+g8,g4,0.120792860276116,activation
+g3,g4,0.0314900958682853,activation
+g2,g1,3.193971640501e-36,activation
+g4,g2,2.56665805851815e-36,activation
+g1,g1,0,no regulation
+g1,g2,0,no regulation
+g1,g3,0,no regulation
+g1,g4,0,no regulation
+g1,g6,0,no regulation
+g1,g7,0,no regulation
+g1,g8,0,no regulation
+g2,g2,0,no regulation
+g2,g3,0,no regulation
+g2,g4,0,no regulation
+g2,g6,0,no regulation
+g2,g7,0,no regulation
+g2,g8,0,no regulation
+g3,g3,0,no regulation
+g3,g6,0,no regulation
+g4,g1,0,no regulation
+g4,g3,0,no regulation
+g4,g4,0,no regulation
+g4,g6,0,no regulation
+g4,g7,0,no regulation
+g4,g8,0,no regulation
+g6,g6,0,no regulation
+g7,g1,0,no regulation
+g7,g2,0,no regulation
+g7,g3,0,no regulation
+g7,g4,0,no regulation
+g7,g6,0,no regulation
+g7,g7,0,no regulation
+g7,g8,0,no regulation
+g8,g8,0,no regulation

@@ -352,7 +352,6 @@ for (j in 1:length(data_path)) {
                 AUCresult_L0REG_L0 <- auc_from_ranks_TC_sign(L0REG_L0_adjs, truth_network, 1000)
                 L0REG_L0Dynamic_AUROC_S <- AUCresult_L0REG_L0$AUROC
                 L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR
-
                 weightdf <- getLinkList(L0REG_L0_adjs)
                 # weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
                 names(weightdf) <- c("regulatoryGene", "targetGene", "weight")

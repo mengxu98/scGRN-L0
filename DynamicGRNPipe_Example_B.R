@@ -2,32 +2,10 @@
 
 library(Seurat)
 library(tidyr)
-# data <- readRDS("../scGRN-L0_data/seu_obj_data_B_samples.rds")
-# meta <- data@meta.data
-
-load("../scGRN-L0_data/seu_obj_data_B_samples.Rdata")
-
-load(paste0("/data/mengxu/data/all/lung_seu.Rdata"))
-table(seu_obj_data$celltype)
-table(seu_obj_data$orig.ident)
-
-obj_cells <- c("B_mature", "B_naive", "B_plasma", "B_plasmablast")
-# subset(x = pbmc, idents = c("CD4 T cells", "CD8 T cells"), invert = TRUE)
-seu_obj_data_obj_cells <- list()
-for (i in 1:length(obj_cells)) {
-  obj_cell <- obj_cells[i]
-  seu_obj_data_obj_cell <- seu_obj_data[, (seu_obj_data$celltype == obj_cell)]
-  seu_obj_data_obj_cells[[i]] <- seu_obj_data_obj_cell
-  rm(seu_obj_data_obj_cell)
-}
-seu_obj_data <- merge(seu_obj_data_obj_cells[[1]], seu_obj_data_obj_cells[2:length(seu_obj_data_obj_cells)])
-rm(seu_obj_data_obj_cells)
-rm(samples_list)
-dim(seu_obj_data)
 
 if (F) {
   
-  Cellratio <- prop.table(table(seu_obj_data$celltype, seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
+  Cellratio <- prop.table(table(seu_obj_data$main_cell_type, seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
   Cellratio
 
   Cellratio <- as.data.frame(Cellratio)
@@ -40,10 +18,15 @@ if (F) {
     coord_flip()+
     theme(panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"))
   
+  ggsave2(paste0("Fig6.contrast1.png"),
+          path = paste0("Results/"),
+          width = 15, height = 10, units = "cm"
+  )
+  
   table(seu_obj_data$orig.ident)#查看各组细胞数
   prop.table(table(Idents(seu_obj_data)))
   table(Idents(seu_obj_data), seu_obj_data$orig.ident)#各组不同细胞群细胞数 colnames(scRNA_harmony)
-  Cellratio <- prop.table(table(seu_obj_data$celltype, seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
+  Cellratio <- prop.table(table(seu_obj_data$main_cell_type, seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
   Cellratio <- data.frame(Cellratio)
   library(reshape2)
   cellper <- reshape2::dcast(Cellratio,Var2~Var1, value.var = "Freq")#长数据转为宽数据
@@ -52,7 +35,7 @@ if (F) {
   
   ###添加分组信息
   sample <- seu_obj_data$orig.ident
-  group <-seu_obj_data$stage
+  group <-seu_obj_data$tissue_type
   samples <- data.frame(sample, group)#创建数据框
   
   # rownames(samples)=samples$sample
@@ -65,10 +48,10 @@ if (F) {
     stage <- samples[which(samples$sample== cellper$sample[i])[1] , "group"]
     cellper$group[i] <- stage
   }
-  table(seu_obj_data$celltype)
+  table(seu_obj_data$main_cell_type)
   ###作图展示
   
-  sce_groups = c("B_mature","B_naive","B_plasma", "B_plasmablast")
+  sce_groups = c("Follicular B cells", "Germinal center B cells","Plasma" )
   library(ggplot2)
   library(dplyr)
   library(ggpubr)
@@ -88,27 +71,38 @@ if (F) {
       geom_jitter(shape = 21,aes(fill=group),width = 0.25) + 
       stat_summary(fun=mean, geom="point", color="grey60") +
       theme_cowplot() +
-      theme(axis.text = element_text(size = 10),axis.title = element_text(size = 10),legend.text = element_text(size = 10),
-            legend.title = element_text(size = 10),plot.title = element_text(size = 10,face = 'plain'),legend.position = 'none') + 
+      theme(axis.text = element_text(size = 8),
+            axis.title = element_text(size = 8),
+            legend.text = element_text(size = 8),
+            legend.title = element_text(size = 8),
+            plot.title = element_text(size = 4,face = 'plain'),
+            legend.position = 'none') + 
       labs(title = group_, y='Percentage') +
-      geom_errorbar(aes(ymin = lower, ymax = upper),col = "grey60",width =  0.5)
+      geom_errorbar(aes(ymin = lower, ymax = upper),col = "grey60",width =  0.5)+theme_bw()
     
     ###组间t检验分析
     labely = max(cellper_$percent)
     compare_means(percent ~ group,  data = cellper_)
-    my_comparisons <- list( c("stage-1", "stage-normal"),
-                            c("stage-2", "stage-normal"),
-                            c("stage-3", "stage-normal"),
-                            c("stage-4", "stage-normal") )
+    my_comparisons <- list( c("Normal", "Tumor") )
     pp1 = pp1 + stat_compare_means(comparisons = my_comparisons,size = 3,method = "t.test")
     pplist[[group_]] = pp1
   }
   
   library(cowplot)
-  plot_grid(pplist[["B_mature"]],
-            pplist[["B_naive"]],
-            pplist[["B_plasma"]],
-            pplist[["B_plasmablast"]])
+  library(patchwork)
+  # plot_grid(pplist[["Follicular B cells"]],
+  #           pplist[["Plasma"]],
+  #           pplist[["Germinal center B cells"]])
+  pplist[["Follicular B cells"]]+
+    pplist[["Germinal center B cells"]]+
+  pplist[["Plasma"]]+
+    plot_annotation(tag_levels = 'a')+
+    plot_layout(guides = 'collect')&
+    theme(legend.position='bottom')
+  ggsave2(paste0("Fig6.contrast.png"),
+          path = paste0("Results/"),
+          width = 25, height = 15, units = "cm"
+  )
 
 }
 
@@ -116,8 +110,8 @@ meta <- seu_obj_data@meta.data
 
 CellInfor_B <- data.frame(UniqueCell_ID = colnames(seu_obj_data),
                         Patient = meta$orig.ident,
-                        majorCluster= meta$celltype,
-                        sampleType=meta$stage)
+                        majorCluster= meta$main_cell_type,
+                        sampleType=meta$tissue_type)
 table(CellInfor_B$majorCluster)
 GSE131907_B <- as.matrix(seu_obj_data@assays$RNA@counts)
 # Example
@@ -135,7 +129,7 @@ t.slingshot <- slingshot_run(scRNAseq.Exp = GSE131907_B,
   ordergene = unlist(clusterSig),
   RMmethod = "pca",
   plot_output = TRUE,
-  start.cluster = "B_naive" # cannot determine what type of cell types as the first type
+  start.cluster = "Follicular B cells" # cannot determine what type of cell types as the first type
 )
 CellInfor.trajectory <- cbind.data.frame(CellInfor_B, t.slingshot$data)
 CD8TCellExp.trajectory <- GSE131907_B
@@ -170,10 +164,9 @@ C4_C5_cross <- densityintersection(
 )
 
 C5_C61_cross <- densityintersections(
-  a = cellInfor[cellInfor$majorCluster == "B_mature", "PseTime.Lineage1"],
-  b = cellInfor[cellInfor$majorCluster == "B_naive", "PseTime.Lineage1"],
-  c = cellInfor[cellInfor$majorCluster == "B_plasma", "PseTime.Lineage1"],
-  d = cellInfor[cellInfor$majorCluster == "B_plasmablast", "PseTime.Lineage1"],
+  a = cellInfor[cellInfor$majorCluster == "Follicular B cells", "PseTime.Lineage1"],
+  b = cellInfor[cellInfor$majorCluster == "Germinal center B cells", "PseTime.Lineage1"],
+  c = cellInfor[cellInfor$majorCluster == "Plasma", "PseTime.Lineage1"],
   filename = "Results/all.png"
 )
 # Manually select the intersection point according to the density plot
@@ -201,10 +194,10 @@ load("DynamicGRNPipe_ExampleData/DynamicGene1.RData")
 load("DynamicGRNPipe_ExampleData/dorothea.RData")
 # Construct a control network and calculate the control weight of each edge
 weightofWindows <- DynNet_RF(
-  Windows = Windows1[1],
+  Windows = Windows1,
   CD8TCellExp.trajectory = CD8TCellExp.trajectory,
   DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
-  allTFs = allTFs[100:200], # set regulators
+  allTFs = allTFs, # set regulators
   detectNum = 10, detectPro = 0.05, meanExp = 1 # Noise filtering threshold
 )
 
@@ -241,7 +234,7 @@ GENIE3_AUPR <- calcAUPR(evaluationObject)
 GENIE3_AUROC
 
 weightofWindows_L0 <- DynNet_L0(
-  Windows = Windows1[1],
+  Windows = Windows1,
   CD8TCellExp.trajectory = CD8TCellExp.trajectory,
   DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
   allTFs = allTFs, # set regulators

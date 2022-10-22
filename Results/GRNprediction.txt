@@ -1,65 +1,26 @@
 SourceGENES,TargetGENES,Interaction,Edges
-Dbx1,Olig2,1,activation
-Irx3,Olig2,0.716543702019021,activation
-Nkx62,Olig2,0.605030993326764,activation
-Irx3,Pax6,0.575419823813615,activation
-Dbx2,Olig2,0.536380188274937,activation
-Nkx62,Pax6,0.501190306275368,activation
-Olig2,Nkx22,0.436123392403338,activation
-Dbx1,Pax6,0.410462557984289,activation
-Dbx2,Pax6,0.405821176361663,activation
-Olig2,Pax6,0.196215516686274,activation
-Nkx61,Pax6,0.12708142434769,activation
-Nkx61,Olig2,0.111618056293785,activation
-Nkx61,Nkx22,0.0739818578601731,activation
-Nkx61,Irx3,0.0698738160371311,activation
-Nkx61,Dbx1,0.069453717188584,activation
-Nkx61,Dbx2,0.0648964297331837,activation
-Olig2,Dbx1,0.0637766067157065,activation
-Nkx61,Nkx62,0.0576929355419275,activation
-Pax6,Nkx22,0.0105226078597835,activation
-Pax6,Nkx61,0.00559581746745743,activation
-Pax6,Olig2,0.00437349845644515,activation
-Pax6,Irx3,4.62254772087355e-05,activation
-Nkx22,Pax6,3.15757751470944e-37,activation
-Nkx22,Dbx2,6.39042417514072e-38,activation
-Nkx22,Irx3,5.75646411725082e-38,activation
-Dbx1,Dbx1,0,no regulation
-Dbx1,Dbx2,0,no regulation
-Dbx1,Irx3,0,no regulation
-Dbx1,Nkx22,0,no regulation
-Dbx1,Nkx61,0,no regulation
-Dbx1,Nkx62,0,no regulation
-Dbx2,Dbx1,0,no regulation
-Dbx2,Dbx2,0,no regulation
-Dbx2,Irx3,0,no regulation
-Dbx2,Nkx22,0,no regulation
-Dbx2,Nkx61,0,no regulation
-Dbx2,Nkx62,0,no regulation
-Irx3,Dbx1,0,no regulation
-Irx3,Dbx2,0,no regulation
-Irx3,Irx3,0,no regulation
-Irx3,Nkx22,0,no regulation
-Irx3,Nkx61,0,no regulation
-Irx3,Nkx62,0,no regulation
-Nkx22,Dbx1,0,no regulation
-Nkx22,Nkx22,0,no regulation
-Nkx22,Nkx61,0,no regulation
-Nkx22,Nkx62,0,no regulation
-Nkx22,Olig2,0,no regulation
-Nkx61,Nkx61,0,no regulation
-Nkx62,Dbx1,0,no regulation
-Nkx62,Dbx2,0,no regulation
-Nkx62,Irx3,0,no regulation
-Nkx62,Nkx22,0,no regulation
-Nkx62,Nkx61,0,no regulation
-Nkx62,Nkx62,0,no regulation
-Olig2,Dbx2,0,no regulation
-Olig2,Irx3,0,no regulation
-Olig2,Nkx61,0,no regulation
-Olig2,Nkx62,0,no regulation
-Olig2,Olig2,0,no regulation
-Pax6,Dbx1,0,no regulation
-Pax6,Dbx2,0,no regulation
-Pax6,Nkx62,0,no regulation
+Coup,Emx2,1,activation
+Emx2,Coup,0.90439707437292,activation
+Fgf8,Pax6,0.240808123544526,activation
+Sp8,Fgf8,0.23080087686511,activation
+Pax6,Fgf8,0.157928602703942,activation
+Sp8,Pax6,0.135309830930668,activation
+Pax6,Sp8,0.119249918333544,activation
+Fgf8,Sp8,0.098690127973424,activation
+Pax6,Emx2,0.0679793360211877,activation
+Coup,Pax6,0.0526986592513075,activation
+Coup,Coup,0,no regulation
+Coup,Fgf8,0,no regulation
+Coup,Sp8,0,no regulation
+Emx2,Emx2,0,no regulation
+Emx2,Fgf8,0,no regulation
+Emx2,Pax6,0,no regulation
+Emx2,Sp8,0,no regulation
+Fgf8,Coup,0,no regulation
+Fgf8,Emx2,0,no regulation
+Fgf8,Fgf8,0,no regulation
+Pax6,Coup,0,no regulation
 Pax6,Pax6,0,no regulation
+Sp8,Coup,0,no regulation
+Sp8,Emx2,0,no regulation
+Sp8,Sp8,0,no regulation

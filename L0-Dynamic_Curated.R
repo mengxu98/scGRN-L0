@@ -324,8 +324,6 @@ for (j in 1:length(data_path)) {
             )
             data_GENIE3 <- data_GENIE3[order(data_GENIE3$h), ]
             PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
-            # PseudoTime <- PseudoTime[order(PseudoTime), ] %>% as.data.frame()
-            # rownames(PseudoTime) <- PseudoTime$X
             data_GENIE3 <- data_GENIE3[, -ncol(data_GENIE3)] %>% as.matrix()
             if (T) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
@@ -337,7 +335,8 @@ for (j in 1:length(data_path)) {
                     data <- data_GENIE3[s:e, ]
                     L0REG_L0_1 <- L0REG(t(data),
                         regulators = colnames(data),
-                        targets = colnames(data), penalty = "L0"
+                        targets = colnames(data), 
+                        penalty = "L0"
                     )
                     L0REG_L0_1$weight <- as.numeric(L0REG_L0_1$weight)
                     L0REG_L0_1 <- as.matrix(L0REG_L0_1)
@@ -352,7 +351,7 @@ for (j in 1:length(data_path)) {
                 AUCresult_L0REG_L0 <- auc_from_ranks_TC_sign(L0REG_L0_adjs, truth_network, 1000)
                 L0REG_L0Dynamic_AUROC_S <- AUCresult_L0REG_L0$AUROC
                 L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR
-                weightdf <- getLinkList(L0REG_L0_adjs)
+                weightdf <- GENIE3::getLinkList(L0REG_L0_adjs)
                 # weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
                 names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
                 write.table(weightdf, file = paste0(output, "L0REG_L02.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
@@ -379,8 +378,6 @@ for (j in 1:length(data_path)) {
                 for (t in 1:(nrow(data_GENIE3) - win)) {
                     s <- t
                     e <- win + t
-                    # s <- floor(nrow(data_GENIE3) * (t - 1) / 10) + 1
-                    # e <- floor(nrow(data_GENIE3) * t / 10)
                     if (e < dim(data_GENIE3)[1]) {
                         data <- data_GENIE3[s:e, ]
                     } else {
@@ -495,10 +492,7 @@ if (F) {
 
         p <- ggplot(
             methods_barplot_all,
-            aes(
-                x = Methods,
-                y = AUROC
-            )
+            aes(x = Methods, y = AUROC)
         ) +
             # guides(fill = guide_legend(title = NULL)) +
             # stat_compare_means(

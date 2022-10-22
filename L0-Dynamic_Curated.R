@@ -327,7 +327,7 @@ for (j in 1:length(data_path)) {
             # PseudoTime <- PseudoTime[order(PseudoTime), ] %>% as.data.frame()
             # rownames(PseudoTime) <- PseudoTime$X
             data_GENIE3 <- data_GENIE3[, -ncol(data_GENIE3)] %>% as.matrix()
-            if (F) {
+            if (T) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE3)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE3)
@@ -371,7 +371,7 @@ for (j in 1:length(data_path)) {
                 )
             }
 
-            if (T) {
+            if (F) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE3)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE3)

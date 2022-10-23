@@ -21,7 +21,7 @@ auc_from_ranks_TC_sign <- dget("SINCERITIES functions/auc_from_ranks_TC_sign.R")
 final_ranked_predictions <- dget("SINCERITIES functions/final_ranked_predictions.R")
 
 data_path <- c(
-  # "hESC",
+  "hESC",
   "hHep",
   "mDC",
   "mESC",
@@ -31,20 +31,20 @@ data_path <- c(
 )
 
 output <- "output_scRNA-Seq/"
-hnetwork_data_dir <- "scGRN-L0_data/BEELINE-Networks/Networks/human/"
-mnetwork_data_dir <- "scGRN-L0_data/BEELINE-Networks/Networks/mouse/"
-
+hnetwork_data_dir <- "../scGRN-L0_data/BEELINE-Networks/Networks/human/"
+mnetwork_data_dir <- "../scGRN-L0_data/BEELINE-Networks/Networks/mouse/"
+tfs <- read.csv("../scGRN-L0_data/BEELINE-Networks/human-tfs.csv")
+tfs <- tfs$TF
 evaluation_infromations_all <- c()
 for (j in 1:length(data_path)) {
-
   simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/scRNA-Seq/", data_path[j], "/")
-  
+
   simulation_data_file <- "ExpressionData.csv"
   simulation_PseudoTime_file <- "PseudoTime.csv"
 
   simulation_data <- read.csv(paste0(simulation_data_dir, simulation_data_file), row.names = 1)
-  head(simulation_data[1:3,1:3])
-  
+  head(simulation_data[1:3, 1:3])
+
   simulation_PseudoTime <- read.csv(paste0(simulation_data_dir, simulation_PseudoTime_file), row.names = 1)
   if (ncol(simulation_PseudoTime) > 1) {
     simulation_data_news <- c()
@@ -210,8 +210,38 @@ for (j in 1:length(data_path)) {
     GENIE3_AUPR <- calcAUPR(evaluationObject)
     GENIE3_AUROC
     GENIE3_AUPR
-
-    # AAA <- convertSortedRankTSVToAdjMatrix(paste0(output, "output_GENIE3.txt"))
+    library(GENIE3)
+    weightMat <- GENIE3(
+      exprMatrix = t(data_GENIE3),
+      regulators = intersect(tfs, rownames(t(data_GENIE3))),
+      nCores = 32
+    )
+    weightdf <- getLinkList(weightMat)
+    names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
+    write.table(weightdf, file = paste0("../output_GENIE32.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
+    if (data_path[j] %in% c("hESC", "hHep")) {
+      ground_truth_h(
+        intput = paste0("../output_GENIE32.txt"),
+        output = "../",
+        dataset_dir = hnetwork_data_dir,
+        database = "All"
+      )
+    } else {
+      ground_truth_m(
+        intput = paste0("../output_GENIE32.txt"),
+        output = "../",
+        dataset_dir = mnetwork_data_dir,
+        database = "All"
+      )
+    }
+    evaluationObject <- prepareEval(paste0("../output_GENIE32.txt"), # paste0(output, "output_GENIE32.txt")
+      paste0(paste0("../", "ground_truth.tsv")),
+      totalPredictionsAccepted = 100000
+    )
+    GENIE3_AUROC2 <- calcAUROC(evaluationObject)
+    GENIE3_AUPR2 <- calcAUPR(evaluationObject)
+    GENIE3_AUROC2
+    GENIE3_AUPR2
   }
 
   if (T) {

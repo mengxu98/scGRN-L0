@@ -26,7 +26,6 @@ data_path <- c(
   "mCAD",
   "VSC"
 )
-
 cell_drop <- c(
   "1", "1-50", "1-70",
   "2", "2-50", "2-70",
@@ -42,20 +41,11 @@ cell_drop <- c(
 output <- "output_Curated/"
 evaluation_infromations_all <- c()
 for (j in 1:length(data_path)) {
-  # evaluation_infromations2 <- c()
-  # for (k in 1:length(cell_num)) {
   evaluation_infromations <- c()
   for (i in 1:length(cell_drop)) {
-    # if (i == 1) {
-    #   message(paste0("----- Now run the GRN model with ", data_path[j], " dataset and drop-out of cell with 1", "! -----"))
-    #   simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Curated/", data_path[j], "/", data_path[j], "-2000-1", "/")
-    # } else {
-    #   message(paste0("----- Now run the GRN model with ", data_path[j], " dataset and drop-out of cell with ", cell_drop[i], "! -----"))
     simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Curated/", data_path[j], "/", data_path[j], "-2000-", cell_drop[i], "/")
-    # }
     simulation_data_file <- "ExpressionData.csv"
     simulation_PseudoTime_file <- "PseudoTime.csv"
-
     simulation_data <- read.csv(paste0(simulation_data_dir, simulation_data_file), row.names = 1)
     simulation_PseudoTime <- read.csv(paste0(simulation_data_dir, simulation_PseudoTime_file), row.names = 1)
     if (ncol(simulation_PseudoTime) > 1) {

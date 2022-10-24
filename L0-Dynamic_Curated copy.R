@@ -32,7 +32,7 @@ cell_drop <- c(
     "2", "2-50", "2-70",
     "3", "3-50", "3-70",
     "4", "4-50", "4-70",
-    "5", "5-50", "5-70",
+    # "5", "5-50", "5-70",
     "6", "6-50", "6-70",
     "7", "7-50", "7-70",
     "8", "8-50", "8-70",
@@ -41,7 +41,6 @@ cell_drop <- c(
 )
 output <- "output_Curated/"
 evaluation_infromations_all <- c()
-
 for (j in 1:length(data_path)) {
     evaluation_infromations <- c()
     for (i in 1:length(cell_drop)) {
@@ -140,6 +139,7 @@ for (j in 1:length(data_path)) {
                     )
                 )
             }
+
             FQnorm <- function(counts) {
                 rk <- apply(counts, 2, rank, ties.method = "min")
                 counts.sort <- apply(counts, 2, sort)

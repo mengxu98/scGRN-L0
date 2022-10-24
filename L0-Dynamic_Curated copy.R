@@ -62,15 +62,14 @@ for (j in 1:length(data_path)) {
             simulation_data_new <- cbind.data.frame(t(simulation_data), h = simulation_PseudoTime$PseudoTime) %>% na.omit()
             write.csv(simulation_data_new, paste0(simulation_data_dir, "ExpressionData_all", ".csv"), row.names = FALSE)
         }
-
+        data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_1.csv"),
+            header = T
+        )
+        data_GENIE3 <- data_GENIE3[order(data_GENIE3$h), ]
+        PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
+        data_GENIE31 <- data_GENIE3[, -ncol(data_GENIE3)] %>% as.matrix()
         if (T) {
-            data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_1.csv"),
-                header = T
-            )
-            data_GENIE3 <- data_GENIE3[order(data_GENIE3$h), ]
-            PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
-            data_GENIE31 <- data_GENIE3[, -ncol(data_GENIE3)] %>% as.matrix()
-            if (T) {
+            if (F) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE31)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE31)

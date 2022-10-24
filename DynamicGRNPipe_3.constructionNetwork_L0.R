@@ -134,19 +134,21 @@ L0REG <- function(matrix,
         # Set the ones that were zero to zero anyway
         wghts[zeros] <- 0
       }
-
-      # weightd <- data.frame(regulatoryGene = colnames(X), regulators[i], weight = wghts)
-      weightd <- data.frame(regulatoryGene = regulators[i], colnames(X), weight = wghts)
-      weightd$weight <- weightd$weight / max(weightd$weight)
+      if (sum(wghts) == 0 & length(wghts) != nrow(matrix)) {
+        weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = 0)
+      # weightd <- data.frame(regulatoryGene = regulators[i], targetGene= colnames(X), weight = wghts)
+      }else {
+        weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = wghts)
+      # weightd <- data.frame(regulatoryGene = regulators[i], targetGene= colnames(X), weight = wghts)
+      }
+      # weightd$weight <- weightd$weight / max(weightd$weight)
       weightdf <- rbind.data.frame(weightdf, weightd)
       if (i == length(regulators)) {
-        # weightdf$weight <- weightdf$weight / max(weightdf$weight)
-        names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
         weightdf <- weightdf[order(weightdf$weight, decreasing = TRUE), ]
       }
     }
   } else {
-    regulators = rownames(matrix)
+    regulators <- rownames(matrix)
     weightdf <- c()
     for (i in 1:length(regulators)) {
       Y <- matrix[, regulators[i]]

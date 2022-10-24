@@ -13,7 +13,7 @@ library("RColorBrewer")
 library("patchwork")
 source("framework_main.R")
 source("ground-truth.R")
-
+source("DynamicGRNPipe_3.constructionNetwork_L0.R")
 uploading <- dget("SINCERITIES functions/uploading.R")
 SINCERITITES <- dget("SINCERITIES functions/SINCERITIES.R")
 SINCERITITES_L0 <- dget("SINCERITIES functions/SINCERITIES_L0.R")
@@ -41,6 +41,7 @@ cell_drop <- c(
 )
 output <- "output_Curated/"
 evaluation_infromations_all <- c()
+
 for (j in 1:length(data_path)) {
     evaluation_infromations <- c()
     for (i in 1:length(cell_drop)) {
@@ -62,262 +63,6 @@ for (j in 1:length(data_path)) {
             write.csv(simulation_data_new, paste0(simulation_data_dir, "ExpressionData_all", ".csv"), row.names = FALSE)
         }
 
-        DATA <- uploading(paste0(simulation_data_dir, "ExpressionData_1", ".csv"))
-
-        # --------------------------------------------------
-        if (F) {
-            # result_L0 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 0, penalty = "L0L2", algorithm = "CD")
-            result_L0 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 1, SIGN = 0, penalty = "L0", algorithm = "CD")
-
-            # Final ranked list of regulatory edges
-            adj_matrix_L0 <- result_L0$adj_matrix / max(result_L0$adj_matrix)
-            table_L0 <- final_ranked_predictions(adj_matrix_L0, DATA$genes, SIGN = 1, saveFile = TRUE) %>% as.data.frame()
-            write.table(table_L0[, -4], paste0(output, "test_L0.txt"), row.names = F, col.names = F, sep = "\t", quote = F)
-            ground_truth_simulation(
-                intput = paste0(output, "test_L0.txt"),
-                output = output,
-                dataset_dir = simulation_data_dir,
-                file = "refNetwork.csv"
-            )
-            evaluationObject <- prepareEval(paste0(output, "test_L0.txt"),
-                paste0(paste0(output, "ground_truth.tsv")),
-                totalPredictionsAccepted = 100000
-            )
-            evaluationObject <- prepareEval(paste0(output, "ground_pred.txt"),
-                paste0(paste0(output, "ground_truth.tsv")),
-                totalPredictionsAccepted = 100000
-            )
-            AUROC_L0_N <- calcAUROC(evaluationObject)
-            AUPR_L0_N <- calcAUPR(evaluationObject)
-            truth_network <- convertSortedRankTSVToAdjMatrix(paste0(output, "ground_truth.tsv"))
-            AUCresult_L0 <- auc_from_ranks_TC_sign(adj_matrix_L0, truth_network, 1000)
-            AUROC_L0_S <- AUCresult_L0$AUROC
-            AUPR_L02_S <- AUCresult_L0$AUPR
-            AUROC_L0_N
-            AUROC_L0_S
-        }
-
-        if (F) {
-            result_L0L2 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 1, SIGN = 0, penalty = "L0L2", algorithm = "CD")
-            # Final ranked list of regulatory edges
-            adj_matrix_L0L2 <- result_L0L2$adj_matrix / max(result_L0L2$adj_matrix)
-            table_L0L2 <- final_ranked_predictions(adj_matrix_L0, DATA$genes, SIGN = 1, saveFile = TRUE) %>% as.data.frame()
-            write.table(table_L0L2[, -4], paste0(output, "test_L0L2.txt"), row.names = F, col.names = F, sep = "\t", quote = F)
-
-            ground_truth_simulation(
-                intput = paste0(output, "test_L0L2.txt"),
-                output = output,
-                dataset_dir = simulation_data_dir,
-                file = "refNetwork.csv"
-            )
-            evaluationObject <- prepareEval(paste0(output, "test_L0L2.txt"),
-                paste0(paste0(output, "ground_truth.tsv")),
-                totalPredictionsAccepted = 100000
-            )
-            evaluationObject <- prepareEval(paste0(output, "ground_pred.txt"),
-                paste0(paste0(output, "ground_truth.tsv")),
-                totalPredictionsAccepted = 100000
-            )
-            AUROC_L0L2_N <- calcAUROC(evaluationObject)
-            AUPR_L0L2_N <- calcAUPR(evaluationObject)
-            truth_network <- convertSortedRankTSVToAdjMatrix(paste0(output, "ground_truth.tsv"))
-            AUCresult_L0L2_S <- auc_from_ranks_TC_sign(adj_matrix_L0L2, truth_network, 1000)
-            AUROC_L0L2_S <- AUCresult_L0L2_S$AUROC
-            AUPR_L0L2_S <- AUCresult_L0L2_S$AUPR
-            AUROC_L0L2_N
-            AUROC_L0L2_S
-        }
-
-        # --------------------------------------------------
-        if (T) {
-            # result <- SINCERITITES(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 1)
-            result <- SINCERITITES(DATA, distance = 1, method = 1, noDIAG = 1, SIGN = 0)
-            # Final ranked list of regulatory edges
-            adj_matrix <- result$adj_matrix / max(result$adj_matrix)
-            if (adj_matrix[1, 1] == "NaN") {
-                SINCERITITES_AUROC_S <- NA
-                SINCERITITES_AUROC_N <- NA
-            } else {
-                table <- final_ranked_predictions(adj_matrix, DATA$genes, SIGN = 1, saveFile = TRUE)
-                table <- as.data.frame(table)
-                write.table(table[, -4], paste0(output, "test_SINCERITITES.txt"), row.names = F, col.names = F, sep = "\t", quote = F)
-
-                ground_truth_simulation(
-                    intput = paste0(output, "test_SINCERITITES.txt"),
-                    output = output,
-                    dataset_dir = simulation_data_dir,
-                    file = "refNetwork.csv"
-                )
-
-                evaluationObject <- prepareEval(paste0(output, "test_SINCERITITES.txt"),
-                    paste0(paste0(output, "ground_truth.tsv")),
-                    totalPredictionsAccepted = 100000
-                )
-                evaluationObject <- prepareEval(paste0(output, "ground_pred.txt"),
-                    paste0(paste0(output, "ground_truth.tsv")),
-                    totalPredictionsAccepted = 100000
-                )
-                SINCERITITES_AUROC_N <- calcAUROC(evaluationObject)
-                SINCERITITES_AUPR_N <- calcAUPR(evaluationObject)
-
-                adj_matrix <- na.omit(adj_matrix)
-                truth_network <- convertSortedRankTSVToAdjMatrix(paste0(output, "ground_truth.tsv"))
-                AUCresult_SINCERITITES <- auc_from_ranks_TC_sign(adj_matrix, truth_network, 1000)
-                SINCERITITES_AUROC_S <- AUCresult_SINCERITITES$AUROC
-                SINCERITITES_AUPR_S <- AUCresult_SINCERITITES$AUPR
-            }
-
-            SINCERITITES_AUROC_N
-            SINCERITITES_AUROC_S
-        }
-        # --------------------------------------------------
-        data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_1.csv"),
-            header = T
-        ) %>% as.matrix()
-        PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
-        data_GENIE3 <- data_GENIE3[, -ncol(data_GENIE3)]
-        if (T) {
-            # NIMEFI(data_GENIE3,
-            #     GENIE = T, SVM = F, EL = F, penalty = "L0",
-            #     outputFileName = paste0(output, "output_GENIE3"),
-            #     outputFileFormat = "txt",
-            #     SVMRankThreshold = 5, SVMEnsembleSize = 100,
-            #     ELPredSampleMin = 20, ELPredSampleMax = 80,
-            #     ELExpSampleMin = 20, ELExpSampleMax = 80,
-            #     ELRankThreshold = 5, ELEnsembleSize = 500
-            # )
-
-            # evaluationObject <- prepareEval(paste0(output, "output_GENIE3.txt"),
-            #     paste0(paste0(output, "ground_truth.tsv")),
-            #     totalPredictionsAccepted = 100000
-            # )
-
-            # GENIE3_AUROC_NIMEFI <- calcAUROC(evaluationObject)
-            # GENIE3_AUPR_NIMEFI <- calcAUPR(evaluationObject)
-
-            library(GENIE3)
-            weightMat <- GENIE3(
-                exprMatrix = t(data_GENIE3),
-                nCores = 32
-            )
-
-            AUCresult_GENIE3 <- auc_from_ranks_TC_sign(weightMat, truth_network, 1000)
-            GENIE3_AUROC_S <- AUCresult_GENIE3$AUROC
-            GENIE3_AUPR_S <- AUCresult_GENIE3$AUPR
-
-            weightdf <- getLinkList(weightMat)
-            # weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
-            names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
-            write.table(weightdf, file = paste0(output, "output_GENIE32.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
-            evaluationObject <- prepareEval(paste0(output, "output_GENIE32.txt"),
-                paste0(paste0(output, "ground_truth.tsv")),
-                totalPredictionsAccepted = 100000
-            )
-            GENIE3_AUROC <- calcAUROC(evaluationObject)
-            GENIE3_AUPR <- calcAUPR(evaluationObject)
-        }
-
-        if (F) {
-            NIMEFI(data_GENIE3,
-                GENIE = F, SVM = F, EL = T, penalty = "L0",
-                outputFileName = paste0(output, "output_NIMEFI_L0"),
-                outputFileFormat = "txt",
-                SVMRankThreshold = 5, SVMEnsembleSize = 100,
-                ELPredSampleMin = 20, ELPredSampleMax = 80,
-                ELExpSampleMin = 20, ELExpSampleMax = 80,
-                ELRankThreshold = 5, ELEnsembleSize = dim(data_GENIE3)[1]
-            )
-
-            evaluationObject <- prepareEval(paste0(output, "output_NIMEFI_L0.txt"),
-                paste0(output, "ground_truth.tsv"),
-                totalPredictionsAccepted = 100000
-            )
-
-            AUROC_NIMEFI_L0 <- calcAUROC(evaluationObject)
-            AUPR_NIMEFI_L0 <- calcAUPR(evaluationObject)
-
-            # --------------------------------------------------
-            NIMEFI(data_GENIE3,
-                GENIE = F, SVM = F, EL = T, penalty = "L0L2",
-                outputFileName = paste0(output, "output_NIMEFI_L0"),
-                outputFileFormat = "txt",
-                SVMRankThreshold = 5, SVMEnsembleSize = 100,
-                ELPredSampleMin = 20, ELPredSampleMax = 80,
-                ELExpSampleMin = 20, ELExpSampleMax = 80,
-                ELRankThreshold = 5, ELEnsembleSize = dim(data_GENIE3)[1]
-            )
-
-            evaluationObject <- prepareEval(paste0(output, "output_NIMEFI_L0.txt"),
-                paste0(paste0(output, "ground_truth.tsv")),
-                totalPredictionsAccepted = 100000
-            )
-
-            AUROC_NIMEFI_L0L2 <- calcAUROC(evaluationObject)
-            AUPR_NIMEFI_L0L2 <- calcAUPR(evaluationObject)
-
-            AUROC_NIMEFI_L0L2
-            AUROC_NIMEFI_L0
-        }
-
-        if (T) {
-            source("DynamicGRNPipe_3.constructionNetwork_L0.R")
-            L0REG_L0 <- L0REG(t(data_GENIE3),
-                regulators = colnames(data_GENIE3),
-                targets = colnames(data_GENIE3), penalty = "L0"
-            )
-            write.table(L0REG_L0,
-                paste0(output, "output_L0GRN.txt"),
-                sep = "\t",
-                quote = F,
-                row.names = F,
-                col.names = F
-            )
-            evaluationObject <- prepareEval(paste0(output, "output_L0GRN.txt"),
-                paste0(paste0(output, "ground_truth.tsv")),
-                totalPredictionsAccepted = 100000
-            )
-
-            AUROC_L0REG_L0_N <- calcAUROC(evaluationObject)
-            AUPR_L0REG_L0_N <- calcAUPR(evaluationObject)
-            AUROC_L0REG_L0_N
-
-            # L0REG_L0 <- L0REG(t(data_GENIE3),
-            #   regulators = colnames(data_GENIE3),
-            #   targets = colnames(data_GENIE3), penalty = "L0"
-            # )
-            # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0, truth_network, 1000)
-            # AUROC_L0REG_L0_S <- AUCresult_L0REG$AUROC
-            # AUROC_L0REG_L0_S
-            # --------------------------------------------------
-            L0REG_L0L2 <- L0REG(t(data_GENIE3),
-                regulators = colnames(data_GENIE3),
-                targets = colnames(data_GENIE3), penalty = "L0L2"
-            )
-            write.table(L0REG_L0L2,
-                paste0(output, "output_L0GRN.txt"),
-                sep = "\t",
-                quote = F,
-                row.names = F,
-                col.names = F
-            )
-            evaluationObject <- prepareEval(paste0(output, "output_L0GRN.txt"),
-                paste0(paste0(output, "ground_truth.tsv")),
-                totalPredictionsAccepted = 100000
-            )
-
-            AUROC_L0REG_L0L2_N <- calcAUROC(evaluationObject)
-            AUPR_L0REG_L0L2_N <- calcAUPR(evaluationObject)
-            AUROC_L0REG_L0L2_N
-
-            # L0REG_L0L2 <- L0REG(t(data_GENIE3),
-            #   # regulators = colnames(data_GENIE3),
-            #   targets = colnames(data_GENIE3), penalty = "L0L2"
-            # )
-            # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0L2, truth_network, 1000)
-            # AUROC_L0REG_L0L2_S <- AUCresult_L0REG$AUROC
-            # AUROC_L0REG_L0L2_S
-        }
-
         if (T) {
             data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_1.csv"),
                 header = T
@@ -329,14 +74,19 @@ for (j in 1:length(data_path)) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE31)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE31)
-                n = 10
+                n <- 1
                 for (t in 1:n) {
                     # s <- floor(nrow(data_GENIE31) * (t - 1) / 10) + 1
                     # e <- floor(nrow(data_GENIE31) * t / 10)
                     # data <- data_GENIE31[s:e, ]
                     # data <- data_GENIE31[which(data_GENIE3$h <= max(PseudoTime) / nrow(data_GENIE31) * 10 * t), ]
                     s <- which(data_GENIE3$h <= max(PseudoTime) / n * (t - 1))
-                    s <- s[length(s)]
+                    if (length(s) == 0) {
+                        s <- 1
+                    } else {
+                        s <- s[length(s)]
+                    }
+
                     e <- which(data_GENIE3$h <= max(PseudoTime) / n * t)
                     e <- e[length(e)]
                     data <- data_GENIE31[s:e, ]
@@ -359,13 +109,98 @@ for (j in 1:length(data_path)) {
                 }
                 L0REG_L0_adjs <- L0REG_L0_adjs / max(L0REG_L0_adjs)
 
-                AUCresult_L0REG_L0 <- auc_from_ranks_TC_sign(L0REG_L0_adjs, truth_network, 1000)
-                L0REG_L0Dynamic_AUROC_S <- AUCresult_L0REG_L0$AUROC
-                L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR
                 weightdf <- GENIE3::getLinkList(L0REG_L0_adjs)
                 # weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
                 names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
                 write.table(weightdf, file = paste0(output, "L0REG_L02.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
+                ground_truth_simulation(
+                    intput = paste0(output, "L0REG_L02.txt"),
+                    output = output,
+                    dataset_dir = simulation_data_dir,
+                    file = "refNetwork.csv"
+                )
+                evaluationObject <- prepareEval(paste0(output, "L0REG_L02.txt"),
+                    paste0(paste0(output, "ground_truth.tsv")),
+                    totalPredictionsAccepted = 100000
+                )
+                truth_network <- convertSortedRankTSVToAdjMatrix(paste0(output, "ground_truth.tsv"))
+                AUCresult_L0REG_L0 <- auc_from_ranks_TC_sign(L0REG_L0_adjs, truth_network, 1000)
+                L0REG_L0Dynamic_AUROC_S <- AUCresult_L0REG_L0$AUROC
+                L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR
+                evaluationObject <- prepareEval(paste0(output, "L0REG_L02.txt"),
+                    paste0(paste0(output, "ground_truth.tsv")),
+                    totalPredictionsAccepted = 100000
+                )
+                L0REG_L0Dynamic_AUROC <- calcAUROC(evaluationObject)
+                L0REG_L0Dynamic_AUPR <- calcAUPR(evaluationObject)
+                print(
+                    paste0(
+                        L0REG_L0Dynamic_AUROC,
+                        "---",
+                        L0REG_L0Dynamic_AUROC_S
+                    )
+                )
+            }
+            FQnorm <- function(counts) {
+                rk <- apply(counts, 2, rank, ties.method = "min")
+                counts.sort <- apply(counts, 2, sort)
+                refdist <- apply(counts.sort, 1, median)
+                norm <- apply(rk, 2, function(r) {
+                    refdist[r]
+                })
+                rownames(norm) <- rownames(counts)
+                return(norm)
+            }
+
+            # data_GENIE31 <- FQnorm(data_GENIE31)
+            if (T) {
+                L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
+                rownames(L0REG_L0_adjs) <- colnames(data_GENIE31)
+                colnames(L0REG_L0_adjs) <- colnames(data_GENIE31)
+                library(mclust, quietly = TRUE)
+                cl1 <- Mclust(data_GENIE31)$classification
+                head(cl1)
+                library(RColorBrewer)
+                plot(data_GENIE31, col = brewer.pal(9, "Set1")[cl1], pch = 16, asp = 1)
+                n <- length(table(cl1))
+                for (t in 1:n) {
+                    data <- data_GENIE31[which(cl1 == t), ]
+                    L0REG_L0_1 <- L0REG(t(data),
+                        regulators = colnames(data),
+                        targets = colnames(data),
+                        penalty = "L0"
+                    )
+                    # L0REG_L0_1$weight <- as.numeric(L0REG_L0_1$weight)
+                    # L0REG_L0_1 <- as.matrix(L0REG_L0_1)
+                    L0REG_L0_adj <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
+                    rownames(L0REG_L0_adj) <- colnames(data_GENIE31)
+                    colnames(L0REG_L0_adj) <- colnames(data_GENIE31)
+                    # L0REG_L0_adj[L0REG_L0_1[, 1:2]] <- L0REG_L0_1[, 3]
+                    for (g in 1:nrow(L0REG_L0_1)) {
+                        L0REG_L0_adj[L0REG_L0_1$regulatoryGene[g], L0REG_L0_1$targetGene[g]] <- L0REG_L0_1$weight[g]
+                    }
+                    L0REG_L0_adjs <- L0REG_L0_adjs + as.numeric(L0REG_L0_adj)
+                }
+                L0REG_L0_adjs <- L0REG_L0_adjs / max(L0REG_L0_adjs)
+
+                weightdf <- GENIE3::getLinkList(L0REG_L0_adjs)
+                # weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
+                names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
+                write.table(weightdf, file = paste0(output, "L0REG_L02.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
+                ground_truth_simulation(
+                    intput = paste0(output, "L0REG_L02.txt"),
+                    output = output,
+                    dataset_dir = simulation_data_dir,
+                    file = "refNetwork.csv"
+                )
+                evaluationObject <- prepareEval(paste0(output, "L0REG_L02.txt"),
+                    paste0(paste0(output, "ground_truth.tsv")),
+                    totalPredictionsAccepted = 100000
+                )
+                truth_network <- convertSortedRankTSVToAdjMatrix(paste0(output, "ground_truth.tsv"))
+                AUCresult_L0REG_L0 <- auc_from_ranks_TC_sign(L0REG_L0_adjs, truth_network, 1000)
+                L0REG_L0Dynamic_AUROC_S <- AUCresult_L0REG_L0$AUROC
+                L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR
                 evaluationObject <- prepareEval(paste0(output, "L0REG_L02.txt"),
                     paste0(paste0(output, "ground_truth.tsv")),
                     totalPredictionsAccepted = 100000
@@ -434,29 +269,16 @@ for (j in 1:length(data_path)) {
         # --------------------------------------------------
         evaluation_infromation <- data.frame(
             datasets = paste0(data_path[j], "-2000-", cell_drop[i]),
-            # AUROC_SINCERITITES_L0 = AUROC_L0_N,
-            # AUROC_SINCERITITES_L0_S = AUROC_L0_S,
-            # AUROC_SINCERITITES_L0L2 = AUROC_L0L2_N,
-            # AUROC_SINCERITITES_L0L2_S = AUROC_L0L2_S,
             AUROC_L0Dynamic = L0REG_L0Dynamic_AUROC,
-            # AUROC_L0Dynamic_S = L0REG_L0Dynamic_AUROC_S,
-            AUROC_L0REG_L0 = AUROC_L0REG_L0_N,
-            # AUROC_L0REG_L0_S = AUROC_L0REG_L0_S,
-            AUROC_L0REG_L0L2 = AUROC_L0REG_L0L2_N,
-            # AUROC_L0REG_L0L2_S = AUROC_L0REG_L0L2_S,
-            # AUROC_NIMEFI_L0L2 = AUROC_NIMEFI_L0L2,
-            # AUROC_NIMEFI_L0 = AUROC_NIMEFI_L0,
-            # AUROC_GENIE3_NIMEFI = GENIE3_AUROC_NIMEFI,
-            AUROC_GENIE3 = GENIE3_AUROC,
-            # AUROC_GENIE3_S = GENIE3_AUROC_S,
-            # AUROC_SINCERITITES_S = SINCERITITES_AUROC_S,
-            AUROC_SINCERITITES = SINCERITITES_AUROC_N
+            AUROC_L0Dynamic_S = L0REG_L0Dynamic_AUROC_S
         )
         message(paste0("----- ", evaluation_infromation, " -----"))
         print(evaluation_infromation)
         evaluation_infromations <- rbind.data.frame(evaluation_infromations, evaluation_infromation)
     }
     evaluation_infromations_all <- rbind.data.frame(evaluation_infromations_all, evaluation_infromations)
+    mean(evaluation_infromations_all$AUROC_L0Dynamic)
+    mean(evaluation_infromations_all$AUROC_L0Dynamic_S)
 }
 evaluation_infromations_all[evaluation_infromations_all == 0] <- NA
 na.omit(evaluation_infromations_all)

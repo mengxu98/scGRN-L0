@@ -1,26 +1,26 @@
 SourceGENES,TargetGENES,Interaction,Edges
-Coup,Emx2,1,activation
-Emx2,Coup,0.90439707437292,activation
-Fgf8,Pax6,0.240808123544526,activation
-Sp8,Fgf8,0.23080087686511,activation
-Pax6,Fgf8,0.157928602703942,activation
-Sp8,Pax6,0.135309830930668,activation
-Pax6,Sp8,0.119249918333544,activation
-Fgf8,Sp8,0.098690127973424,activation
-Pax6,Emx2,0.0679793360211877,activation
-Coup,Pax6,0.0526986592513075,activation
+Emx2,Coup,1,activation
+Coup,Emx2,0.571334081295381,activation
+Sp8,Fgf8,0.427655611630481,activation
+Fgf8,Pax6,0.354853008142842,activation
+Fgf8,Sp8,0.31941494370905,activation
+Coup,Pax6,0.283443586808612,activation
+Emx2,Fgf8,0.105699901678651,activation
+Pax6,Sp8,1.43076021730424e-37,activation
+Pax6,Coup,6.63497241464896e-39,activation
 Coup,Coup,0,no regulation
 Coup,Fgf8,0,no regulation
 Coup,Sp8,0,no regulation
 Emx2,Emx2,0,no regulation
-Emx2,Fgf8,0,no regulation
 Emx2,Pax6,0,no regulation
 Emx2,Sp8,0,no regulation
 Fgf8,Coup,0,no regulation
 Fgf8,Emx2,0,no regulation
 Fgf8,Fgf8,0,no regulation
-Pax6,Coup,0,no regulation
+Pax6,Emx2,0,no regulation
+Pax6,Fgf8,0,no regulation
 Pax6,Pax6,0,no regulation
 Sp8,Coup,0,no regulation
 Sp8,Emx2,0,no regulation
+Sp8,Pax6,0,no regulation
 Sp8,Sp8,0,no regulation

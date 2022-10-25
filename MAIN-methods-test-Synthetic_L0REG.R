@@ -185,7 +185,6 @@ for (j in 1:length(data_path)) {
           SINCERITITES_AUPR_S <- AUCresult_SINCERITITES$AUPR
         }
 
-
         SINCERITITES_AUROC_N
         SINCERITITES_AUROC_S
       }

@@ -13,7 +13,9 @@ library("RColorBrewer")
 library("patchwork")
 source("framework_main.R")
 source("ground-truth.R")
-source("DynamicGRNPipe_3.constructionNetwork_L0.R")
+source("Function-L0REG.R", chdir = TRUE)
+
+
 uploading <- dget("SINCERITIES functions/uploading.R")
 SINCERITITES <- dget("SINCERITIES functions/SINCERITIES.R")
 SINCERITITES_L0 <- dget("SINCERITIES functions/SINCERITIES_L0.R")
@@ -32,11 +34,11 @@ cell_drop <- c(
     "2", "2-50", "2-70",
     "3", "3-50", "3-70",
     "4", "4-50", "4-70",
-    "5", "5-50", #"5-70",
-    #"6", "6-50", "6-70",
+    "5", "5-50", "5-70",
+    "6", "6-50", "6-70",
     "7", "7-50", "7-70",
-    "8", "8-50", #"8-70",
-    #"9", "9-50", "9-70",
+    "8", "8-50", "8-70",
+    "9", "9-50", "9-70",
     "10", "10-50", "10-70"
 )
 output <- "output_Curated/"
@@ -140,17 +142,6 @@ for (j in 1:length(data_path)) {
                 )
             }
 
-            FQnorm <- function(counts) {
-                rk <- apply(counts, 2, rank, ties.method = "min")
-                counts.sort <- apply(counts, 2, sort)
-                refdist <- apply(counts.sort, 1, median)
-                norm <- apply(rk, 2, function(r) {
-                    refdist[r]
-                })
-                rownames(norm) <- rownames(counts)
-                return(norm)
-            }
-
             # data_GENIE31 <- FQnorm(data_GENIE31)
             if (F) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
@@ -158,9 +149,8 @@ for (j in 1:length(data_path)) {
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE31)
                 library(mclust, quietly = TRUE)
                 cl1 <- Mclust(data_GENIE31)$classification
-                head(cl1)
                 library(RColorBrewer)
-                plot(data_GENIE31, col = brewer.pal(9, "Set1")[cl1], pch = 16, asp = 1)
+                # plot(data_GENIE31, col = brewer.pal(9, "Set1")[cl1], pch = 16, asp = 1)
                 n <- length(table(cl1))
                 for (t in 1:n) {
                     data <- data_GENIE31[which(cl1 == t), ]

@@ -116,6 +116,18 @@ pc_num <- function(sce) {
   return(pcs)
 }
 
+# 使用分位数归一化的方法对表达数据进行归一化处理，它可以使每个细胞具有相同的表达值分布
+FQnorm <- function(counts) {
+  rk <- apply(counts, 2, rank, ties.method = "min")
+  counts.sort <- apply(counts, 2, sort)
+  refdist <- apply(counts.sort, 1, median)
+  norm <- apply(rk, 2, function(r) {
+    refdist[r]
+  })
+  rownames(norm) <- rownames(counts)
+  return(norm)
+}
+
 # Normalization for sample --------------------------------------------------
 normalize_data <- function(seu_obj, platform = NULL) {
   if (length(table(seu_obj$platform)) == 1) {

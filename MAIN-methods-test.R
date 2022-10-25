@@ -13,6 +13,7 @@ library("RColorBrewer")
 library("patchwork")
 source("framework_main.R")
 source("ground-truth.R")
+source('Function-L0REG.R', chdir = TRUE)
 
 uploading <- dget("SINCERITIES functions/uploading.R")
 SINCERITITES <- dget("SINCERITIES functions/SINCERITIES.R")

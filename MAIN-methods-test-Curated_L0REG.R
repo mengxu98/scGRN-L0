@@ -209,7 +209,7 @@ for (j in 1:length(data_path)) {
       )
       GENIE3_AUROC2 <- calcAUROC(evaluationObject)
       GENIE3_AUPR2 <- calcAUPR(evaluationObject)
-      GENIE3_AUROC
+      
       GENIE3_AUROC2
       GENIE3_AUROC_S
     }
@@ -290,9 +290,9 @@ for (j in 1:length(data_path)) {
       L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR
       L0REG_L0Dynamic_AUROC_S
       L0REG_L0Dynamic_AUPR_S
-      for (g in 1:nrow(L0REG_L0)) {
-        L0REG_L0_adj[L0REG_L0$regulatoryGene[g], L0REG_L0$targetGene[g]] <- L0REG_L0$weight[g]
-      }
+      # for (g in 1:nrow(L0REG_L0)) {
+      #   L0REG_L0_adj[L0REG_L0$regulatoryGene[g], L0REG_L0$targetGene[g]] <- L0REG_L0$weight[g]
+      # }
       # L0REG_L0 <- L0REG(t(data_GENIE3),
       #   regulators = colnames(data_GENIE3),
       #   targets = colnames(data_GENIE3), penalty = "L0"
@@ -348,9 +348,9 @@ for (j in 1:length(data_path)) {
       AUROC_SINCERITITES = SINCERITITES_AUROC_N # ,
       # AUROC_SINCERITITES_S = SINCERITITES_AUROC_S
     )
-
-    message(paste0("----- ", evaluation_infromation, " -----"))
+    # message(paste0("----- ", evaluation_infromation, " -----"))
     evaluation_infromations <- rbind.data.frame(evaluation_infromations, evaluation_infromation)
+    print(evaluation_infromations)
   }
   evaluation_infromations_all <- rbind.data.frame(evaluation_infromations_all, evaluation_infromations)
 }

@@ -59,7 +59,7 @@ for (c in 1:length(celltypes)) {
 
 DATA <- uploading(paste0(simulation_data_dir, "ExpressionData_", celltype, ".csv"))
 # --------------------------------------------------
-if (T) {
+if (F) {
   # result_L0 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 0, penalty = "L0L2", algorithm = "CD")
   result_L0 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 1, SIGN = 0, penalty = "L0", algorithm = "CD")
   result_L0 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 1, SIGN = 0, penalty = "L0L2", algorithm = "CD")
@@ -113,7 +113,7 @@ if (T) {
   GENIE3_AUROC_S
 }
 
-if (T) {
+if (F) {
   NIMEFI(data_GENIE3,
     GENIE = F, SVM = F, EL = T, penalty = "L0",
     outputFileName = paste0(output, "output_NIMEFI_L0"),
@@ -161,6 +161,16 @@ if (T) {
     regulators = colnames(data_GENIE3),
     targets = colnames(data_GENIE3), penalty = "L0"
   )
+
+L0REG_L0_adj <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
+                    rownames(L0REG_L0_adj) <- colnames(data_GENIE3)
+                    colnames(L0REG_L0_adj) <- colnames(data_GENIE3)
+                    # L0REG_L0_adj[L0REG_L0_1[, 1:2]] <- L0REG_L0_1[, 3]
+                    for (g in 1:nrow(L0REG_L0)) {
+                        L0REG_L0_adj[L0REG_L0$regulatoryGene[g], L0REG_L0$targetGene[g]] <- L0REG_L0$weight[g]
+                    }
+
+
   write.table(L0REG_L0,
     paste0(output, "output_L0GRN.txt"),
     sep = "\t",
@@ -168,8 +178,14 @@ if (T) {
     row.names = F,
     col.names = F
   )
+  ground_truth_simulation(
+                    intput = paste0(output, "output_L0GRN.txt"),
+                    output = output,
+                    dataset_dir = simulation_data_dir,
+                    file = "refNetwork.csv"
+                )
   evaluationObject <- prepareEval(paste0(output, "output_L0GRN.txt"),
-    paste0(paste0(output, "ground_truth.tsv")),
+    paste0(paste0("../scGRN-L0_data/mESC/", "ground_truth.tsv")),
     totalPredictionsAccepted = 100000
   )
 
@@ -181,7 +197,7 @@ if (T) {
     # regulators = colnames(data_GENIE3),
     targets = colnames(data_GENIE3), penalty = "L0"
   )
-  AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0, truth_network, 1000)
+  AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0_adj, truth_network, 100000)
   AUROC_L0REG_L0_S <- AUCresult_L0REG$AUROC
   AUROC_L0REG_L0_S
   # --------------------------------------------------

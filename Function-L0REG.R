@@ -1,10 +1,40 @@
 
 
+LO_fit <- function(X, Y,
+                   penalty = penalty,
+                   nFolds = 10, seed = 1,
+                   maxSuppSize = 20,
+                   nGamma = 5,
+                   gammaMin = 0.0001, gammaMax = 10) {
+  fit <- L0Learn.cvfit(X, Y,
+    penalty = penalty,
+    nFolds = 10, seed = 1,
+    maxSuppSize = 20,
+    nGamma = 5,
+    gammaMin = 0.0001, gammaMax = 10
+  )
+  fit_inf <- print(fit)
+  optimalGammaIndex <- which(unlist(lapply(fit$cvMeans, min)) == min(unlist(lapply(fit$cvMeans, min))))
+  gamma <- fit$fit$gamma[optimalGammaIndex]
+  lambda_list <- fit_inf[which(fit_inf$gamma == gamma), ]
+
+  if (is.null(maxSuppSize)) {
+    lambda <- min(lambda_list$lambda)
+  } else {
+    if (maxSuppSize %in% lambda_list$maxSuppSize) {
+      lambda <- lambda_list$maxSuppSize[which(lambda_list$maxSuppSize == maxSuppSize)]
+    } else {
+      lambda <- min(lambda_list$lambda)
+    }
+  }
+  temp <- coef(fit, lambda = lambda, gamma = gamma)
+}
+
 L0REG <- function(matrix,
                   targets = rownames(matrix),
                   penalty = penalty,
                   regulators = NULL,
-                  suppSize=NULL) {
+                  maxSuppSize = NULL) {
   library(L0Learn)
   matrix <- as.data.frame(t(matrix))
   if (!is.null(regulators)) {
@@ -13,28 +43,13 @@ L0REG <- function(matrix,
       X <- as.matrix(matrix[, -which(colnames(matrix) == regulators[i])])
       Y <- matrix[, regulators[i]]
       if (T) {
-        fit <- L0Learn.cvfit(X, Y,
+        temp <- LO_fit(X, Y,
           penalty = penalty,
-          nFolds = 10, seed = 1, 
-          maxSuppSize = 20, 
+          nFolds = 10, seed = 1,
+          maxSuppSize = 20,
           nGamma = 5,
           gammaMin = 0.0001, gammaMax = 10
         )
-        fit_inf <- print(fit)
-        optimalGammaIndex <- which(unlist(lapply(fit$cvMeans, min)) == min(unlist(lapply(fit$cvMeans, min))))
-        gamma <- fit$fit$gamma[optimalGammaIndex]
-        lambda_list <- fit_inf[which(fit_inf$gamma == gamma), ]
-
-        if (is.null(suppSize)) {
-          lambda <- min(lambda_list$lambda)
-        } else {
-          if (suppSize %in% lambda_list$suppSize) {
-            lambda <- lambda_list$suppSize[which(lambda_list$suppSize == suppSize)]
-          } else {
-            lambda <- min(lambda_list$lambda)
-          }
-        }
-        temp <- coef(fit, lambda = lambda, gamma = gamma)
       } else {
         L0_Model <- L0Learn.fit(X, Y,
           penalty = penalty,
@@ -42,7 +57,7 @@ L0REG <- function(matrix,
         )
 
         L0_Model_Information <- as.data.frame(print(L0_Model))
-        L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$suppSize, decreasing = TRUE), ]
+        L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$maxSuppSize, decreasing = TRUE), ]
         lambda_L0 <- L0_Model_Information$lambda[1]
         gamma_L0 <- L0_Model_Information$gamma[1]
         # lambda_L0 <- L0_Model_Information$lambda[ceiling(nrow(L0_Model_Information))]
@@ -73,11 +88,11 @@ L0REG <- function(matrix,
         wghts[zeros] <- 0
       }
       if (sum(wghts) == 0 & length(wghts) != nrow(matrix)) {
-        # weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = 0)
-        weightd <- data.frame(regulatoryGene = regulators[i], targetGene = colnames(X), weight = 0)
+        weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = 0)
+        # weightd <- data.frame(regulatoryGene = regulators[i], targetGene = colnames(X), weight = 0)
       } else {
-        # weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = wghts)
-        weightd <- data.frame(regulatoryGene = regulators[i], targetGene = colnames(X), weight = wghts)
+        weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = wghts)
+        # weightd <- data.frame(regulatoryGene = regulators[i], targetGene = colnames(X), weight = wghts)
       }
       # weightd$weight <- weightd$weight / max(weightd$weight)
       weightdf <- rbind.data.frame(weightdf, weightd)
@@ -97,7 +112,7 @@ L0REG <- function(matrix,
       )
 
       L0_Model_Information <- as.data.frame(print(L0_Model))
-      L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$suppSize, decreasing = TRUE), ]
+      L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$maxSuppSize, decreasing = TRUE), ]
       lambda_L0 <- L0_Model_Information$lambda[1]
       gamma_L0 <- L0_Model_Information$gamma[1]
       # lambda_L0 <- L0_Model_Information$lambda[ceiling(nrow(L0_Model_Information))]
@@ -149,7 +164,7 @@ L0REG <- function(matrix,
           maxSuppSize = dim(matrix)[2]
         )
         L0_Model_Information <- as.data.frame(print(L0_Model))
-        L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$suppSize, decreasing = TRUE), ]
+        L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$maxSuppSize, decreasing = TRUE), ]
         lambda_L0 <- L0_Model_Information$lambda[1]
         gamma_L0 <- L0_Model_Information$gamma[1]
         temp <- coef(L0_Model,

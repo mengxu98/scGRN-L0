@@ -34,7 +34,6 @@ ElVariableEnsembleSolve <- function(expressionMatrix,
                                     trace = TRUE,
                                     traceDetail = FALSE,
                                     ...) {
-
   # Check input
   if ((minSampleSize <= 0 || maxSampleSize > dim(expressionMatrix)[1] || maxSampleSize < minSampleSize)) {
     stop("Please specify a valid sample sample size minimum and maximum.")
@@ -47,7 +46,6 @@ ElVariableEnsembleSolve <- function(expressionMatrix,
 
   # Take a sample this many times
   for (i in 1:ensembleSize) {
-
     # sampling
     if (minSampleSize == maxSampleSize) {
       sampleSize <- minSampleSize
@@ -104,8 +102,6 @@ elasticNetRankedSolve <- function(expressionMatrix,
                                   predictorSampleSizeMax,
                                   penalty = "L0",
                                   ...) {
-
-
   # Check arguments
   if ((predictorSampleSizeMin <= 0 || predictorSampleSizeMax >= length(predictorIndices) || predictorSampleSizeMin > predictorSampleSizeMax)) {
     stop("Please specify a valid predictor sample size minimum and maximum (between 1 inclusive and the length of the predictorIndices exclusive).")
@@ -175,24 +171,34 @@ elasticNetRankedSolve <- function(expressionMatrix,
       #                         target,
       #                         penalty = penalty,
       #                         maxSuppSize = ncol(predictorsWithoutTarget))
-      L0_Model <- L0Learn.fit(predictorsWithoutTarget,
-        target,
+      # L0_Model <- L0Learn.fit(predictorsWithoutTarget,
+      #   target,
+      #   penalty = penalty,
+      #   maxSuppSize = ncol(predictorsWithoutTarget)
+      # )
+      # L0_Model_Information <- as.data.frame(print(L0_Model))
+      # L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$suppSize, decreasing = TRUE), ]
+      # lambda_L0 <- L0_Model_Information$lambda[1]
+      # gamma_L0 <- L0_Model_Information$gamma[1]
+      # temp <- coef(L0_Model,
+      #   lambda = lambda_L0,
+      #   gamma = gamma_L0
+      # )
+      
+      source("Function-L0REG.R")
+      temp <- LO_fit(predictorsWithoutTarget, target,
         penalty = penalty,
-        maxSuppSize = ncol(predictorsWithoutTarget)
+        nFolds = 10, seed = 1,
+        maxSuppSize = 20,
+        nGamma = 5,
+        gammaMin = 0.0001, gammaMax = 10
       )
-      L0_Model_Information <- as.data.frame(print(L0_Model))
-      L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$suppSize, decreasing = TRUE), ]
-      lambda_L0 <- L0_Model_Information$lambda[1]
-      gamma_L0 <- L0_Model_Information$gamma[1]
-      temp <- coef(L0_Model,
-        lambda = lambda_L0,
-        gamma = gamma_L0
-      )
+
       temp <- as.vector(temp)
       wghts <- temp[-1]
     }
 
-    if (T) {
+    if (F) {
       wghts <- abs(wghts)
     } else {
       wghts <- abs(wghts)

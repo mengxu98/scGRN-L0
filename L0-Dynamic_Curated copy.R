@@ -147,17 +147,28 @@ for (j in 1:length(data_path)) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE31)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE31)
+
                 library(mclust, quietly = TRUE)
                 cl1 <- Mclust(data_GENIE31)$classification
                 library(RColorBrewer)
                 # plot(data_GENIE31, col = brewer.pal(9, "Set1")[cl1], pch = 16, asp = 1)
                 n <- length(table(cl1))
+
+                # library(NMF)
+                # seed <- "20210101"
+                # data_nmf <- log(t(data_GENIE31) + 1, 10)
+                # gene_no <- ncol(data_GENIE31)
+                # mads <- apply(data_nmf, 1, mad)
+                # data_nmf <- data_nmf[rev(order(mads)), ]
+                # dataset <- data_nmf[1:gene_no, ]
+                # res <- nmf(dataset, 2:6, nrun = 50, seed = seed)
+                # plot(res)
                 for (t in 1:n) {
                     data <- data_GENIE31[which(cl1 == t), ]
                     L0REG_L0_1 <- L0REG(t(data),
                         regulators = colnames(data),
                         targets = colnames(data),
-                        penalty = "L0"
+                        penalty = "L0L2"
                     )
                     # L0REG_L0_1$weight <- as.numeric(L0REG_L0_1$weight)
                     # L0REG_L0_1 <- as.matrix(L0REG_L0_1)
@@ -170,7 +181,7 @@ for (j in 1:length(data_path)) {
                     }
                     L0REG_L0_adjs <- L0REG_L0_adjs + as.numeric(L0REG_L0_adj)
                 }
-                L0REG_L0_adjs <- L0REG_L0_adjs / max(L0REG_L0_adjs)
+                # L0REG_L0_adjs <- L0REG_L0_adjs / max(L0REG_L0_adjs)
 
                 weightdf <- GENIE3::getLinkList(L0REG_L0_adjs)
                 # weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
@@ -230,7 +241,7 @@ for (j in 1:length(data_path)) {
                     L0REG_L0_adj[L0REG_L0_1[, 1:2]] <- L0REG_L0_1[, 3]
                     L0REG_L0_adjs <- L0REG_L0_adjs + as.numeric(L0REG_L0_adj)
                 }
-                L0REG_L0_adjs <- L0REG_L0_adjs / max(L0REG_L0_adjs)
+                # L0REG_L0_adjs <- L0REG_L0_adjs / max(L0REG_L0_adjs)
                 AUCresult_L0REG_L0 <- auc_from_ranks_TC_sign(L0REG_L0_adjs, truth_network, 1000)
                 L0REG_L0Dynamic_AUROC_S <- AUCresult_L0REG_L0$AUROC
                 L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR

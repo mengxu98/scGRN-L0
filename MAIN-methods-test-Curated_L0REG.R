@@ -166,12 +166,13 @@ for (j in 1:length(data_path)) {
       SINCERITITES_AUROC_S
     }
     # --------------------------------------------------
-    if (T) {
-      data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_all.csv"),
-        header = T
-      ) %>% as.matrix()
-      PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
-      data_GENIE3 <- data_GENIE3[, -ncol(data_GENIE3)]
+
+    data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_all.csv"),
+      header = T
+    ) %>% as.matrix()
+    PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
+    data_GENIE3 <- data_GENIE3[, -ncol(data_GENIE3)]
+    if (F) {
       NIMEFI(data_GENIE3,
         GENIE = T, SVM = F, EL = F, penalty = "L0",
         outputFileName = paste0(output, "output_GENIE3"),
@@ -189,6 +190,8 @@ for (j in 1:length(data_path)) {
       GENIE3_AUPR <- calcAUPR(evaluationObject)
       GENIE3_AUROC
       GENIE3_AUPR
+    }
+    if (T) {
       library(GENIE3)
       weightMat <- GENIE3(
         exprMatrix = t(data_GENIE3),
@@ -211,7 +214,7 @@ for (j in 1:length(data_path)) {
       GENIE3_AUROC_S
     }
 
-    if (T) {
+    if (F) {
       NIMEFI(data_GENIE3,
         GENIE = F, SVM = F, EL = T, penalty = "L0",
         outputFileName = paste0(output, "output_NIMEFI_L0"),
@@ -287,8 +290,8 @@ for (j in 1:length(data_path)) {
       L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR
       L0REG_L0Dynamic_AUROC_S
       L0REG_L0Dynamic_AUPR_S
-      for(g in 1:nrow(L0REG_L0)){
-        L0REG_L0_adj[L0REG_L0$regulatoryGene[g],L0REG_L0$targetGene[g]] <- L0REG_L0$weight[g]
+      for (g in 1:nrow(L0REG_L0)) {
+        L0REG_L0_adj[L0REG_L0$regulatoryGene[g], L0REG_L0$targetGene[g]] <- L0REG_L0$weight[g]
       }
       # L0REG_L0 <- L0REG(t(data_GENIE3),
       #   regulators = colnames(data_GENIE3),
@@ -334,13 +337,13 @@ for (j in 1:length(data_path)) {
       # AUROC_SINCERITITES_L0_S = AUROC_L0_S,
       # AUROC_SINCERITITES_L0L2 = AUROC_L0L2_N,
       # AUROC_SINCERITITES_L0L2_S = AUROC_L0L2_S,
-      AUROC_L0REG_L0_N = AUROC_L0REG_L0_N,
+      AUROC_L0REG_L0 = AUROC_L0REG_L0_N,
       # AUROC_L0REG_L0_S = AUROC_L0REG_L0_S,
-      AUROC_L0REG_L0L2_N = AUROC_L0REG_L0L2_N,
+      AUROC_L0REG_L0L2 = AUROC_L0REG_L0L2_N,
       # AUROC_L0REG_L0L2_S = AUROC_L0REG_L0L2_S,
-      AUROC_NIMEFI_L0L2 = AUROC_NIMEFI_L0L2,
-      AUROC_NIMEFI_L0 = AUROC_NIMEFI_L0,
-      AUROC_GENIE3 = GENIE3_AUROC,
+      # AUROC_NIMEFI_L0L2 = AUROC_NIMEFI_L0L2,
+      # AUROC_NIMEFI_L0 = AUROC_NIMEFI_L0,
+      # AUROC_GENIE3 = GENIE3_AUROC,
       AUROC2_GENIE3 = GENIE3_AUROC2,
       AUROC_SINCERITITES = SINCERITITES_AUROC_N # ,
       # AUROC_SINCERITITES_S = SINCERITITES_AUROC_S

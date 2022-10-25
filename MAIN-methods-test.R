@@ -13,7 +13,7 @@ library("RColorBrewer")
 library("patchwork")
 source("framework_main.R")
 source("ground-truth.R")
-source('Function-L0REG.R', chdir = TRUE)
+source("Function-L0REG.R", chdir = TRUE)
 
 uploading <- dget("SINCERITIES functions/uploading.R")
 SINCERITITES <- dget("SINCERITIES functions/SINCERITIES.R")
@@ -36,42 +36,20 @@ simulation_PseudoTime <- read.table(paste0(simulation_data_dir, simulation_Pseud
 simulation_celltype <- read.csv(paste0(simulation_data_dir, simulation_data_celltype), row.names = 1)
 truth_network <- read.csv("../scGRN-L0_data/mESC/GRN.csv", row.names = 1)
 truth_network_list <- GENIE3::getLinkList(as.matrix(truth_network))
-for (i in 1:nrow(truth_network_list)) {
-  if (truth_network_list$regulatoryGene[i] == truth_network_list$targetGene[i]) {
-    print(1)
-  }
-}
-apply(truth_network_list,1,function(x){
-  if (truth_network_list$regulatoryGene[i] == truth_network_list$targetGene[i]) {
-    print(1)
-  }
-})
 write.table(truth_network_list, "../scGRN-L0_data/mESC/ground_truth.tsv", quote = FALSE, row.names = FALSE, col.names = FALSE, sep = "\t")
-simulation_data <- cbind(simulation_data, celltype = simulation_celltype$label)
 simulation_data <- cbind(simulation_data, h = simulation_PseudoTime$V2)
+write.csv(simulation_data, paste0(simulation_data_dir, "ExpressionData_all", ".csv"), row.names = FALSE)
+simulation_data <- cbind(simulation_data, celltype = simulation_celltype$label)
 celltypes <- unique(simulation_celltype$label)
 for (c in 1:length(celltypes)) {
   celltype <- celltypes[c]
   simulation_data_new <- simulation_data[which(simulation_data$celltype == celltype), ]
-  simulation_data_new <- simulation_data_new[, -(ncol(simulation_data_new) - 1)]
+  simulation_data_new <- simulation_data_new[, -(ncol(simulation_data_new))]
   write.csv(simulation_data_new, paste0(simulation_data_dir, "ExpressionData_", celltype, ".csv"), row.names = FALSE)
 }
 
 DATA <- uploading(paste0(simulation_data_dir, "ExpressionData_", celltype, ".csv"))
-# --------------------------------------------------
-if (F) {
-  # result_L0 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 0, penalty = "L0L2", algorithm = "CD")
-  result_L0 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 1, SIGN = 0, penalty = "L0", algorithm = "CD")
-  result_L0 <- SINCERITITES_L0(DATA, distance = 1, method = 1, noDIAG = 1, SIGN = 0, penalty = "L0L2", algorithm = "CD")
-  adj_matrix_L0 <- result_L0$adj_matrix / max(result_L0$adj_matrix)
-  table_L0 <- final_ranked_predictions(adj_matrix_L0, DATA$genes, SIGN = 1, saveFile = TRUE) %>% as.data.frame()
-  # write.table(table_L0[, -4], paste0(output, "test_L0.txt"), row.names = F, col.names = F, sep = "\t", quote = F)
-  AUCresult_L0 <- auc_from_ranks_TC_sign(adj_matrix_L0, truth_network, 10000)
-  AUROC_L0_S <- AUCresult_L0$AUROC
-  AUPR_L0_S <- AUCresult_L0$AUPR
-  AUROC_L0_S
-  AUPR_L0_S
-}
+DATA <- uploading(paste0(simulation_data_dir, "ExpressionData_all", ".csv"))
 # --------------------------------------------------
 if (T) {
   # result <- SINCERITITES(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 1)
@@ -85,7 +63,7 @@ if (T) {
 }
 # --------------------------------------------------
 if (T) {
-  data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_", celltype, ".csv"),
+  data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_all", ".csv"),
     header = T
   ) %>% as.matrix()
   PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
@@ -162,13 +140,13 @@ if (T) {
     targets = colnames(data_GENIE3), penalty = "L0"
   )
 
-L0REG_L0_adj <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
-                    rownames(L0REG_L0_adj) <- colnames(data_GENIE3)
-                    colnames(L0REG_L0_adj) <- colnames(data_GENIE3)
-                    # L0REG_L0_adj[L0REG_L0_1[, 1:2]] <- L0REG_L0_1[, 3]
-                    for (g in 1:nrow(L0REG_L0)) {
-                        L0REG_L0_adj[L0REG_L0$regulatoryGene[g], L0REG_L0$targetGene[g]] <- L0REG_L0$weight[g]
-                    }
+  L0REG_L0_adj <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
+  rownames(L0REG_L0_adj) <- colnames(data_GENIE3)
+  colnames(L0REG_L0_adj) <- colnames(data_GENIE3)
+  # L0REG_L0_adj[L0REG_L0_1[, 1:2]] <- L0REG_L0_1[, 3]
+  for (g in 1:nrow(L0REG_L0)) {
+    L0REG_L0_adj[L0REG_L0$regulatoryGene[g], L0REG_L0$targetGene[g]] <- L0REG_L0$weight[g]
+  }
 
 
   write.table(L0REG_L0,
@@ -179,11 +157,11 @@ L0REG_L0_adj <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
     col.names = F
   )
   ground_truth_simulation(
-                    intput = paste0(output, "output_L0GRN.txt"),
-                    output = output,
-                    dataset_dir = simulation_data_dir,
-                    file = "refNetwork.csv"
-                )
+    intput = paste0(output, "output_L0GRN.txt"),
+    output = output,
+    dataset_dir = simulation_data_dir,
+    file = "refNetwork.csv"
+  )
   evaluationObject <- prepareEval(paste0(output, "output_L0GRN.txt"),
     paste0(paste0("../scGRN-L0_data/mESC/", "ground_truth.tsv")),
     totalPredictionsAccepted = 100000
@@ -197,7 +175,7 @@ L0REG_L0_adj <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
     # regulators = colnames(data_GENIE3),
     targets = colnames(data_GENIE3), penalty = "L0"
   )
-  AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0_adj, truth_network, 100000)
+  AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0_adj, truth_network, 1000)
   AUROC_L0REG_L0_S <- AUCresult_L0REG$AUROC
   AUROC_L0REG_L0_S
   # --------------------------------------------------
@@ -205,27 +183,14 @@ L0REG_L0_adj <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
     regulators = colnames(data_GENIE3),
     targets = colnames(data_GENIE3), penalty = "L0L2"
   )
-  write.table(L0REG_L0L2,
-    paste0(output, "output_L0GRN.txt"),
-    sep = "\t",
-    quote = F,
-    row.names = F,
-    col.names = F
-  )
-  evaluationObject <- prepareEval(paste0(output, "output_L0GRN.txt"),
-    paste0(paste0(output, "ground_truth.tsv")),
-    totalPredictionsAccepted = 100000
-  )
-
-  AUROC_L0REG_L0L2_N <- calcAUROC(evaluationObject)
-  AUPR_L0REG_L0L2_N <- calcAUPR(evaluationObject)
-  AUROC_L0REG_L0L2_N
-
-  L0REG_L0L2 <- L0REG(t(data_GENIE3),
-    # regulators = colnames(data_GENIE3),
-    targets = colnames(data_GENIE3), penalty = "L0L2"
-  )
-  AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0L2, truth_network, 1000)
+  L0REG_L0_adj_L0L2 <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
+  rownames(L0REG_L0_adj_L0L2) <- colnames(data_GENIE3)
+  colnames(L0REG_L0_adj_L0L2) <- colnames(data_GENIE3)
+  # L0REG_L0_adj[L0REG_L0_1[, 1:2]] <- L0REG_L0_1[, 3]
+  for (g in 1:nrow(L0REG_L0)) {
+    L0REG_L0_adj_L0L2[L0REG_L0L2$regulatoryGene[g], L0REG_L0L2$targetGene[g]] <- L0REG_L0L2$weight[g]
+  }
+  AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0_adj_L0L2, truth_network, 1000)
   AUROC_L0REG_L0L2_S <- AUCresult_L0REG$AUROC
   AUROC_L0REG_L0L2_S
 }

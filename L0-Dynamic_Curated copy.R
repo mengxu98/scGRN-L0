@@ -68,7 +68,7 @@ for (j in 1:length(data_path)) {
         PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
         data_GENIE31 <- data_GENIE3[, -ncol(data_GENIE3)] %>% as.matrix()
         if (T) {
-            if (F) {
+            if (T) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE31)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE31)
@@ -92,7 +92,7 @@ for (j in 1:length(data_path)) {
                     L0REG_L0_1 <- L0REG(t(data),
                         regulators = colnames(data),
                         targets = colnames(data),
-                        penalty = "L0"
+                        penalty = "L0L2"
                     )
                     # L0REG_L0_1$weight <- as.numeric(L0REG_L0_1$weight)
                     # L0REG_L0_1 <- as.matrix(L0REG_L0_1)
@@ -152,7 +152,7 @@ for (j in 1:length(data_path)) {
             }
 
             # data_GENIE31 <- FQnorm(data_GENIE31)
-            if (T) {
+            if (F) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE31)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE31)

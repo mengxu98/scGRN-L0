@@ -324,7 +324,6 @@ for (j in 1:length(data_path)) {
         PPCOR = AUROC_PPCOR,
         LEAP = AUROC_LEAP
       )
-      # message(paste0("----- ", evaluation_infromation, " -----"))
       evaluation_infromations <- rbind.data.frame(evaluation_infromations, evaluation_infromation)
       print(evaluation_infromations)
     }

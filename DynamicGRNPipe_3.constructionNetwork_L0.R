@@ -44,6 +44,7 @@ DynNet_L0 <- function(Windows, CD8TCellExp.trajectory, DynamicGene, allTFs, dete
     return(windExp)
   })
 
+  source("Function-L0REG.R", chdir = TRUE)
   # 2. run L0-Dynamic
   weightofWindows <- lapply(ExpofWindows, function(matrix) {
     if (T) {
@@ -88,8 +89,6 @@ DynNet_L0 <- function(Windows, CD8TCellExp.trajectory, DynamicGene, allTFs, dete
 
   return(weightofWindows)
 }
-
-source('Function-L0REG.R', chdir = TRUE)
 
 # Prune weak edges
 #' @param Windows list,cells in each window

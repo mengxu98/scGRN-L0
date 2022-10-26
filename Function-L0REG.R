@@ -9,7 +9,7 @@ LO_fit <- function(X, Y,
   fit <- L0Learn.cvfit(X, Y,
     penalty = penalty,
     nFolds = 10, seed = 1,
-    maxSuppSize = 20,
+    maxSuppSize = dim(matrix)[2],
     nGamma = 5,
     gammaMin = 0.0001, gammaMax = 10
   )
@@ -17,7 +17,6 @@ LO_fit <- function(X, Y,
   optimalGammaIndex <- which(unlist(lapply(fit$cvMeans, min)) == min(unlist(lapply(fit$cvMeans, min))))
   gamma <- fit$fit$gamma[optimalGammaIndex]
   lambda_list <- fit_inf[which(fit_inf$gamma == gamma), ]
-
   if (is.null(maxSuppSize)) {
     lambda <- min(lambda_list$lambda)
   } else {
@@ -34,7 +33,7 @@ L0REG <- function(matrix,
                   targets = rownames(matrix),
                   penalty = penalty,
                   regulators = NULL,
-                  maxSuppSize = NULL) {
+                  maxSuppSize = dim(matrix)[2]) {
   library(L0Learn)
   matrix <- as.data.frame(t(matrix))
   if (!is.null(regulators)) {
@@ -42,33 +41,33 @@ L0REG <- function(matrix,
     for (i in 1:length(regulators)) {
       X <- as.matrix(matrix[, -which(colnames(matrix) == regulators[i])])
       Y <- matrix[, regulators[i]]
-      if (T) {
-        temp <- LO_fit(X, Y,
-          penalty = penalty,
-          nFolds = 10, seed = 1,
-          maxSuppSize = 20,
-          nGamma = 5,
-          gammaMin = 0.0001, gammaMax = 10
-        )
-      } else {
-        L0_Model <- L0Learn.fit(X, Y,
+      temp <- LO_fit(X, Y,
+        penalty = penalty,
+        nFolds = 10, seed = 1,
+        maxSuppSize = dim(matrix)[2],
+        nGamma = 5,
+        gammaMin = 0.0001, gammaMax = 10
+      )
+      temp <- as.vector(temp)
+
+      if (F) {
+        fit <- L0Learn.fit(X, Y,
           penalty = penalty,
           maxSuppSize = dim(matrix)[2]
         )
-
-        L0_Model_Information <- as.data.frame(print(L0_Model))
-        L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$maxSuppSize, decreasing = TRUE), ]
-        lambda_L0 <- L0_Model_Information$lambda[1]
-        gamma_L0 <- L0_Model_Information$gamma[1]
-        # lambda_L0 <- L0_Model_Information$lambda[ceiling(nrow(L0_Model_Information))]
-        # gamma_L0 <- L0_Model_Information$gamma[ceiling(nrow(L0_Model_Information))]
-        temp <- coef(L0_Model,
-          lambda = lambda_L0,
-          gamma = gamma_L0
+        fit_inf <- as.data.frame(print(fit))
+        fit_inf <- fit_inf[order(fit_inf$suppSize, decreasing = TRUE), ]
+        lambda <- fit_inf$lambda[1]
+        gamma <- fit_inf$gamma[1]
+        # lambda <- fit_inf$lambda[ceiling(nrow(fit_inf))]
+        # gamma <- fit_inf$gamma[ceiling(nrow(fit_inf))]
+        temp <- coef(fit,
+          lambda = lambda,
+          gamma = gamma
         )
+        temp <- as.vector(temp)
       }
 
-      temp <- as.vector(temp)
       wghts <- temp[-1]
       wghts <- abs(wghts)
       # wghts <- wghts / max(wghts)
@@ -106,20 +105,20 @@ L0REG <- function(matrix,
     for (i in 1:length(regulators)) {
       Y <- matrix[, regulators[i]]
       X <- as.matrix(matrix[, -which(colnames(matrix) == regulators[i])])
-      L0_Model <- L0Learn.fit(X, Y,
+      fit <- L0Learn.fit(X, Y,
         penalty = penalty,
         maxSuppSize = dim(matrix)[2]
       )
 
-      L0_Model_Information <- as.data.frame(print(L0_Model))
-      L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$maxSuppSize, decreasing = TRUE), ]
-      lambda_L0 <- L0_Model_Information$lambda[1]
-      gamma_L0 <- L0_Model_Information$gamma[1]
-      # lambda_L0 <- L0_Model_Information$lambda[ceiling(nrow(L0_Model_Information))]
-      # gamma_L0 <- L0_Model_Information$gamma[ceiling(nrow(L0_Model_Information))]
-      temp <- coef(L0_Model,
-        lambda = lambda_L0,
-        gamma = gamma_L0
+      fit_inf <- as.data.frame(print(fit))
+      fit_inf <- fit_inf[order(fit_inf$maxSuppSize, decreasing = TRUE), ]
+      lambda <- fit_inf$lambda[1]
+      gamma <- fit_inf$gamma[1]
+      # lambda <- fit_inf$lambda[ceiling(nrow(fit_inf))]
+      # gamma <- fit_inf$gamma[ceiling(nrow(fit_inf))]
+      temp <- coef(fit,
+        lambda = lambda,
+        gamma = gamma
       )
       temp <- as.vector(temp)
       wghts <- temp[-1]
@@ -159,17 +158,17 @@ L0REG <- function(matrix,
       for (i in 1:dim(matrix)[2]) {
         Y <- matrix[, i]
         X <- as.matrix(matrix[, -i])
-        L0_Model <- L0Learn.fit(X, Y,
+        fit <- L0Learn.fit(X, Y,
           penalty = penalty,
           maxSuppSize = dim(matrix)[2]
         )
-        L0_Model_Information <- as.data.frame(print(L0_Model))
-        L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$maxSuppSize, decreasing = TRUE), ]
-        lambda_L0 <- L0_Model_Information$lambda[1]
-        gamma_L0 <- L0_Model_Information$gamma[1]
-        temp <- coef(L0_Model,
-          lambda = lambda_L0,
-          gamma = gamma_L0
+        fit_inf <- as.data.frame(print(fit))
+        fit_inf <- fit_inf[order(fit_inf$maxSuppSize, decreasing = TRUE), ]
+        lambda <- fit_inf$lambda[1]
+        gamma <- fit_inf$gamma[1]
+        temp <- coef(fit,
+          lambda = lambda,
+          gamma = gamma
         )
         temp <- as.vector(temp)
         wghts <- temp[-1]

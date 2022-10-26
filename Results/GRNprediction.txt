@@ -1,37 +1,37 @@
 SourceGENES,TargetGENES,Interaction,Edges
-g3,g6,1,activation
-g3,g4,0.900501742355411,activation
-g2,g6,0.725274359691769,activation
-g5,g4,0.582478913015241,activation
-g5,g3,0.506163003291432,activation
-g1,g4,0.46195042017386,activation
-g1,g5,0.458252566264439,activation
-g4,g6,0.438391399329117,activation
-g2,g3,0.429619636843784,activation
-g6,g3,0.41169010400199,activation
-g4,g3,0.337157539949035,activation
-g1,g3,0.325794257259296,activation
-g4,g5,0.302197254906357,activation
-g6,g4,0.289044233448971,activation
-g6,g2,0.199008440208044,activation
-g6,g5,0.191853617045901,activation
-g2,g1,0.137847657079135,activation
-g5,g1,0.120273964101574,activation
-g6,g1,0.106266339613118,activation
-g4,g1,0.0894830775827204,activation
+g6,g2,1,activation
+g1,g5,0.8661840200047,activation
+g3,g2,0.795500873400985,activation
+g3,g6,0.542203222105165,activation
+g1,g4,0.50690387267798,activation
+g3,g4,0.482428052313529,activation
+g2,g3,0.442482606608521,activation
+g1,g2,0.418161762365024,activation
+g2,g6,0.417873488604854,activation
+g6,g1,0.398461670319035,activation
+g5,g4,0.373660623007647,activation
+g4,g6,0.372675808545846,activation
+g5,g6,0.353603029791503,activation
+g5,g1,0.350120486186611,activation
+g5,g2,0.302357442888766,activation
+g6,g5,0.294385448811843,activation
+g4,g5,0.292373297048165,activation
+g2,g5,0.2625997626197,activation
+g3,g1,0.253707429382861,activation
+g3,g5,0.248258500823531,activation
+g2,g4,0.227145054072726,activation
+g4,g2,0.226925501257349,activation
+g6,g3,0.177567749672207,activation
+g6,g4,0.169889855371394,activation
+g5,g3,0.160045775893101,activation
+g4,g1,0.140700662415162,activation
 g1,g1,0,no regulation
-g1,g2,0,no regulation
+g1,g3,0,no regulation
 g1,g6,0,no regulation
+g2,g1,0,no regulation
 g2,g2,0,no regulation
-g2,g4,0,no regulation
-g2,g5,0,no regulation
-g3,g1,0,no regulation
-g3,g2,0,no regulation
 g3,g3,0,no regulation
-g3,g5,0,no regulation
-g4,g2,0,no regulation
+g4,g3,0,no regulation
 g4,g4,0,no regulation
-g5,g2,0,no regulation
 g5,g5,0,no regulation
-g5,g6,0,no regulation
 g6,g6,0,no regulation

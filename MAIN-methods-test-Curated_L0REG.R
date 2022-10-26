@@ -358,7 +358,7 @@ evaluation_infromations_all[evaluation_infromations_all == 0] <- NA
 na.omit(evaluation_infromations_all)
 write.csv(evaluation_infromations_all, "Results/evaluation_infromations_Curated_L0REG.csv")
 
-if (F) {
+if (T) {
   library(patchwork)
   library(ggplot2)
   library(reshape2)
@@ -380,7 +380,7 @@ if (F) {
   for (i in 1:length(data_path)) {
     dataset <- data_path[i]
     evaluation_infromations_GSD <- evaluation_infromations_all[grep(dataset, evaluation_infromations_all$datasets), ]
-    evaluation_infromations_GSD <- evaluation_infromations_GSD[, c("datasets", "AUROC_L0REG_L0_N", "AUROC_L0REG_L0L2_N", "AUROC_GENIE3", "AUROC_SINCERITITES")]
+    evaluation_infromations_GSD <- evaluation_infromations_GSD[, c("datasets", "AUROC_L0REG_L0", "AUROC_L0REG_L0L2", "AUROC2_GENIE3", "AUROC_SINCERITITES")]
     names(evaluation_infromations_GSD) <- c("Dataset", "L0-Dynamic", "L0-Dynamic2", "GENIE3", "SINCERITITES")
     methods_barplot_all <- evaluation_infromations_GSD %>%
       as.data.frame() %>%
@@ -395,15 +395,12 @@ if (F) {
       c("SINCERITITES", "GENIE3"),
       c("SINCERITITES", "L0-Dynamic")
     )
-
+    mycol <- c("#3399cc","#3366cc","#ff00cc","#cc0033")
+    mycol <- c("black", "black", "gray", "white")
     p <- ggplot(
       methods_barplot_all,
-      aes(
-        x = Methods,
-        y = AUROC
-      )
+      aes(x = Methods, y = AUROC)
     ) +
-      # guides(fill = guide_legend(title = NULL)) +
       stat_compare_means(
         method = "wilcox.test",
         label = "p.signif",
@@ -412,10 +409,7 @@ if (F) {
         sizen = 4,
         color = "#6699cc"
       ) +
-      labs(
-        x = "Methods",
-        y = "AUROC"
-      ) +
+      labs(x = "Methods",y = "AUROC") +
       # stat_summary(
       #   fun.data = "mean_sdl",
       #   fun.args = list(mult = 1),
@@ -428,7 +422,6 @@ if (F) {
       geom_boxplot(width = 0.2) +
       theme(legend.position = "bottom") +
       # facet_wrap(~Methods) +
-      # theme_gray() +
       theme_bw() +
       theme(
         axis.text.x = element_text(
@@ -446,32 +439,20 @@ if (F) {
     #   theme_bw() +
     #   theme(legend.position = "none")
 
-    P1 <- ggplot(methods_barplot_all, aes(x = Methods, y = AUROC, fill = Methods)) + # ”fill=“设置填充颜色
+    P1 <- ggplot(methods_barplot_all, aes(x = Methods, y = AUROC, fill = Methods))+
       stat_boxplot(geom = "errorbar", width = 0.15, aes(color = "black")) + # 由于自带的箱形图没有胡须末端没有短横线，使用误差条的方式补上
-      geom_boxplot(size = 0.5, fill = "white", outlier.fill = "white", outlier.color = "white") + # size设置箱线图的边框线和胡须的线宽度，fill设置填充颜色，outlier.fill和outlier.color设置异常点的属性
-      geom_jitter(aes(fill = Methods), width = 0.2, shape = 21, size = 2.5) + # 设置为向水平方向抖动的散点图，width指定了向水平方向抖动，不改变纵轴的值
-      scale_fill_manual(values = c("black", "gray", "white", "#c6524a", "#eabf00", "#696969")) + # 设置填充的颜色
-      scale_color_manual(values = c("black", "#2874c5", "#008a00", "#c6524a", "#eabf00", "#696969")) + # 设置散点图的圆圈的颜色为黑色
+      geom_boxplot(size = 0.5, fill = "white", outlier.fill = "white", outlier.color = "white") +
+      geom_jitter(aes(fill = Methods), width = 0.2, shape = 21, size = 2.5) +
+      scale_fill_manual(values = mycol) +
+      scale_color_manual(values = mycol) +
       # scale_x_discrete(labels = c("L0-Dynamic", "GENIE3","SINCERITITES"))+
-      ggtitle(" ") + # 设置总的标题
+      ggtitle(" ") +
       theme_bw() +
       theme(legend.position = "bottom") +
-      # theme(legend.position="none", #不需要图例
-      #       axis.text.x=element_text(colour="black",family="Times",size=14), #设置x轴刻度标签的字体属性
-      #       axis.text.y=element_text(family="Times",size=14,face="plain"), #设置x轴刻度标签的字体属性
-      #       axis.title.y=element_text(family="Times",size = 14,face="plain"), #设置y轴的标题的字体属性
-      #       axis.title.x=element_text(family="Times",size = 14,face="plain"), #设置x轴的标题的字体属性
-      #       plot.title = element_text(family="Times",size=15,face="bold",hjust = 0.5), #设置总标题的字体属性
-      #       # panel.grid.major = element_blank(), #不显示网格线
-      #       panel.grid.minor = element_blank())+
       ylab("AUROC") +
-      xlab("Methods") # 设置x轴和y轴的标题
+      xlab("Methods")
     # P1
-    # ggsave("Results/Methods-contrast-1.png", width = 4, height = 4, dpi = 600)
-    # ggsave(paste0("Results/", "Methods-contrast-cur.png"), width = 11, height = 8, dpi = 600)
-    # ggsave(p, filename = paste0("Results/", "Methods-contrast-cur.png"))
 
-    mycol <- c("black", "gray", "white")
     results_10nets <- evaluation_infromations_GSD
     results_10nets$Dataset <- c(
       "1", "1-50", "1-70",
@@ -487,14 +468,13 @@ if (F) {
     )
     df_res10 <- melt(results_10nets, id = "Dataset", variable.name = "Method", value.name = "AUROC")
     df_res10$Method <- factor(df_res10$Method,
-      levels = c("L0-Dynamic", "L0-Dynamic2", "GENIE3", "SINCERITITES"),
-      labels = c("L0-Dynamic", "L0-Dynamic2", "GENIE3", "SINCERITITES")
+      levels = c("L0-Dynamic", "L0-Dynamic2", "GENIE3", "SINCERITITES")
     )
 
     p2 <- ggplot(df_res10, aes(x = Dataset, y = AUROC, fill = Method)) +
-      geom_bar(stat = "identity", position = position_dodge(), color = "black", width = .6) +
+      geom_bar(stat = "identity", position = position_dodge(), color = "black", width = 0.8) +
       scale_fill_manual(values = mycol) +
-      # geom_errorbar(aes(ymin=AUROC - Sd, ymax=AUROC + Sd), position = position_dodge(.6), width=.2)
+      # geom_errorbar(aes(ymin=AUROC - 0.1, ymax=AUROC + 0.1), position = position_dodge(.6), width=.2)+
       scale_x_discrete(labels = results_10nets$Dataset) +
       theme_bw() +
       theme(

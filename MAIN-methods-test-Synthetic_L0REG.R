@@ -53,11 +53,11 @@ output <- "../scGRN-L0_output/output_Synthetic/"
 evaluation_AUROC_all <- c()
 evaluation_AUPRC_all <- c()
 for (j in 1:length(data_path)) {
-  evaluation_AUROC <- c()
-  evaluation_AUPRC <- c()
+  evaluation_AUROC_two <- c()
+  evaluation_AUPRC_two <- c()
   for (k in 1:length(cell_num)) {
-    evaluation_AUROC_two <- c()
-    evaluation_AUPRC_two <- c()
+    evaluation_AUROC_one <- c()
+    evaluation_AUPRC_one <- c()
     for (i in 1:length(cell_drop)) {
       simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], "-", cell_num[k], "-", cell_drop[i], "/")
       simulation_data_file <- "ExpressionData.csv"
@@ -185,7 +185,9 @@ for (j in 1:length(data_path)) {
       if (T) {
         L0REG_L0 <- L0REG(t(data_grn),
           regulators = colnames(data_grn),
-          targets = colnames(data_grn), penalty = "L0"
+          targets = colnames(data_grn), 
+          maxSuppSize = 2,
+          penalty = "L0"
         )
         write.table(L0REG_L0,
           paste0(output, "GRN_L0.txt"),
@@ -226,7 +228,9 @@ for (j in 1:length(data_path)) {
         # --------------------------------------------------
         L0REG_L0L2 <- L0REG(t(data_grn),
           regulators = colnames(data_grn),
-          targets = colnames(data_grn), penalty = "L0L2"
+          targets = colnames(data_grn),
+          # maxSuppSize = 5,
+          penalty = "L0L2"
         )
         write.table(L0REG_L0L2,
           paste0(output, "GRN_L0L2.txt"),
@@ -307,7 +311,7 @@ for (j in 1:length(data_path)) {
         AUPRC_LEAP <- calcAUPR(evaluationObject)
       }
       # --------------------------------------------------
-      evaluation_AUROC_one <- data.frame(
+      evaluation_AUROC <- data.frame(
         Dataset = paste0(data_path[j], "-2000-", cell_drop[i]),
         L0REG_L0 = AUROC_L0,
         L0REG_L0L2 = AUROC_L0L2,
@@ -316,7 +320,7 @@ for (j in 1:length(data_path)) {
         PPCOR = AUROC_PPCOR,
         LEAP = AUROC_LEAP
       )
-      evaluation_AUPRC_one <- data.frame(
+      evaluation_AUPRC <- data.frame(
         Dataset = paste0(data_path[j], "-2000-", cell_drop[i]),
         L0REG_L0 = AUPRC_L0,
         L0REG_L0L2 = AUPRC_L0L2,
@@ -325,9 +329,9 @@ for (j in 1:length(data_path)) {
         PPCOR = AUPRC_PPCOR,
         LEAP = AUPRC_LEAP
       )
-      evaluation_AUROC_two <- rbind.data.frame(evaluation_AUROC, evaluation_AUROC_one)
-      evaluation_AUPRC_two <- rbind.data.frame(evaluation_AUPRC, evaluation_AUPRC_one)
-      print(evaluation_AUROC)
+      evaluation_AUROC_one <- rbind.data.frame(evaluation_AUROC_one, evaluation_AUROC)
+      evaluation_AUPRC_one <- rbind.data.frame(evaluation_AUPRC_one, evaluation_AUPRC)
+      print(evaluation_AUROC_one)
     }
     evaluation_AUROC_two <- rbind.data.frame(evaluation_AUROC_two, evaluation_AUROC_one)
     evaluation_AUPRC_two <- rbind.data.frame(evaluation_AUPRC_two, evaluation_AUPRC_one)

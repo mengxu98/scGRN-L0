@@ -100,7 +100,7 @@ for (j in 1:length(data_path)) {
       }
     }
     # --------------------------------------------------
-    data_grn <- read.csv(paste0(simulation_data_dir, "ExpressionData_1.csv"),
+    data_grn <- read.csv(paste0(simulation_data_dir, "ExpressionData_all.csv"),
       header = T
     ) %>% as.matrix()
     PseudoTime <- data_grn[, ncol(data_grn)]
@@ -172,9 +172,12 @@ for (j in 1:length(data_path)) {
     }
 
     if (T) {
-      L0REG_L0 <- L0REG(t(data_grn),
+      L0REG_L0 <- L0REG(
+        matrix = t(data_grn),
         regulators = colnames(data_grn),
-        targets = colnames(data_grn), penalty = "L0"
+        targets = colnames(data_grn),
+        # maxSuppSize = 5,
+        penalty = "L0"
       )
       write.table(L0REG_L0,
         paste0(output, "GRN_L0.txt"),
@@ -215,7 +218,9 @@ for (j in 1:length(data_path)) {
       # --------------------------------------------------
       L0REG_L0L2 <- L0REG(t(data_grn),
         regulators = colnames(data_grn),
-        targets = colnames(data_grn), penalty = "L0L2"
+        targets = colnames(data_grn),
+        # maxSuppSize = 5,
+        penalty = "L0L2"
       )
       write.table(L0REG_L0L2,
         paste0(output, "GRN_L0L2.txt"),
@@ -314,8 +319,8 @@ for (j in 1:length(data_path)) {
       PPCOR = AUPRC_PPCOR,
       LEAP = AUPRC_LEAP
     )
-    evaluation_AUROC <- rbind.data.frame(evaluation_AUROC, evaluation_AUROC_one)
-    evaluation_AUPRC <- rbind.data.frame(evaluation_AUPRC, evaluation_AUPRC_one)
+    evaluation_AUROC <- rbind.data.frame(evaluation_AUROC_one, evaluation_AUROC)
+    evaluation_AUPRC <- rbind.data.frame(evaluation_AUPRC_one, evaluation_AUPRC)
     print(evaluation_AUROC)
   }
   evaluation_AUROC_all <- rbind.data.frame(evaluation_AUROC_all, evaluation_AUROC)

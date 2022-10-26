@@ -2,14 +2,15 @@
 
 LO_fit <- function(X, Y,
                    penalty = penalty,
-                   nFolds = 10, seed = 1,
-                   maxSuppSize = 20,
+                   nFolds = 10,
+                   seed = 1,
+                   maxSuppSize = maxSuppSize,
                    nGamma = 5,
                    gammaMin = 0.0001, gammaMax = 10) {
   fit <- L0Learn.cvfit(X, Y,
     penalty = penalty,
     nFolds = 10, seed = 1,
-    maxSuppSize = dim(matrix)[2],
+    maxSuppSize = maxSuppSize,
     nGamma = 5,
     gammaMin = 0.0001, gammaMax = 10
   )
@@ -30,11 +31,14 @@ LO_fit <- function(X, Y,
 }
 
 L0REG <- function(matrix,
-                  targets = rownames(matrix),
                   penalty = penalty,
+                  targets = rownames(matrix),
                   regulators = NULL,
-                  maxSuppSize = dim(matrix)[2]) {
+                  maxSuppSize = NULL) {
   library(L0Learn)
+  if (is.null(maxSuppSize)) {
+    maxSuppSize <- dim(matrix)[2]
+  }
   matrix <- as.data.frame(t(matrix))
   if (!is.null(regulators)) {
     weightdf <- c()
@@ -44,7 +48,7 @@ L0REG <- function(matrix,
       temp <- LO_fit(X, Y,
         penalty = penalty,
         nFolds = 10, seed = 1,
-        maxSuppSize = dim(matrix)[2],
+        maxSuppSize = maxSuppSize,
         nGamma = 5,
         gammaMin = 0.0001, gammaMax = 10
       )
@@ -53,7 +57,7 @@ L0REG <- function(matrix,
       if (F) {
         fit <- L0Learn.fit(X, Y,
           penalty = penalty,
-          maxSuppSize = dim(matrix)[2]
+          maxSuppSize = maxSuppSize
         )
         fit_inf <- as.data.frame(print(fit))
         fit_inf <- fit_inf[order(fit_inf$suppSize, decreasing = TRUE), ]

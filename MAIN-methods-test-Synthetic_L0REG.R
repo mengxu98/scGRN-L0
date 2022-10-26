@@ -48,7 +48,7 @@ cell_drop <- c(
   "10"
 )
 
-output <- "output_Synthetic/"
+output <- "../scGRN-L0_output/output_Synthetic/"
 
 evaluation_infromations_all <- c()
 for (j in 1:length(data_path)) {
@@ -316,7 +316,7 @@ for (j in 1:length(data_path)) {
       AUPR_LEAP <- calcAUPR(evaluationObject)
       # --------------------------------------------------
       evaluation_infromation <- data.frame(
-        datasets = paste0(data_path[j], "-2000-", cell_drop[i]),
+        Dataset = paste0(data_path[j], "-2000-", cell_drop[i]),
         L0REG_L0 = AUROC_L0REG_L0_N,
         L0REG_L0L2 = AUROC_L0REG_L0L2_N,
         GENIE3 = GENIE3_AUROC2,
@@ -333,23 +333,7 @@ for (j in 1:length(data_path)) {
   evaluation_infromations_all <- rbind.data.frame(evaluation_infromations_all, evaluation_infromations2)
 }
 
-if (F) {
-  evaluation_infromations_all <- na.omit(evaluation_infromations_all)
-  write.csv(evaluation_infromations_all, "Results/evaluation_infromations.csv")
-  mean(evaluation_infromations_all$L0REG_L0)
-  mean(evaluation_infromations_all$L0REG_L0L2)
-  mean(evaluation_infromations_all$GENIE3)
-  mean(evaluation_infromations_all$SINCERITITES)
-  mean(evaluation_infromations_all$PPCOR)
-  mean(evaluation_infromations_all$LEAP)
-  evaluation_infromations_all1 <- evaluation_infromations_all
-  evaluation_infromations_all1$SINCERITITES <- as.factor(evaluation_infromations_all$SINCERITITES)
-  evaluation_infromations_all1[evaluation_infromations_all1 == "NA"] <- 0
-  evaluation_infromations_all1 <- na.omit(evaluation_infromations_all1)
-  evaluation_infromations_all1$SINCERITITES <- as.numeric(evaluation_infromations_all1$SINCERITITES)
-  nrow(evaluation_infromations_all1)
-  write.csv(evaluation_infromations_all1, "Results/evaluation_infromations1.csv")
-}
+write.csv(evaluation_infromations_all[,-1], paste0(output, "evaluation_infromations.csv"), row.names = F)
 
 if (F) {
   library(patchwork)
@@ -370,24 +354,15 @@ if (F) {
     "dyn-LL",
     "dyn-TF"
   )
-  evaluation_infromations_alldatasets <- read.csv("Results/evaluation_infromations1.csv")
+  evaluation_infromations_alldatasets <- read.csv(paste0(output, "evaluation_infromations.csv"))
   head(evaluation_infromations_alldatasets[1:3, 1:3])
   for (d in 1:length(data_path)) {
     dataset <- data_path[d]
-    evaluation_infromations_GSD <- evaluation_infromations_alldatasets[grep(dataset, evaluation_infromations_alldatasets$datasets), ]
-    evaluation_infromations_GSD <- evaluation_infromations_GSD[, c(
-      "datasets",
-      "L0REG_L0",
-      # "L0REG_L0L2",
-      "GENIE3",
-      # "SINCERITITES",
-      "PPCOR", 
-      "LEAP"
-    )]
-    methods_barplot_all <- evaluation_infromations_GSD %>%
+    evaluation_infromations_dataset <- evaluation_infromations_alldatasets[grep(dataset, evaluation_infromations_alldatasets$Dataset), ]
+    methods_barplot_all <- evaluation_infromations_dataset %>%
       as.data.frame() %>%
       pivot_longer(
-        cols = 2:c(ncol(evaluation_infromations_GSD)),
+        cols = 2:c(ncol(evaluation_infromations_dataset)),
         names_to = "Methods",
         values_to = "AUROC"
       )
@@ -395,7 +370,7 @@ if (F) {
     my_comparisons <- list(
       c("L0REG_L0", "GENIE3"),
       c("L0REG_L0", "PPCOR"),
-      # c("L0REG_L0", "SINCERITITES"),
+      c("L0REG_L0", "SINCERITITES"),
       c("L0REG_L0", "LEAP")
     )
 
@@ -473,7 +448,7 @@ if (F) {
     # ggsave("Results/Methods-contrast-1.png", width = 4, height = 4, dpi = 600)
 
     mycol <- c("black", "gray", "white")
-    results_10nets <- evaluation_infromations_GSD
+    results_10nets <- evaluation_infromations_dataset
     results_10nets$Dataset <- c(
       "100-1", "100-2", "100-3", "100-4", "100-5", "100-6", "100-7", "100-8", "100-9", "100-10",
       "200-1", "200-2", "200-3", "200-4", "200-5", "200-6", "200-7", "200-8", "200-9", "200-10",

@@ -38,10 +38,10 @@ cell_drop <- c(
   "9", "9-50", "9-70",
   "10", "10-50", "10-70"
 )
-output <- "output_Curated/"
-evaluation_infromations_all <- c()
+output <- "../scGRN-L0_output/output_Curated/"
+evaluation_AUROC_all <- c()
 for (j in 1:length(data_path)) {
-  evaluation_infromations <- c()
+  evaluation_AUROC <- c()
   for (i in 1:length(cell_drop)) {
     simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Curated/", data_path[j], "/", data_path[j], "-2000-", cell_drop[i], "/")
     simulation_data_file <- "ExpressionData.csv"
@@ -303,7 +303,7 @@ for (j in 1:length(data_path)) {
     AUPR_LEAP <- calcAUPR(evaluationObject)
     # --------------------------------------------------
     evaluation_infromation <- data.frame(
-      datasets = paste0(data_path[j], "-2000-", cell_drop[i]),
+      Dataset = paste0(data_path[j], "-2000-", cell_drop[i]),
       L0REG_L0 = AUROC_L0REG_L0_N,
       L0REG_L0L2 = AUROC_L0REG_L0L2_N,
       GENIE3 = GENIE3_AUROC2,
@@ -312,29 +312,13 @@ for (j in 1:length(data_path)) {
       LEAP = AUROC_LEAP
     )
     # message(paste0("----- ", evaluation_infromation, " -----"))
-    evaluation_infromations <- rbind.data.frame(evaluation_infromations, evaluation_infromation)
-    print(evaluation_infromations)
+    evaluation_AUROC <- rbind.data.frame(evaluation_AUROC, evaluation_infromation)
+    print(evaluation_AUROC)
   }
-  evaluation_infromations_all <- rbind.data.frame(evaluation_infromations_all, evaluation_infromations)
+  evaluation_AUROC_all <- rbind.data.frame(evaluation_AUROC_all, evaluation_AUROC)
 }
 
-if (F) {
-  evaluation_infromations_all <- na.omit(evaluation_infromations_all)
-  write.csv(evaluation_infromations_all, "Results/evaluation_infromations.csv")
-  mean(evaluation_infromations_all$L0REG_L0)
-  mean(evaluation_infromations_all$L0REG_L0L2)
-  mean(evaluation_infromations_all$GENIE3)
-  mean(evaluation_infromations_all$SINCERITITES)
-  mean(evaluation_infromations_all$PPCOR)
-  mean(evaluation_infromations_all$LEAP)
-  evaluation_infromations_all1 <- evaluation_infromations_all
-  evaluation_infromations_all1$SINCERITITES <- as.factor(evaluation_infromations_all$SINCERITITES)
-  evaluation_infromations_all1[evaluation_infromations_all1 == "NA"] <- 0
-  evaluation_infromations_all1 <- na.omit(evaluation_infromations_all1)
-  evaluation_infromations_all1$SINCERITITES <- as.numeric(evaluation_infromations_all1$SINCERITITES)
-  nrow(evaluation_infromations_all1)
-  write.csv(evaluation_infromations_all1, "Results/evaluation_infromations1.csv")
-}
+write.csv(evaluation_AUROC_all[,-1], paste0(output, "evaluation_AUROC.csv"), row.names = F)
 
 if (F) {
   library(patchwork)
@@ -352,27 +336,28 @@ if (F) {
     "mCAD",
     "VSC"
   )
-  evaluation_infromations_all <- read.csv("Results/evaluation_infromations_Curated_L0REG.csv")
-  head(evaluation_infromations_all[1:3, 1:3])
+  evaluation_AUROC_all <- read.csv(paste0(output, "evaluation_AUROC.csv"))
+  head(evaluation_AUROC_all[1:3, 1:3])
 
   for (i in 1:length(data_path)) {
     dataset <- data_path[i]
-    evaluation_infromations_GSD <- evaluation_infromations_all[grep(dataset, evaluation_infromations_all$datasets), ]
-    evaluation_infromations_GSD <- evaluation_infromations_GSD[, c("datasets", "AUROC_L0REG_L0", "AUROC_L0REG_L0L2", "AUROC2_GENIE3", "AUROC_SINCERITITES")]
-    names(evaluation_infromations_GSD) <- c("Dataset", "L0-Dynamic", "L0-Dynamic2", "GENIE3", "SINCERITITES")
-    methods_barplot_all <- evaluation_infromations_GSD %>%
+    evaluation_AUROC_dataset <- evaluation_AUROC_all[grep(dataset, evaluation_AUROC_all$Dataset), ]
+    names(evaluation_AUROC_dataset) <- c("Dataset", "L0-Dynamic", "L0-Dynamic2", "GENIE3", "SINCERITITES")
+    methods_barplot_all <- evaluation_AUROC_dataset %>%
       as.data.frame() %>%
       pivot_longer(
-        cols = 2:c(ncol(evaluation_infromations_GSD)),
+        cols = 2:c(ncol(evaluation_AUROC_dataset)),
         names_to = "Methods",
         values_to = "AUROC"
       )
 
     my_comparisons <- list(
-      c("L0-Dynamic", "GENIE3"),
-      c("SINCERITITES", "GENIE3"),
-      c("SINCERITITES", "L0-Dynamic")
+      c("L0REG_L0", "GENIE3"),
+      c("L0REG_L0", "PPCOR"),
+      c("L0REG_L0", "SINCERITITES"),
+      c("L0REG_L0", "LEAP")
     )
+
     mycol <- c("#3399cc", "#3366cc", "#ff00cc", "#cc0033")
     mycol <- c("black", "black", "gray", "white")
     p <- ggplot(
@@ -431,7 +416,7 @@ if (F) {
       xlab("Methods")
     # P1
 
-    results_10nets <- evaluation_infromations_GSD
+    results_10nets <- evaluation_AUROC_dataset
     results_10nets$Dataset <- c(
       "1", "1-50", "1-70",
       "2", "2-50", "2-70",

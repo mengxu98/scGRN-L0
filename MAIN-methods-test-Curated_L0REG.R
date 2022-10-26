@@ -58,7 +58,7 @@ for (j in 1:length(data_path)) {
       write.csv(simulation_data_news, paste0(simulation_data_dir, "ExpressionData_all", ".csv"), row.names = FALSE)
     } else {
       simulation_data_new <- cbind.data.frame(t(simulation_data), h = simulation_PseudoTime$PseudoTime) %>% na.omit()
-      write.csv(simulation_data_new, paste0(simulation_data_dir, "ExpressionData_all", ".csv"), row.names = FALSE)
+      write.csv(simulation_data_new, paste0(simulation_data_dir, "ExpressionData_1", ".csv"), row.names = FALSE)
     }
     DATA <- uploading(paste0(simulation_data_dir, "ExpressionData_1", ".csv"))
     # --------------------------------------------------

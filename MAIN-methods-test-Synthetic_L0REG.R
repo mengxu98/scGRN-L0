@@ -80,8 +80,8 @@ for (j in 1:length(data_path)) {
         result <- SINCERITITES(DATA, distance = 1, method = 1, noDIAG = 1, SIGN = 0)
         adj_matrix <- result$adj_matrix / max(result$adj_matrix)
         if (adj_matrix[1, 1] == "NaN") {
-          SINCERITITES_AUROC_S <- NA
-          SINCERITITES_AUROC_N <- NA
+          SINCERITITES_AUROC_S <- 0
+          SINCERITITES_AUROC_N <- 0
         } else {
           table <- final_ranked_predictions(adj_matrix, DATA$genes, SIGN = 1, saveFile = TRUE)
           table <- as.data.frame(table)

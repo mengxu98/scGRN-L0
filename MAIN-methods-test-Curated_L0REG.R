@@ -301,7 +301,7 @@ for (j in 1:length(data_path)) {
       AUPRC_LEAP <- calcAUPR(evaluationObject)
     }
     # --------------------------------------------------
-    evaluation_AUROC_one <- data.frame(
+    evaluation_AUROC <- data.frame(
       Dataset = paste0(data_path[j], "-2000-", cell_drop[i]),
       L0REG_L0 = AUROC_L0,
       L0REG_L0L2 = AUROC_L0L2,
@@ -310,7 +310,7 @@ for (j in 1:length(data_path)) {
       PPCOR = AUROC_PPCOR,
       LEAP = AUROC_LEAP
     )
-    evaluation_AUPRC_one <- data.frame(
+    evaluation_AUPRC <- data.frame(
       Dataset = paste0(data_path[j], "-2000-", cell_drop[i]),
       L0REG_L0 = AUPRC_L0,
       L0REG_L0L2 = AUPRC_L0L2,

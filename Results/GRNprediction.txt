@@ -1,50 +1,50 @@
 SourceGENES,TargetGENES,Interaction,Edges
-g2,g1,1,activation
-g4,g1,0.975819032993999,activation
-g3,g1,0.951531398647989,activation
-g7,g1,0.874793249128329,activation
-g6,g1,0.849176284362428,activation
-g5,g1,0.777169979953388,activation
-g1,g5,0.0787804853932572,activation
-g1,g4,0.0630210147740589,activation
-g1,g7,0.0612787592017566,activation
-g1,g3,0.0541799701799691,activation
-g1,g2,0.0509523912219012,activation
-g1,g6,0.0311289918705203,activation
+g1,g4,1,activation
+g3,g4,0.740122713048273,activation
+g6,g1,0.711871534713704,activation
+g1,g3,0.63691756519769,activation
+g3,g7,0.461098652672489,activation
+g6,g4,0.441734240127457,activation
+g1,g7,0.422428337255711,activation
+g3,g5,0.354812402407209,activation
+g6,g2,0.346586104745288,activation
+g2,g1,0.257308783539094,activation
+g5,g1,0.238501150070781,activation
+g7,g4,0.236196574522827,activation
+g5,g4,0.199166691141173,activation
+g7,g1,0.190751447761411,activation
+g2,g5,0.166241646882979,activation
+g7,g5,0.159510730743644,activation
+g7,g3,0.154739250370279,activation
+g7,g2,0.147182591093484,activation
+g4,g5,0.146722833408902,activation
+g4,g7,0.135755605101718,activation
+g2,g7,0.121615952705047,activation
+g4,g1,0.1015952868748,activation
+g5,g3,0.0979618740031899,activation
+g1,g6,0.0825123835294657,activation
+g7,g6,0.0754838565240342,activation
+g6,g5,0.0698920209541965,activation
+g2,g4,0.0675694543932942,activation
+g4,g2,0.0651900846977785,activation
+g2,g6,0.053757886788471,activation
+g2,g3,0.0532366357256175,activation
 g1,g1,0,no regulation
+g1,g2,0,no regulation
+g1,g5,0,no regulation
 g2,g2,0,no regulation
-g2,g3,0,no regulation
-g2,g4,0,no regulation
-g2,g5,0,no regulation
-g2,g6,0,no regulation
-g2,g7,0,no regulation
+g3,g1,0,no regulation
 g3,g2,0,no regulation
 g3,g3,0,no regulation
-g3,g4,0,no regulation
-g3,g5,0,no regulation
 g3,g6,0,no regulation
-g3,g7,0,no regulation
-g4,g2,0,no regulation
 g4,g3,0,no regulation
 g4,g4,0,no regulation
-g4,g5,0,no regulation
 g4,g6,0,no regulation
-g4,g7,0,no regulation
 g5,g2,0,no regulation
-g5,g3,0,no regulation
-g5,g4,0,no regulation
 g5,g5,0,no regulation
 g5,g6,0,no regulation
 g5,g7,0,no regulation
-g6,g2,0,no regulation
 g6,g3,0,no regulation
-g6,g4,0,no regulation
-g6,g5,0,no regulation
 g6,g6,0,no regulation
 g6,g7,0,no regulation
-g7,g2,0,no regulation
-g7,g3,0,no regulation
-g7,g4,0,no regulation
-g7,g5,0,no regulation
-g7,g6,0,no regulation
 g7,g7,0,no regulation

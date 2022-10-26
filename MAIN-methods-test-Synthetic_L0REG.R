@@ -332,8 +332,24 @@ for (j in 1:length(data_path)) {
   }
   evaluation_infromations_all <- rbind.data.frame(evaluation_infromations_all, evaluation_infromations2)
 }
-evaluation_infromations_all <- na.omit(evaluation_infromations_all)
-write.csv(evaluation_infromations_all, "Results/evaluation_infromations.csv")
+
+if (F) {
+  evaluation_infromations_all <- na.omit(evaluation_infromations_all)
+  write.csv(evaluation_infromations_all, "Results/evaluation_infromations.csv")
+  mean(evaluation_infromations_all$L0REG_L0)
+  mean(evaluation_infromations_all$L0REG_L0L2)
+  mean(evaluation_infromations_all$GENIE3)
+  mean(evaluation_infromations_all$SINCERITITES)
+  mean(evaluation_infromations_all$PPCOR)
+  mean(evaluation_infromations_all$LEAP)
+  evaluation_infromations_all1 <- evaluation_infromations_all
+  evaluation_infromations_all1$SINCERITITES <- as.factor(evaluation_infromations_all$SINCERITITES)
+  evaluation_infromations_all1[evaluation_infromations_all1 == "NA"] <- 0
+  evaluation_infromations_all1 <- na.omit(evaluation_infromations_all1)
+  evaluation_infromations_all1$SINCERITITES <- as.numeric(evaluation_infromations_all1$SINCERITITES)
+  nrow(evaluation_infromations_all1)
+  write.csv(evaluation_infromations_all1, "Results/evaluation_infromations1.csv")
+}
 
 if (F) {
   library(patchwork)
@@ -354,14 +370,20 @@ if (F) {
     "dyn-LL",
     "dyn-TF"
   )
-  mean(evaluation_infromations_all$AUROC_SINCERITITES)
-  evaluation_infromations_all <- read.csv("Results/evaluation_infromations.csv")
-  head(evaluation_infromations_all[1:3, 1:3])
-  for (i in 1:length(data_path)) {
-    dataset <- data_path[i]
-    evaluation_infromations_GSD <- evaluation_infromations_all[grep(dataset, evaluation_infromations_all$datasets), ]
-    evaluation_infromations_GSD <- evaluation_infromations_GSD[, c("datasets", "AUROC_NIMEFI_L0", "AUROC_GENIE3", "AUROC_SINCERITITES_N")]
-    names(evaluation_infromations_GSD) <- c("Dataset", "L0-Dynamic", "GENIE3", "SINCERITITES")
+  evaluation_infromations_alldatasets <- read.csv("Results/evaluation_infromations1.csv")
+  head(evaluation_infromations_alldatasets[1:3, 1:3])
+  for (d in 1:length(data_path)) {
+    dataset <- data_path[d]
+    evaluation_infromations_GSD <- evaluation_infromations_alldatasets[grep(dataset, evaluation_infromations_alldatasets$datasets), ]
+    evaluation_infromations_GSD <- evaluation_infromations_GSD[, c(
+      "datasets",
+      "L0REG_L0",
+      # "L0REG_L0L2",
+      "GENIE3",
+      # "SINCERITITES",
+      "PPCOR", 
+      "LEAP"
+    )]
     methods_barplot_all <- evaluation_infromations_GSD %>%
       as.data.frame() %>%
       pivot_longer(
@@ -371,9 +393,10 @@ if (F) {
       )
 
     my_comparisons <- list(
-      c("L0-Dynamic", "GENIE3"),
-      c("SINCERITITES", "GENIE3"),
-      c("SINCERITITES", "L0-Dynamic")
+      c("L0REG_L0", "GENIE3"),
+      c("L0REG_L0", "PPCOR"),
+      # c("L0REG_L0", "SINCERITITES"),
+      c("L0REG_L0", "LEAP")
     )
 
     p <- ggplot(
@@ -419,7 +442,7 @@ if (F) {
         )
       )
     p
-    ggsave(paste0("Results/Methods-contrast-", dataset, "-1.png"), width = 3, height = 4, dpi = 600)
+    ggsave(paste0("Results/Methods-contrast-Synthetic-", dataset, "-1.png"), width = 3, height = 4, dpi = 600)
 
     # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUROC, colour = Methods)) +
     #   geom_boxplot() +
@@ -479,6 +502,6 @@ if (F) {
         )
       )
     p2
-    ggsave(paste0("Results/Methods-contrast-", dataset, "-2.png"), width = 8, height = 4, dpi = 600)
+    ggsave(paste0("Results/Methods-contrast-Synthetic-", dataset, "-2.png"), width = 8, height = 4, dpi = 600)
   }
 }

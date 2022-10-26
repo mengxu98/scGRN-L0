@@ -43,8 +43,8 @@ output <- "../scGRN-L0_output/output_Curated/"
 evaluation_AUROC_all <- c()
 evaluation_AUPRC_all <- c()
 for (j in 1:length(data_path)) {
-  evaluation_AUROC <- c()
-  evaluation_AUPRC <- c()
+  evaluation_AUROC_one <- c()
+  evaluation_AUPRC_one <- c()
   for (i in 1:length(cell_drop)) {
     simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Curated/", data_path[j], "/", data_path[j], "-2000-", cell_drop[i], "/")
     simulation_data_file <- "ExpressionData.csv"
@@ -319,12 +319,12 @@ for (j in 1:length(data_path)) {
       PPCOR = AUPRC_PPCOR,
       LEAP = AUPRC_LEAP
     )
-    evaluation_AUROC <- rbind.data.frame(evaluation_AUROC_one, evaluation_AUROC)
-    evaluation_AUPRC <- rbind.data.frame(evaluation_AUPRC_one, evaluation_AUPRC)
-    print(evaluation_AUROC)
+    evaluation_AUROC_one <- rbind.data.frame(evaluation_AUROC_one, evaluation_AUROC)
+    evaluation_AUPRC_one <- rbind.data.frame(evaluation_AUPRC_one, evaluation_AUPRC)
+    print(evaluation_AUROC_one)
   }
-  evaluation_AUROC_all <- rbind.data.frame(evaluation_AUROC_all, evaluation_AUROC)
-  evaluation_AUPRC_all <- rbind.data.frame(evaluation_AUPRC_all, evaluation_AUPRC)
+  evaluation_AUROC_all <- rbind.data.frame(evaluation_AUROC_all, evaluation_AUROC_one)
+  evaluation_AUPRC_all <- rbind.data.frame(evaluation_AUPRC_all, evaluation_AUPRC_one)
 }
 
 write.csv(evaluation_AUROC_all[, -1], paste0(output, "evaluation_AUROC.csv"), row.names = F)

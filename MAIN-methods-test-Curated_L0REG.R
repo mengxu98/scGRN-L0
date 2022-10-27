@@ -131,11 +131,11 @@ for (j in 1:length(data_path)) {
       names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
       write.table(weightdf, file = paste0(output, "GRN_GENIE3.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
       ground_truth_simulation(
-          intput = paste0(output, "GRN_GENIE3.txt"),
-          output = output,
-          dataset_dir = simulation_data_dir,
-          file = "refNetwork.csv"
-        )
+        intput = paste0(output, "GRN_GENIE3.txt"),
+        output = output,
+        dataset_dir = simulation_data_dir,
+        file = "refNetwork.csv"
+      )
       evaluationObject <- prepareEval(paste0(output, "GRN_GENIE3.txt"),
         paste0(paste0(output, "ground_truth.tsv")),
         totalPredictionsAccepted = 100000
@@ -365,7 +365,7 @@ if (F) {
         names_to = "Methods",
         values_to = "AUROC"
       )
-
+    methods <- names(evaluation_AUROC_dataset[, -1])
     my_comparisons <- list(
       c("L0REG_L0", "GENIE3"),
       c("L0REG_L0", "PPCOR"),
@@ -374,7 +374,7 @@ if (F) {
     )
 
     mycol <- c("#3399cc", "#3366cc", "#ff00cc", "#cc0033")
-    mycol <- c("black", "black", "gray", "white")
+    mycol <- c("black", "black", "gray", "white", "#3399cc", "#3366cc")
     p <- ggplot(
       methods_barplot_all,
       aes(x = Methods, y = AUROC)
@@ -387,6 +387,9 @@ if (F) {
         sizen = 4,
         color = "#6699cc"
       ) +
+      # scale_fill_manual(values = mycol) +
+      # scale_color_manual(values = mycol) +
+      # scale_x_discrete(labels = methods)+
       labs(x = "Methods", y = "AUROC") +
       # stat_summary(
       #   fun.data = "mean_sdl",
@@ -410,12 +413,14 @@ if (F) {
         )
       )
     p
-    ggsave(paste0("Results/Methods-contrast-", dataset, "-1.png"), width = 3, height = 4, dpi = 600)
+    ggsave(paste0("../scGRN-L0_output/output_Curated/Methods-contrast-", dataset, "-1.png"), width = 3, height = 4, dpi = 600)
 
     # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUROC, colour = Methods)) +
     #   geom_boxplot() +
     #   theme_bw() +
+    #   # scale_x_discrete(labels = methods)+
     #   theme(legend.position = "none")
+      
 
     P1 <- ggplot(methods_barplot_all, aes(x = Methods, y = AUROC, fill = Methods)) +
       stat_boxplot(geom = "errorbar", width = 0.15, aes(color = "black")) + # 由于自带的箱形图没有胡须末端没有短横线，使用误差条的方式补上
@@ -423,37 +428,23 @@ if (F) {
       geom_jitter(aes(fill = Methods), width = 0.2, shape = 21, size = 2.5) +
       scale_fill_manual(values = mycol) +
       scale_color_manual(values = mycol) +
-      # scale_x_discrete(labels = c("L0-Dynamic", "GENIE3","SINCERITITES"))+
+      scale_x_discrete(labels = methods)+
       ggtitle(" ") +
       theme_bw() +
       theme(legend.position = "bottom") +
       ylab("AUROC") +
       xlab("Methods")
     # P1
-
-    results_10nets <- evaluation_AUROC_dataset
-    results_10nets$Dataset <- c(
-      "1", "1-50", "1-70",
-      "2", "2-50", "2-70",
-      "3", "3-50", "3-70",
-      "4", "4-50", "4-70",
-      "5", "5-50", "5-70",
-      "6", "6-50", "6-70",
-      "7", "7-50", "7-70",
-      "8", "8-50", "8-70",
-      "9", "9-50", "9-70",
-      "10", "10-50", "10-70"
-    )
-    df_res10 <- melt(results_10nets, id = "Dataset", variable.name = "Method", value.name = "AUROC")
+    df_res10 <- melt(evaluation_AUROC_dataset, id = "Dataset", variable.name = "Method", value.name = "AUROC")
     df_res10$Method <- factor(df_res10$Method,
-      levels = c("L0-Dynamic", "L0-Dynamic2", "GENIE3", "SINCERITITES")
+      levels = methods
     )
 
     p2 <- ggplot(df_res10, aes(x = Dataset, y = AUROC, fill = Method)) +
       geom_bar(stat = "identity", position = position_dodge(), color = "black", width = 0.8) +
       scale_fill_manual(values = mycol) +
       # geom_errorbar(aes(ymin=AUROC - 0.1, ymax=AUROC + 0.1), position = position_dodge(.6), width=.2)+
-      scale_x_discrete(labels = results_10nets$Dataset) +
+      scale_x_discrete(labels = evaluation_AUROC_dataset$Dataset) +
       theme_bw() +
       theme(
         axis.text.x = element_text(
@@ -464,7 +455,7 @@ if (F) {
         )
       )
     p2
-    ggsave(paste0("Results/Methods-contrast-", dataset, "-2.png"), width = 8, height = 4, dpi = 600)
+    ggsave(paste0("../scGRN-L0_output/output_Curated/Methods-contrast-", dataset, "-2.png"), width = 15, height = 4, dpi = 600)
   }
 }
 

@@ -19,7 +19,7 @@ library(Rtsne)
 ```
 Read input files. The input file is from https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE75748
 ```{r warning=FALSE}
-Chu2017 <- read.table('data/GSE75748/GSE75748_sc_time_course_ec.csv', sep = ',', header = T, row.names = 1)
+Chu2017 <- read.table('../scGRN-L0_data/scRNAseq_preprocessing_data/GSE75748/GSE75748_sc_time_course_ec.csv', sep = ',', header = T, row.names = 1)
 ChuCellTypes <- data.frame()
 for (col in colnames(Chu2017)){
   cType <- strsplit(strsplit(col,'[.]')[[1]][2],'b4s_|_')[[1]][1]

@@ -283,11 +283,17 @@ for (j in 1:length(data_path)) {
     AUROC_NIMEFI_L0
   }
 
+  data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_all.csv"),
+    header = T
+  ) %>% as.matrix()
+  PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
+  data_GENIE3 <- data_GENIE3[, -ncol(data_GENIE3)]
   if (T) {
     source("Function-L0REG.R")
-    L0REG_L0 <- L0REG(matrix= t(data_GENIE3),
-      regulators = tfs$TF[100:200],
-      targets = colnames(data_GENIE3), 
+    L0REG_L0 <- L0REG(
+      matrix = t(data_GENIE3),
+      regulators = tfs$TF[100:150],
+      targets = colnames(data_GENIE3),
       penalty = "L0"
     )
     write.table(L0REG_L0,

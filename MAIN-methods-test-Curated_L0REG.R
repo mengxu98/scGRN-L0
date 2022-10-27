@@ -148,13 +148,13 @@ for (j in 1:length(data_path)) {
     if (F) {
       NIMEFI(data_grn,
         GENIE = F, SVM = F, EL = T, penalty = "L0",
-        outputFileName = paste0(output, "output_NIMEFI_L0"),
+        outputFileName = paste0(output, "GRN_L0_N"),
         outputFileFormat = "txt",
         ELPredSampleMin = 20, ELPredSampleMax = 80,
         ELExpSampleMin = 20, ELExpSampleMax = 80,
-        ELRankThreshold = 5, ELEnsembleSize = dim(data_grn)[1]
+        ELRankThreshold = 5, ELEnsembleSize = dim(data_grn)[2]
       )
-      evaluationObject <- prepareEval(paste0(output, "output_NIMEFI_L0.txt"),
+      evaluationObject <- prepareEval(paste0(output, "GRN_L0_N.txt"),
         paste0(output, "ground_truth.tsv"),
         totalPredictionsAccepted = 100000
       )
@@ -162,14 +162,14 @@ for (j in 1:length(data_path)) {
       AUPRC_L0_N <- calcAUPR(evaluationObject)
       NIMEFI(data_grn,
         GENIE = F, SVM = F, EL = T, penalty = "L0L2",
-        outputFileName = paste0(output, "output_NIMEFI_L0"),
+        outputFileName = paste0(output, "GRN_L0L2_N"),
         outputFileFormat = "txt",
         SVMRankThreshold = 5, SVMEnsembleSize = 100,
         ELPredSampleMin = 20, ELPredSampleMax = 80,
         ELExpSampleMin = 20, ELExpSampleMax = 80,
-        ELRankThreshold = 5, ELEnsembleSize = dim(data_grn)[1]
+        ELRankThreshold = 5, ELEnsembleSize = dim(data_grn)[2]
       )
-      evaluationObject <- prepareEval(paste0(output, "output_NIMEFI_L0.txt"),
+      evaluationObject <- prepareEval(paste0(output, "GRN_L0L2_N.txt"),
         paste0(paste0(output, "ground_truth.tsv")),
         totalPredictionsAccepted = 100000
       )
@@ -178,14 +178,14 @@ for (j in 1:length(data_path)) {
     }
 
     if (T) {
-      L0REG_L0 <- L0REG(
+      L0Dynamic <- L0REG(
         matrix = t(data_grn),
         regulators = colnames(data_grn),
         targets = colnames(data_grn),
         # maxSuppSize = 5,
         penalty = "L0"
       )
-      write.table(L0REG_L0,
+      write.table(L0Dynamic,
         paste0(output, "GRN_L0.txt"),
         sep = "\t",
         quote = F,
@@ -198,37 +198,37 @@ for (j in 1:length(data_path)) {
       )
       AUROC_L0 <- calcAUROC(evaluationObject)
       AUPRC_L0 <- calcAUPR(evaluationObject)
-      # L0REG_L0$weight <- as.numeric(L0REG_L0$weight)
-      # L0REG_L0$regulatoryGene <- as.factor(L0REG_L0$regulatoryGene)
-      # L0REG_L0$targetGene <- as.factor(L0REG_L0$targetGene)
-      # L0REG_L0 <- as.matrix(L0REG_L0)
-      # L0REG_L0_adj <- matrix(0, ncol(data_grn), ncol(data_grn))
-      # rownames(L0REG_L0_adj) <- colnames(data_grn)
-      # colnames(L0REG_L0_adj) <- colnames(data_grn)
-      # L0REG_L0_adj[L0REG_L0[, 1:2]] <- L0REG_L0[, 3]
-      # L0REG_L0_adj <- as.numeric(L0REG_L0_adj)
+      # L0Dynamic$weight <- as.numeric(L0Dynamic$weight)
+      # L0Dynamic$regulatoryGene <- as.factor(L0Dynamic$regulatoryGene)
+      # L0Dynamic$targetGene <- as.factor(L0Dynamic$targetGene)
+      # L0Dynamic <- as.matrix(L0Dynamic)
+      # L0Dynamic_adj <- matrix(0, ncol(data_grn), ncol(data_grn))
+      # rownames(L0Dynamic_adj) <- colnames(data_grn)
+      # colnames(L0Dynamic_adj) <- colnames(data_grn)
+      # L0Dynamic_adj[L0Dynamic[, 1:2]] <- L0Dynamic[, 3]
+      # L0Dynamic_adj <- as.numeric(L0Dynamic_adj)
       # truth_network <- convertSortedRankTSVToAdjMatrix(paste0(output, "ground_truth.tsv"))
-      # AUCresult_L0REG_L0 <- auc_from_ranks_TC_sign(L0REG_L0_adj, truth_network, 1000)
-      # L0REG_L0Dynamic_AUROC_S <- AUCresult_L0REG_L0$AUROC
-      # L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR
-      # for (g in 1:nrow(L0REG_L0)) {
-      #   L0REG_L0_adj[L0REG_L0$regulatoryGene[g], L0REG_L0$targetGene[g]] <- L0REG_L0$weight[g]
+      # AUCresult_L0Dynamic <- auc_from_ranks_TC_sign(L0Dynamic_adj, truth_network, 1000)
+      # L0DynamicDynamic_AUROC_S <- AUCresult_L0Dynamic$AUROC
+      # L0DynamicDynamic_AUPR_S <- AUCresult_L0Dynamic$AUPR
+      # for (g in 1:nrow(L0Dynamic)) {
+      #   L0Dynamic_adj[L0Dynamic$regulatoryGene[g], L0Dynamic$targetGene[g]] <- L0Dynamic$weight[g]
       # }
-      # L0REG_L0 <- L0REG(t(data_grn),
+      # L0Dynamic <- L0REG(t(data_grn),
       #   regulators = colnames(data_grn),
       #   targets = colnames(data_grn), penalty = "L0"
       # )
-      # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0, truth_network, 1000)
-      # AUROC_L0REG_L0_S <- AUCresult_L0REG$AUROC
-      # AUROC_L0REG_L0_S
+      # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0Dynamic, truth_network, 1000)
+      # AUROC_L0Dynamic_S <- AUCresult_L0REG$AUROC
+      # AUROC_L0Dynamic_S
       # --------------------------------------------------
-      L0REG_L0L2 <- L0REG(t(data_grn),
+      L0DynamicL2 <- L0REG(t(data_grn),
         regulators = colnames(data_grn),
         targets = colnames(data_grn),
         # maxSuppSize = 5,
         penalty = "L0L2"
       )
-      write.table(L0REG_L0L2,
+      write.table(L0DynamicL2,
         paste0(output, "GRN_L0L2.txt"),
         sep = "\t",
         quote = F,
@@ -241,12 +241,12 @@ for (j in 1:length(data_path)) {
       )
       AUROC_L0L2 <- calcAUROC(evaluationObject)
       AUPRC_L0L2 <- calcAUPR(evaluationObject)
-      # L0REG_L0L2 <- L0REG(t(data_grn),
+      # L0DynamicL2 <- L0REG(t(data_grn),
       #   # regulators = colnames(data_grn),
       #   targets = colnames(data_grn), penalty = "L0L2"
       # )
-      # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0L2, truth_network, 1000)
-      # AUROC_L0REG_L0L2_S <- AUCresult_L0REG$AUROC
+      # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0DynamicL2, truth_network, 1000)
+      # AUROC_L0DynamicL2_S <- AUCresult_L0REG$AUROC
     }
     # --------------------------------------------------
     if (T) {
@@ -309,8 +309,10 @@ for (j in 1:length(data_path)) {
     # --------------------------------------------------
     evaluation_AUROC <- data.frame(
       Dataset = paste0(data_path[j], "-2000-", cell_drop[i]),
-      L0REG_L0 = AUROC_L0,
-      L0REG_L0L2 = AUROC_L0L2,
+      L0Dynamic = AUROC_L0,
+      L0DynamicL2 = AUROC_L0L2,
+      # L0Dynamic_N = AUROC_L0_N,
+      # L0DynamicL2_N = AUROC_L0L2_N,
       GENIE3 = AUROC_GENIE3,
       SINCERITITES = AUROC_SINCERITITES,
       PPCOR = AUROC_PPCOR,
@@ -318,8 +320,10 @@ for (j in 1:length(data_path)) {
     )
     evaluation_AUPRC <- data.frame(
       Dataset = paste0(data_path[j], "-2000-", cell_drop[i]),
-      L0REG_L0 = AUPRC_L0,
-      L0REG_L0L2 = AUPRC_L0L2,
+      L0Dynamic = AUPRC_L0,
+      L0DynamicL2 = AUPRC_L0L2,
+      # L0Dynamic_N = AUPRC_L0_N,
+      # L0DynamicL2_N = AUPRC_L0L2_N,
       GENIE3 = AUPRC_GENIE3,
       SINCERITITES = AUPRC_SINCERITITES,
       PPCOR = AUPRC_PPCOR,
@@ -353,6 +357,7 @@ if (F) {
     "VSC"
   )
   evaluation_AUROC_all <- read.csv(paste0(output, "evaluation_AUROC.csv"))
+  evaluation_AUROC_all <- evaluation_AUROC_all[,-3]
   head(evaluation_AUROC_all[1:3, 1:3])
 
   for (d in 1:length(data_path)) {
@@ -362,23 +367,30 @@ if (F) {
       as.data.frame() %>%
       pivot_longer(
         cols = 2:c(ncol(evaluation_AUROC_dataset)),
-        names_to = "Methods",
+        names_to = "Method",
         values_to = "AUROC"
       )
+
     methods <- names(evaluation_AUROC_dataset[, -1])
+    methods_barplot_all$Method <- factor(methods_barplot_all$Method,
+      levels = methods
+    )
     my_comparisons <- list(
-      c("L0REG_L0", "GENIE3"),
-      c("L0REG_L0", "PPCOR"),
-      c("L0REG_L0", "SINCERITITES"),
-      c("L0REG_L0", "LEAP")
+      c("L0Dynamic", "GENIE3"),
+      c("L0Dynamic", "SINCERITITES"),
+      c("L0Dynamic", "PPCOR"),
+      c("L0Dynamic", "LEAP")
     )
 
-    mycol <- c("#3399cc", "#3366cc", "#ff00cc", "#cc0033")
-    mycol <- c("black", "black", "gray", "white", "#3399cc", "#3366cc")
+    mycol <- c("gray","#008B00", "#008B8B", "#3366cc","#104E8B")
     p <- ggplot(
       methods_barplot_all,
-      aes(x = Methods, y = AUROC)
+      aes(x = Method, y = AUROC)
     ) +
+      geom_violin(aes(fill = Method),
+        trim = FALSE
+      ) +
+      geom_boxplot(width = 0.2) +
       stat_compare_means(
         method = "wilcox.test",
         label = "p.signif",
@@ -387,22 +399,11 @@ if (F) {
         sizen = 4,
         color = "#6699cc"
       ) +
-      # scale_fill_manual(values = mycol) +
+      scale_fill_manual(values = mycol) +
       # scale_color_manual(values = mycol) +
-      # scale_x_discrete(labels = methods)+
+      scale_x_discrete(labels = methods) +
       labs(x = "Methods", y = "AUROC") +
-      # stat_summary(
-      #   fun.data = "mean_sdl",
-      #   fun.args = list(mult = 1),
-      #   geom = "pointrange",
-      #   color = "gray"
-      # ) +
-      geom_violin(aes(fill = Methods),
-        trim = FALSE
-      ) +
-      geom_boxplot(width = 0.2) +
       theme(legend.position = "bottom") +
-      # facet_wrap(~Methods) +
       theme_bw() +
       theme(
         axis.text.x = element_text(
@@ -413,22 +414,21 @@ if (F) {
         )
       )
     p
-    ggsave(paste0("../scGRN-L0_output/output_Curated/Methods-contrast-", dataset, "-1.png"), width = 3, height = 4, dpi = 600)
+    ggsave(paste0("../scGRN-L0_output/output_Curated/Methods-contrast-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
 
     # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUROC, colour = Methods)) +
     #   geom_boxplot() +
     #   theme_bw() +
     #   # scale_x_discrete(labels = methods)+
     #   theme(legend.position = "none")
-      
 
     P1 <- ggplot(methods_barplot_all, aes(x = Methods, y = AUROC, fill = Methods)) +
-      stat_boxplot(geom = "errorbar", width = 0.15, aes(color = "black")) + # 由于自带的箱形图没有胡须末端没有短横线，使用误差条的方式补上
+      stat_boxplot(geom = "errorbar", width = 0.15, aes(color = "black")) +
       geom_boxplot(size = 0.5, fill = "white", outlier.fill = "white", outlier.color = "white") +
       geom_jitter(aes(fill = Methods), width = 0.2, shape = 21, size = 2.5) +
       scale_fill_manual(values = mycol) +
       scale_color_manual(values = mycol) +
-      scale_x_discrete(labels = methods)+
+      scale_x_discrete(labels = methods) +
       ggtitle(" ") +
       theme_bw() +
       theme(legend.position = "bottom") +

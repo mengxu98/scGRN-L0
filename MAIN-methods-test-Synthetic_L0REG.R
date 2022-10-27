@@ -164,7 +164,7 @@ for (j in 1:length(data_path)) {
           outputFileFormat = "txt",
           ELPredSampleMin = 20, ELPredSampleMax = 80,
           ELExpSampleMin = 20, ELExpSampleMax = 80,
-          ELRankThreshold = 5, ELEnsembleSize = dim(data_grn)[1]
+          ELRankThreshold = 5, ELEnsembleSize = dim(data_grn)[2]
         )
         evaluationObject <- prepareEval(paste0(output, "GRN_L0_N.txt"),
           paste0(output, "ground_truth.tsv"),
@@ -179,7 +179,7 @@ for (j in 1:length(data_path)) {
           SVMRankThreshold = 5, SVMEnsembleSize = 100,
           ELPredSampleMin = 20, ELPredSampleMax = 80,
           ELExpSampleMin = 20, ELExpSampleMax = 80,
-          ELRankThreshold = 5, ELEnsembleSize = dim(data_grn)[1]
+          ELRankThreshold = 5, ELEnsembleSize = dim(data_grn)[2]
         )
         evaluationObject <- prepareEval(paste0(output, "GRN_L0L2_N.txt"),
           paste0(paste0(output, "ground_truth.tsv")),
@@ -189,13 +189,13 @@ for (j in 1:length(data_path)) {
         AUPRC_L0L2_N <- calcAUPR(evaluationObject)
       }
       if (T) {
-        L0REG_L0 <- L0REG(t(data_grn),
+        L0Dynamic <- L0REG(t(data_grn),
           regulators = colnames(data_grn),
           targets = colnames(data_grn),
           maxSuppSize = 2,
           penalty = "L0"
         )
-        write.table(L0REG_L0,
+        write.table(L0Dynamic,
           paste0(output, "GRN_L0.txt"),
           sep = "\t",
           quote = F,
@@ -208,37 +208,37 @@ for (j in 1:length(data_path)) {
         )
         AUROC_L0 <- calcAUROC(evaluationObject)
         AUPRC_L0 <- calcAUPR(evaluationObject)
-        # L0REG_L0$weight <- as.numeric(L0REG_L0$weight)
-        # L0REG_L0$regulatoryGene <- as.factor(L0REG_L0$regulatoryGene)
-        # L0REG_L0$targetGene <- as.factor(L0REG_L0$targetGene)
-        # L0REG_L0 <- as.matrix(L0REG_L0)
-        # L0REG_L0_adj <- matrix(0, ncol(data_grn), ncol(data_grn))
-        # rownames(L0REG_L0_adj) <- colnames(data_grn)
-        # colnames(L0REG_L0_adj) <- colnames(data_grn)
-        # L0REG_L0_adj[L0REG_L0[, 1:2]] <- L0REG_L0[, 3]
-        # L0REG_L0_adj <- as.numeric(L0REG_L0_adj)
+        # L0Dynamic$weight <- as.numeric(L0Dynamic$weight)
+        # L0Dynamic$regulatoryGene <- as.factor(L0Dynamic$regulatoryGene)
+        # L0Dynamic$targetGene <- as.factor(L0Dynamic$targetGene)
+        # L0Dynamic <- as.matrix(L0Dynamic)
+        # L0Dynamic_adj <- matrix(0, ncol(data_grn), ncol(data_grn))
+        # rownames(L0Dynamic_adj) <- colnames(data_grn)
+        # colnames(L0Dynamic_adj) <- colnames(data_grn)
+        # L0Dynamic_adj[L0Dynamic[, 1:2]] <- L0Dynamic[, 3]
+        # L0Dynamic_adj <- as.numeric(L0Dynamic_adj)
         # truth_network <- convertSortedRankTSVToAdjMatrix(paste0(output, "ground_truth.tsv"))
-        # AUCresult_L0REG_L0 <- auc_from_ranks_TC_sign(L0REG_L0_adj, truth_network, 1000)
-        # L0REG_L0Dynamic_AUROC_S <- AUCresult_L0REG_L0$AUROC
-        # L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR
-        # for (g in 1:nrow(L0REG_L0)) {
-        #   L0REG_L0_adj[L0REG_L0$regulatoryGene[g], L0REG_L0$targetGene[g]] <- L0REG_L0$weight[g]
+        # AUCresult_L0Dynamic <- auc_from_ranks_TC_sign(L0Dynamic_adj, truth_network, 1000)
+        # L0DynamicDynamic_AUROC_S <- AUCresult_L0Dynamic$AUROC
+        # L0DynamicDynamic_AUPR_S <- AUCresult_L0Dynamic$AUPR
+        # for (g in 1:nrow(L0Dynamic)) {
+        #   L0Dynamic_adj[L0Dynamic$regulatoryGene[g], L0Dynamic$targetGene[g]] <- L0Dynamic$weight[g]
         # }
-        # L0REG_L0 <- L0REG(t(data_grn),
+        # L0Dynamic <- L0REG(t(data_grn),
         #   regulators = colnames(data_grn),
         #   targets = colnames(data_grn), penalty = "L0"
         # )
-        # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0, truth_network, 1000)
-        # AUROC_L0REG_L0_S <- AUCresult_L0REG$AUROC
-        # AUROC_L0REG_L0_S
+        # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0Dynamic, truth_network, 1000)
+        # AUROC_L0Dynamic_S <- AUCresult_L0REG$AUROC
+        # AUROC_L0Dynamic_S
         # --------------------------------------------------
-        L0REG_L0L2 <- L0REG(t(data_grn),
+        L0DynamicL2 <- L0REG(t(data_grn),
           regulators = colnames(data_grn),
           targets = colnames(data_grn),
           # maxSuppSize = 5,
           penalty = "L0L2"
         )
-        write.table(L0REG_L0L2,
+        write.table(L0DynamicL2,
           paste0(output, "GRN_L0L2.txt"),
           sep = "\t",
           quote = F,
@@ -251,12 +251,12 @@ for (j in 1:length(data_path)) {
         )
         AUROC_L0L2 <- calcAUROC(evaluationObject)
         AUPRC_L0L2 <- calcAUPR(evaluationObject)
-        # L0REG_L0L2 <- L0REG(t(data_grn),
+        # L0DynamicL2 <- L0REG(t(data_grn),
         #   # regulators = colnames(data_grn),
         #   targets = colnames(data_grn), penalty = "L0L2"
         # )
-        # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0REG_L0L2, truth_network, 1000)
-        # AUROC_L0REG_L0L2_S <- AUCresult_L0REG$AUROC
+        # AUCresult_L0REG <- auc_from_ranks_TC_sign(L0DynamicL2, truth_network, 1000)
+        # AUROC_L0DynamicL2_S <- AUCresult_L0REG$AUROC
       }
       # --------------------------------------------------
       if (T) {
@@ -318,18 +318,22 @@ for (j in 1:length(data_path)) {
       }
       # --------------------------------------------------
       evaluation_AUROC <- data.frame(
-        Dataset = paste0(data_path[j], "-2000-", cell_drop[i]),
-        L0REG_L0 = AUROC_L0,
-        L0REG_L0L2 = AUROC_L0L2,
+        Dataset = paste0(data_path[j], "-", cell_num[k], "-", cell_drop[i]),
+        L0Dynamic = AUROC_L0,
+        L0DynamicL2 = AUROC_L0L2,
+        # L0Dynamic_N = AUROC_L0_N,
+        # L0DynamicL2_N = AUROC_L0L2_N,
         GENIE3 = AUROC_GENIE3,
         SINCERITITES = AUROC_SINCERITITES,
         PPCOR = AUROC_PPCOR,
         LEAP = AUROC_LEAP
       )
       evaluation_AUPRC <- data.frame(
-        Dataset = paste0(data_path[j], "-2000-", cell_drop[i]),
-        L0REG_L0 = AUPRC_L0,
-        L0REG_L0L2 = AUPRC_L0L2,
+        Dataset = paste0(data_path[j], "-", cell_num[k], "-", cell_drop[i]),
+        L0Dynamic = AUPRC_L0,
+        L0DynamicL2 = AUPRC_L0L2,
+        # L0Dynamic_N = AUPRC_L0_N,
+        # L0DynamicL2_N = AUPRC_L0L2_N,
         GENIE3 = AUPRC_GENIE3,
         SINCERITITES = AUPRC_SINCERITITES,
         PPCOR = AUPRC_PPCOR,
@@ -359,7 +363,6 @@ if (F) {
   library(pheatmap)
   library(tidyverse)
   library(RColorBrewer)
-
   data_path <- c(
     "dyn-BF-",
     "dyn-BFC",
@@ -368,34 +371,41 @@ if (F) {
     "dyn-LL",
     "dyn-TF"
   )
-  evaluation_infromations_alldatasets <- read.csv(paste0(output, "evaluation_infromations.csv"))
-  head(evaluation_infromations_alldatasets[1:3, 1:3])
+  evaluation_AUROC_all <- read.csv(paste0(output, "evaluation_AUROC.csv"))
+  evaluation_AUROC_all <- evaluation_AUROC_all[, -3]
+  head(evaluation_AUROC_all[1:3, 1:3])
+
   for (d in 1:length(data_path)) {
     dataset <- data_path[d]
-    evaluation_infromations_dataset <- evaluation_infromations_alldatasets[grep(dataset, evaluation_infromations_alldatasets$Dataset), ]
-    methods_barplot_all <- evaluation_infromations_dataset %>%
+    evaluation_AUROC_dataset <- evaluation_AUROC_all[grep(dataset, evaluation_AUROC_all$Dataset), ]
+    methods_barplot_all <- evaluation_AUROC_dataset %>%
       as.data.frame() %>%
       pivot_longer(
-        cols = 2:c(ncol(evaluation_infromations_dataset)),
-        names_to = "Methods",
+        cols = 2:c(ncol(evaluation_AUROC_dataset)),
+        names_to = "Method",
         values_to = "AUROC"
       )
 
+    methods <- names(evaluation_AUROC_dataset[, -1])
+    methods_barplot_all$Method <- factor(methods_barplot_all$Method,
+      levels = methods
+    )
     my_comparisons <- list(
-      c("L0REG_L0", "GENIE3"),
-      c("L0REG_L0", "PPCOR"),
-      c("L0REG_L0", "SINCERITITES"),
-      c("L0REG_L0", "LEAP")
+      c("L0Dynamic", "GENIE3"),
+      c("L0Dynamic", "SINCERITITES"),
+      c("L0Dynamic", "PPCOR"),
+      c("L0Dynamic", "LEAP")
     )
 
+    mycol <- c("gray", "#008B00", "#008B8B", "#3366cc", "#104E8B")
     p <- ggplot(
       methods_barplot_all,
-      aes(
-        x = Methods,
-        y = AUROC
-      )
+      aes(x = Method, y = AUROC)
     ) +
-      # guides(fill = guide_legend(title = NULL)) +
+      geom_violin(aes(fill = Method),
+        trim = FALSE
+      ) +
+      geom_boxplot(width = 0.2) +
       stat_compare_means(
         method = "wilcox.test",
         label = "p.signif",
@@ -404,23 +414,11 @@ if (F) {
         sizen = 4,
         color = "#6699cc"
       ) +
-      labs(
-        x = "Methods",
-        y = "AUROC"
-      ) +
-      # stat_summary(
-      #   fun.data = "mean_sdl",
-      #   fun.args = list(mult = 1),
-      #   geom = "pointrange",
-      #   color = "gray"
-      # ) +
-      geom_violin(aes(fill = Methods),
-        trim = FALSE
-      ) +
-      geom_boxplot(width = 0.2) +
+      scale_fill_manual(values = mycol) +
+      # scale_color_manual(values = mycol) +
+      scale_x_discrete(labels = methods) +
+      labs(x = "Methods", y = "AUROC") +
       theme(legend.position = "bottom") +
-      # facet_wrap(~Methods) +
-      # theme_gray() +
       theme_bw() +
       theme(
         axis.text.x = element_text(
@@ -431,56 +429,37 @@ if (F) {
         )
       )
     p
-    ggsave(paste0("Results/Methods-contrast-Synthetic-", dataset, "-1.png"), width = 3, height = 4, dpi = 600)
+    ggsave(paste0("../scGRN-L0_output/output_Synthetic/Methods-contrast-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
 
     # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUROC, colour = Methods)) +
     #   geom_boxplot() +
     #   theme_bw() +
+    #   # scale_x_discrete(labels = methods)+
     #   theme(legend.position = "none")
 
-    P1 <- ggplot(methods_barplot_all, aes(x = Methods, y = AUROC, fill = Methods)) + # ”fill=“设置填充颜色
-      stat_boxplot(geom = "errorbar", width = 0.15, aes(color = "black")) + # 由于自带的箱形图没有胡须末端没有短横线，使用误差条的方式补上
-      geom_boxplot(size = 0.5, fill = "white", outlier.fill = "white", outlier.color = "white") + # size设置箱线图的边框线和胡须的线宽度，fill设置填充颜色，outlier.fill和outlier.color设置异常点的属性
-      geom_jitter(aes(fill = Methods), width = 0.2, shape = 21, size = 2.5) + # 设置为向水平方向抖动的散点图，width指定了向水平方向抖动，不改变纵轴的值
-      scale_fill_manual(values = c("black", "gray", "white", "#c6524a", "#eabf00", "#696969")) + # 设置填充的颜色
-      scale_color_manual(values = c("black", "#2874c5", "#008a00", "#c6524a", "#eabf00", "#696969")) + # 设置散点图的圆圈的颜色为黑色
-      # scale_x_discrete(labels = c("L0-Dynamic", "GENIE3","SINCERITITES"))+
-      ggtitle(" ") + # 设置总的标题
+    P1 <- ggplot(methods_barplot_all, aes(x = Methods, y = AUROC, fill = Methods)) +
+      stat_boxplot(geom = "errorbar", width = 0.15, aes(color = "black")) +
+      geom_boxplot(size = 0.5, fill = "white", outlier.fill = "white", outlier.color = "white") +
+      geom_jitter(aes(fill = Methods), width = 0.2, shape = 21, size = 2.5) +
+      scale_fill_manual(values = mycol) +
+      scale_color_manual(values = mycol) +
+      scale_x_discrete(labels = methods) +
+      ggtitle(" ") +
       theme_bw() +
       theme(legend.position = "bottom") +
-      # theme(legend.position="none",
-      #       axis.text.x=element_text(colour="black",family="Times",size=14), #设置x轴刻度标签的字体属性
-      #       axis.text.y=element_text(family="Times",size=14,face="plain"), #设置x轴刻度标签的字体属性
-      #       axis.title.y=element_text(family="Times",size = 14,face="plain"), #设置y轴的标题的字体属性
-      #       axis.title.x=element_text(family="Times",size = 14,face="plain"), #设置x轴的标题的字体属性
-      #       plot.title = element_text(family="Times",size=15,face="bold",hjust = 0.5), #设置总标题的字体属性
-      #       # panel.grid.major = element_blank(), #不显示网格线
-      #       panel.grid.minor = element_blank())+
       ylab("AUROC") +
-      xlab("Method")
+      xlab("Methods")
     # P1
-    # ggsave("Results/Methods-contrast-1.png", width = 4, height = 4, dpi = 600)
-
-    mycol <- c("black", "gray", "white")
-    results_10nets <- evaluation_infromations_dataset
-    results_10nets$Dataset <- c(
-      "100-1", "100-2", "100-3", "100-4", "100-5", "100-6", "100-7", "100-8", "100-9", "100-10",
-      "200-1", "200-2", "200-3", "200-4", "200-5", "200-6", "200-7", "200-8", "200-9", "200-10",
-      "300-1", "300-2", "300-3", "300-4", "300-5", "300-6", "300-7", "300-8", "300-9", "300-10",
-      "400-1", "400-2", "400-3", "400-4", "400-5", "400-6", "400-7", "400-8", "400-9", "400-10",
-      "500-1", "500-2", "500-3", "500-4", "500-5", "500-6", "500-7", "500-8", "500-9", "500-10"
-    )
-    df_res10 <- melt(results_10nets, id = "Dataset", variable.name = "Method", value.name = "AUROC")
+    df_res10 <- melt(evaluation_AUROC_dataset, id = "Dataset", variable.name = "Method", value.name = "AUROC")
     df_res10$Method <- factor(df_res10$Method,
-      levels = c("L0-Dynamic", "GENIE3", "SINCERITITES"),
-      labels = c("L0-Dynamic", "GENIE3", "SINCERITITES")
+      levels = methods
     )
 
     p2 <- ggplot(df_res10, aes(x = Dataset, y = AUROC, fill = Method)) +
-      geom_bar(stat = "identity", position = position_dodge(), color = "black", width = .6) +
+      geom_bar(stat = "identity", position = position_dodge(), color = "black", width = 0.8) +
       scale_fill_manual(values = mycol) +
-      # geom_errorbar(aes(ymin=AUROC - Sd, ymax=AUROC + Sd), position = position_dodge(.6), width=.2)
-      scale_x_discrete(labels = results_10nets$Dataset) +
+      # geom_errorbar(aes(ymin=AUROC - 0.1, ymax=AUROC + 0.1), position = position_dodge(.6), width=.2)+
+      scale_x_discrete(labels = evaluation_AUROC_dataset$Dataset) +
       theme_bw() +
       theme(
         axis.text.x = element_text(
@@ -491,6 +470,6 @@ if (F) {
         )
       )
     p2
-    ggsave(paste0("Results/Methods-contrast-Synthetic-", dataset, "-2.png"), width = 8, height = 4, dpi = 600)
+    ggsave(paste0("../scGRN-L0_output/output_Synthetic/Methods-contrast-", dataset, "-2.png"), width = 15, height = 4, dpi = 600)
   }
 }

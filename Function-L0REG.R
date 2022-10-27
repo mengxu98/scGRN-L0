@@ -90,6 +90,7 @@ L0REG <- function(matrix,
         # Set the ones that were zero to zero anyway
         wghts[zeros] <- 0
       }
+
       if (sum(wghts) == 0 & length(wghts) != nrow(matrix)) {
         weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = 0)
         # weightd <- data.frame(regulatoryGene = regulators[i], targetGene = colnames(X), weight = 0)

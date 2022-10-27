@@ -143,6 +143,12 @@ for (j in 1:length(data_path)) {
         weightdf <- getLinkList(weightMat)
         names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
         write.table(weightdf, file = paste0(output, "GRN_GENIE3.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
+        ground_truth_simulation(
+          intput = paste0(output, "GRN_GENIE3.txt"),
+          output = output,
+          dataset_dir = simulation_data_dir,
+          file = "refNetwork.csv"
+        )
         evaluationObject <- prepareEval(paste0(output, "GRN_GENIE3.txt"),
           paste0(paste0(output, "ground_truth.tsv")),
           totalPredictionsAccepted = 100000
@@ -185,7 +191,7 @@ for (j in 1:length(data_path)) {
       if (T) {
         L0REG_L0 <- L0REG(t(data_grn),
           regulators = colnames(data_grn),
-          targets = colnames(data_grn), 
+          targets = colnames(data_grn),
           maxSuppSize = 2,
           penalty = "L0"
         )
@@ -340,8 +346,8 @@ for (j in 1:length(data_path)) {
   evaluation_AUPRC_all <- rbind.data.frame(evaluation_AUPRC_all, evaluation_AUPRC_two)
 }
 
-write.csv(evaluation_AUROC_all[, -1], paste0(output, "evaluation_AUROC.csv"), row.names = F)
-write.csv(evaluation_AUPRC_all[, -1], paste0(output, "evaluation_AUPRC.csv"), row.names = F)
+write.csv(evaluation_AUROC_all, paste0(output, "evaluation_AUROC.csv"), row.names = F)
+write.csv(evaluation_AUPRC_all, paste0(output, "evaluation_AUPRC.csv"), row.names = F)
 
 if (F) {
   library(patchwork)

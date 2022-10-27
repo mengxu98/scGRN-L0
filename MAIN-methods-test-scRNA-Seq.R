@@ -288,11 +288,12 @@ for (j in 1:length(data_path)) {
   ) %>% as.matrix()
   PseudoTime <- data_GENIE3[, ncol(data_GENIE3)]
   data_GENIE3 <- data_GENIE3[, -ncol(data_GENIE3)]
+  dim(data_GENIE3)
   if (T) {
     source("Function-L0REG.R")
     L0REG_L0 <- L0REG(
       matrix = t(data_GENIE3),
-      regulators = tfs$TF[100:150],
+      regulators = tfs$TF,
       targets = colnames(data_GENIE3),
       penalty = "L0"
     )

@@ -58,32 +58,24 @@ L0REG <- function(matrix,
         gammaMin = 0.0001, gammaMax = 10
       )
       temp <- as.vector(temp)
-
       wghts <- temp[-1]
       wghts <- abs(wghts)
       # wghts <- wghts / max(wghts)
-
       if (F) {
         wghts <- wghts / max(wghts)
-
-        # Now sort the wghts
         indices <- sort.list(wghts, decreasing = TRUE)
-        # Check for zero entries
         zeros <- which(wghts == 0)
-        # Now replace by ones that are in the top and are non-zero
         wghts[1:length(wghts)] <- 0
         wghts[indices[1:(0.25 * length(wghts))]] <- 1
         # wghts[indices[1:5]] <- 1
-        # Set the ones that were zero to zero anyway
         wghts[zeros] <- 0
       }
-
       if (sum(wghts) == 0 & length(wghts) != nrow(matrix)) {
-        weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = 0)
-        # weightd <- data.frame(regulatoryGene = regulators[i], targetGene = colnames(X), weight = 0)
+        weightd <- data.frame(regulatoryGene = colnames(X), targetGene = targets[i], weight = 0)
+        # weightd <- data.frame(regulatoryGene = targets[i], targetGene = colnames(X), weight = 0)
       } else {
-        weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = wghts)
-        # weightd <- data.frame(regulatoryGene = regulators[i], targetGene = colnames(X), weight = wghts)
+        weightd <- data.frame(regulatoryGene = colnames(X), targetGene = targets[i], weight = wghts)
+        # weightd <- data.frame(regulatoryGene = targets[i], targetGene = colnames(X), weight = wghts)
       }
       # weightd$weight <- weightd$weight / max(weightd$weight)
       weightdf <- rbind.data.frame(weightdf, weightd)
@@ -104,7 +96,6 @@ L0REG <- function(matrix,
         gammaMin = 0.0001, gammaMax = 10
       )
       temp <- as.vector(temp)
-
       wghts <- temp[-1]
       wghts <- abs(wghts)
       # wghts <- wghts / max(wghts)

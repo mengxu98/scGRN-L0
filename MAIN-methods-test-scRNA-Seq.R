@@ -34,17 +34,14 @@ output <- "output_scRNA-Seq/"
 hnetwork_data_dir <- "../scGRN-L0_data/BEELINE-Networks/Networks/human/"
 mnetwork_data_dir <- "../scGRN-L0_data/BEELINE-Networks/Networks/mouse/"
 tfs <- read.csv("../scGRN-L0_data/BEELINE-Networks/human-tfs.csv")
-tfs <- tfs$TF
+tfs <- as.data.frame(tfs$TF)
 evaluation_infromations_all <- c()
 for (j in 1:length(data_path)) {
   simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/scRNA-Seq/", data_path[j], "/")
-
   simulation_data_file <- "ExpressionData.csv"
   simulation_PseudoTime_file <- "PseudoTime.csv"
-
   simulation_data <- read.csv(paste0(simulation_data_dir, simulation_data_file), row.names = 1)
   head(simulation_data[1:3, 1:3])
-
   simulation_PseudoTime <- read.csv(paste0(simulation_data_dir, simulation_PseudoTime_file), row.names = 1)
   if (ncol(simulation_PseudoTime) > 1) {
     simulation_data_news <- c()
@@ -287,10 +284,11 @@ for (j in 1:length(data_path)) {
   }
 
   if (T) {
-    source("DynamicGRNPipe_3.constructionNetwork_L0.R")
-    L0REG_L0 <- L0REG(t(data_GENIE3),
-      regulators = colnames(data_GENIE3),
-      targets = colnames(data_GENIE3), penalty = "L0"
+    source("Function-L0REG.R")
+    L0REG_L0 <- L0REG(matrix= t(data_GENIE3),
+      regulators = tfs$TF[100:200],
+      targets = colnames(data_GENIE3), 
+      penalty = "L0"
     )
     write.table(L0REG_L0,
       paste0(output, "output_L0GRN.txt"),

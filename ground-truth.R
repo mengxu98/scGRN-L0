@@ -104,7 +104,7 @@ ground_truth_m <- function(intput, output, dataset_dir, database = "STRING") {
     if (database == "STRING") {
       dataset <- read.csv(paste0(dataset_dir, "STRING-network.csv"))
     } else if (database == "ChIP-seq") {
-      dataset <- read.csv(paste0(dataset_dir, "Non-specific-ChIP-seq-network.csv"))
+      dataset <- read.csv(paste0(dataset_dir, "Non-Specific-ChIP-seq-network.csv"))
     } else if (database == "HepG2-ChIP-seq") {
       dataset <- read.csv(paste0(dataset_dir, "mDC-ChIP-seq-network.csv"))
     } else if (database == "ChIP-seq") {
@@ -115,12 +115,12 @@ ground_truth_m <- function(intput, output, dataset_dir, database = "STRING") {
       dataset <- read.csv(paste0(dataset_dir, "mHSC-ChIP-seq-network.csv"))
     } else if (database == "All") {
       dataset1 <- read.csv(paste0(dataset_dir, "STRING-network.csv"))
-      dataset2 <- read.csv(paste0(dataset_dir, "Non-specific-ChIP-seq-network.csv"))
+      dataset2 <- read.csv(paste0(dataset_dir, "Non-Specific-ChIP-seq-network.csv"))
       dataset3 <- read.csv(paste0(dataset_dir, "mDC-ChIP-seq-network.csv"))
       dataset4 <- read.csv(paste0(dataset_dir, "mESC-ChIP-seq-network.csv"))
       dataset5 <- read.csv(paste0(dataset_dir, "mESC-lofgof-network.csv"))
       dataset6 <- read.csv(paste0(dataset_dir, "mHSC-ChIP-seq-network.csv"))
-      dataset <- rbind.data.frame(dataset1, dataset2, dataset3, dataset4, dataset5, dataset6)
+      dataset <- rbind.data.frame(dataset1[,1:2], dataset2[,1:2], dataset3[,1:2], dataset4[,1:2], dataset5[,1:2], dataset6[,1:2])
     }
 
     if (!exists("output")) {

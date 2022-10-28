@@ -297,15 +297,23 @@ for (j in 1:length(data_path)) {
       targets = colnames(data_GENIE3),
       penalty = "L0"
     )
-    write.table(L0REG_L0,
-      paste0(output, "output_L0GRN.txt"),
+    write.table(L0REG_L0[1:100000, ],
+      paste0("../scGRN-L0_output/output_scRNA-Seq/output_L0GRN.txt"),
       sep = "\t",
       quote = F,
       row.names = F,
       col.names = F
     )
-    evaluationObject <- prepareEval(paste0(output, "output_L0GRN.txt"),
-      paste0(paste0(output, "ground_truth.tsv")),
+
+    ground_truth_m(
+      intput = paste0("../scGRN-L0_output/output_scRNA-Seq/output_L0GRN.txt"),
+      output = "../scGRN-L0_output/output_scRNA-Seq/",
+      dataset_dir = mnetwork_data_dir,
+      database = "All"
+    )
+
+    evaluationObject <- prepareEval(paste0("../scGRN-L0_output/output_scRNA-Seq/output_L0GRN.txt"),
+      paste0(paste0("../scGRN-L0_output/output_scRNA-Seq/ground_truth.tsv")),
       totalPredictionsAccepted = 100000
     )
 
@@ -349,6 +357,37 @@ for (j in 1:length(data_path)) {
     AUROC_L0REG_L0L2_S <- AUCresult_L0REG$AUROC
     AUROC_L0REG_L0L2_S
   }
+
+  library(ppcor)
+  inputExpr <- t(data_GENIE3)
+  geneNames <- rownames(inputExpr)
+  rownames(inputExpr) <- c(geneNames)
+  pcorResults <- pcor(x = t(as.matrix(inputExpr)), method = "spearman")
+  DF <- data.frame(
+    Gene1 = geneNames[c(row(pcorResults$estimate))], Gene2 = geneNames[c(col(pcorResults$estimate))],
+    corVal = c(pcorResults$estimate), pValue = c(pcorResults$p.value)
+  )
+  outDF <- DF[order(DF$corVal, decreasing = TRUE), ]
+  outDF <- outDF[-(1:length(geneNames)), ]
+  write.table(outDF[1:100000, ],
+    paste0("../scGRN-L0_output/output_scRNA-Seq/GRN_PPCOR.txt"),
+    sep = "\t",
+    quote = F,
+    row.names = F,
+    col.names = F
+  )
+  ground_truth_m(
+      intput = paste0("../scGRN-L0_output/output_scRNA-Seq/GRN_PPCOR.txt"),
+      output = "../scGRN-L0_output/output_scRNA-Seq/",
+      dataset_dir = mnetwork_data_dir,
+      database = "All"
+    )
+  evaluationObject <- prepareEval(paste0("../scGRN-L0_output/output_scRNA-Seq/GRN_PPCOR.txt"),
+    paste0(paste0("../scGRN-L0_output/output_scRNA-Seq/ground_truth.tsv")),
+    totalPredictionsAccepted = 100000
+  )
+  AUROC_PPCOR <- calcAUROC(evaluationObject)
+  AUPRC_PPCOR <- calcAUPR(evaluationObject)
 
   # --------------------------------------------------
   evaluation_infromation <- data.frame(

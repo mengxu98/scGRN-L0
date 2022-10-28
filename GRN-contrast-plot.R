@@ -76,6 +76,7 @@ if (F) {
                 )
             )
         p
+        
         ggsave(paste0("../scGRN-L0_output/output_Curated/dataset/Methods-contrast-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
 
         # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUROC, colour = Methods)) +
@@ -98,9 +99,7 @@ if (F) {
             xlab("Methods")
         # P1
         df_res10 <- melt(evaluation_AUROC_dataset, id = "Dataset", variable.name = "Method", value.name = "AUROC")
-        df_res10$Method <- factor(df_res10$Method,
-            levels = methods
-        )
+        df_res10$Method <- factor(df_res10$Method, levels = methods)
 
         p2 <- ggplot(df_res10, aes(x = Dataset, y = AUROC, fill = Method)) +
             geom_bar(stat = "identity", position = position_dodge(), color = "black", width = 0.8) +
@@ -117,20 +116,22 @@ if (F) {
                 )
             )
         p2
-        ggsave(paste0("../scGRN-L0_output/output_Curated/dataset/Methods-contrast-", dataset, "-2.png"), width = 15, height = 4, dpi = 600)
+        ggsave(paste0("../scGRN-L0_output/output_Curated/dataset/Methods-contrast-", dataset, "-2.png"),
+            width = 15, height = 4, dpi = 600
+        )
     }
 
     for (c in 1:length(data_path)) {
         dataset <- cell_num[c]
-        evaluation_AUROC_dataset <- evaluation_AUROC_all[grep(dataset, evaluation_AUROC_all$Dataset), ]
-        methods_barplot_all <- evaluation_AUROC_dataset %>%
+        evaluation_AUROC <- evaluation_AUROC_all[grep(dataset, evaluation_AUROC_all$Dataset), ]
+        methods_barplot_all <- evaluation_AUROC %>%
             as.data.frame() %>%
             pivot_longer(
-                cols = 2:c(ncol(evaluation_AUROC_dataset)),
+                cols = 2:c(ncol(evaluation_AUROC)),
                 names_to = "Method",
                 values_to = "AUROC"
             )
-        methods <- names(evaluation_AUROC_dataset[, -1])
+        methods <- names(evaluation_AUROC[, -1])
         methods_barplot_all$Method <- factor(methods_barplot_all$Method,
             levels = methods
         )

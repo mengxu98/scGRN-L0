@@ -32,7 +32,7 @@ LO_fit <- function(X, Y,
 
 L0REG <- function(matrix,
                   penalty = penalty,
-                  targets = rownames(matrix),
+                  targets = NULL,
                   regulators = NULL,
                   maxSuppSize = NULL) {
   library(L0Learn)
@@ -40,6 +40,9 @@ L0REG <- function(matrix,
   weightdf <- c()
   if (is.null(maxSuppSize)) {
     maxSuppSize <- dim(matrix)[2]
+  }
+  if(is.null(targets)){
+    targets <- rownames(matrix)
   }
   if (!is.null(regulators)) {
     matrix_reg <- matrix[, regulators]
@@ -60,17 +63,15 @@ L0REG <- function(matrix,
       temp <- as.vector(temp)
       wghts <- temp[-1]
       wghts <- abs(wghts)
-      # wghts <- wghts / max(wghts)
+      wghts <- wghts / max(wghts)
       if (F) {
         wghts <- wghts / max(wghts)
         indices <- sort.list(wghts, decreasing = TRUE)
-        zeros <- which(wghts == 0)
-        wghts[1:length(wghts)] <- 0
-        wghts[indices[1:(0.25 * length(wghts))]] <- 1
-        # wghts[indices[1:5]] <- 1
+        zeros <- which(wghts <= 0.8)
+        # wghts[1:length(wghts)] <- 1
         wghts[zeros] <- 0
       }
-      if (sum(wghts) == 0 & length(wghts) != nrow(matrix)) {
+      if (length(wghts) != (ncol(matrix)-1)) {
         weightd <- data.frame(regulatoryGene = colnames(X), targetGene = targets[i], weight = 0)
         # weightd <- data.frame(regulatoryGene = targets[i], targetGene = colnames(X), weight = 0)
       } else {
@@ -98,21 +99,15 @@ L0REG <- function(matrix,
       temp <- as.vector(temp)
       wghts <- temp[-1]
       wghts <- abs(wghts)
-      # wghts <- wghts / max(wghts)
+      wghts <- wghts / max(wghts)
       if (F) {
         wghts <- wghts / max(wghts)
-        # Now sort the wghts
         indices <- sort.list(wghts, decreasing = TRUE)
-        # Check for zero entries
-        zeros <- which(wghts == 0)
-        # Now replace by ones that are in the top and are non-zero
-        wghts[1:length(wghts)] <- 0
-        wghts[indices[1:(0.25 * length(wghts))]] <- 1
-        # wghts[indices[1:5]] <- 1
-        # Set the ones that were zero to zero anyway
+        zeros <- which(wghts <= 0.8)
+        # wghts[1:length(wghts)] <- 1
         wghts[zeros] <- 0
       }
-      if (sum(wghts) == 0 & length(wghts) != nrow(matrix)) {
+      if (length(wghts) != (ncol(matrix)-1)) {
         weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = 0)
         # weightd <- data.frame(regulatoryGene = regulators[i], targetGene = colnames(X), weight = 0)
       } else {

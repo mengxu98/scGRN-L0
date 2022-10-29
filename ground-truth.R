@@ -52,7 +52,7 @@ ground_truth_h <- function(intput, output, dataset_dir, database = "STRING") {
       dataset2 <- read.csv(paste0(dataset_dir, "Non-specific-ChIP-seq-network.csv"))
       dataset3 <- read.csv(paste0(dataset_dir, "HepG2-ChIP-seq-network.csv"))
       dataset4 <- read.csv(paste0(dataset_dir, "hESC-ChIP-seq-network.csv"))
-      dataset <- rbind.data.frame(dataset1, dataset2, dataset3, dataset4)
+      dataset <- rbind.data.frame(dataset1[, 1:2], dataset2[, 1:2], dataset3[, 1:2], dataset4[, 1:2])
     }
 
     if (!exists("output")) {
@@ -78,6 +78,7 @@ ground_truth_h <- function(intput, output, dataset_dir, database = "STRING") {
           pred_tf_genes <- rbind.data.frame(pred_tf_genes, pred_tf_gene)
         }
       }
+
       write.table(pred_tf_genes,
         paste0(output, "ground_pred.txt"),
         quote = F,
@@ -120,7 +121,7 @@ ground_truth_m <- function(intput, output, dataset_dir, database = "STRING") {
       dataset4 <- read.csv(paste0(dataset_dir, "mESC-ChIP-seq-network.csv"))
       dataset5 <- read.csv(paste0(dataset_dir, "mESC-lofgof-network.csv"))
       dataset6 <- read.csv(paste0(dataset_dir, "mHSC-ChIP-seq-network.csv"))
-      dataset <- rbind.data.frame(dataset1[,1:2], dataset2[,1:2], dataset3[,1:2], dataset4[,1:2], dataset5[,1:2], dataset6[,1:2])
+      dataset <- rbind.data.frame(dataset1[, 1:2], dataset2[, 1:2], dataset3[, 1:2], dataset4[, 1:2], dataset5[, 1:2], dataset6[, 1:2])
     }
 
     if (!exists("output")) {
@@ -216,39 +217,39 @@ ground_truth_simulation <- function(intput, output, dataset_dir, file) {
 }
 
 # For T cell dynamic regulation
-ground_truth_T <- function(input, dataset,output=NULL) {
-    if (!exists("input")) {
-      message("----- Regulatory network does not exist! Please check input or dataset! -----")
-    } else {
-      grn <- input
-      tf_genes <- c()
-      pred_tf_genes <- c()
-      for (i in 1:nrow(grn)) {
-        if (grn$regulatoryGene[i] != grn$targetGene[i]) {
-          dataset_list <- dataset$target[which(dataset$tf == grn$regulatoryGene[i])]
-          if (grn$targetGene[i] %in% dataset_list) {
-            tf_gene <- data.frame(Gene1 = grn$regulatoryGene[i], Gene2 = grn$targetGene[i], label = "1")
-          } else {
-            tf_gene <- data.frame(Gene1 = grn$regulatoryGene[i], Gene2 = grn$targetGene[i], label = "0")
-          }
-          tf_genes <- rbind.data.frame(tf_genes, tf_gene)
-          pred_tf_gene <- data.frame(Gene1 = grn$regulatoryGene[i], Gene2 = grn$targetGene[i], rank = i)
-          pred_tf_genes <- rbind.data.frame(pred_tf_genes, pred_tf_gene)
+ground_truth_T <- function(input, dataset, output = NULL) {
+  if (!exists("input")) {
+    message("----- Regulatory network does not exist! Please check input or dataset! -----")
+  } else {
+    grn <- input
+    tf_genes <- c()
+    pred_tf_genes <- c()
+    for (i in 1:nrow(grn)) {
+      if (grn$regulatoryGene[i] != grn$targetGene[i]) {
+        dataset_list <- dataset$target[which(dataset$tf == grn$regulatoryGene[i])]
+        if (grn$targetGene[i] %in% dataset_list) {
+          tf_gene <- data.frame(Gene1 = grn$regulatoryGene[i], Gene2 = grn$targetGene[i], label = "1")
+        } else {
+          tf_gene <- data.frame(Gene1 = grn$regulatoryGene[i], Gene2 = grn$targetGene[i], label = "0")
         }
+        tf_genes <- rbind.data.frame(tf_genes, tf_gene)
+        pred_tf_gene <- data.frame(Gene1 = grn$regulatoryGene[i], Gene2 = grn$targetGene[i], rank = i)
+        pred_tf_genes <- rbind.data.frame(pred_tf_genes, pred_tf_gene)
       }
-      write.table(pred_tf_genes,
-                  paste0(output, "ground_pred.txt"),
-                  quote = F,
-                  sep = "\t",
-                  row.names = F,
-                  col.names = F
-      )
-      write.table(tf_genes,
-                  paste0(output, "ground_truth.tsv"),
-                  quote = F,
-                  sep = "\t",
-                  row.names = F,
-                  col.names = F
-      )
     }
+    write.table(pred_tf_genes,
+      paste0(output, "ground_pred.txt"),
+      quote = F,
+      sep = "\t",
+      row.names = F,
+      col.names = F
+    )
+    write.table(tf_genes,
+      paste0(output, "ground_truth.tsv"),
+      quote = F,
+      sep = "\t",
+      row.names = F,
+      col.names = F
+    )
+  }
 }

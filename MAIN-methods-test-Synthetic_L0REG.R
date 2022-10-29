@@ -189,10 +189,10 @@ for (j in 1:length(data_path)) {
         AUPRC_L0L2_N <- calcAUPR(evaluationObject)
       }
       if (T) {
-        L0Dynamic <- L0REG(t(data_grn),
+        L0Dynamic <- L0REG(matrix = t(data_grn),
           regulators = colnames(data_grn),
           targets = colnames(data_grn),
-          maxSuppSize = 2,
+          # maxSuppSize = 2,
           penalty = "L0"
         )
         write.table(L0Dynamic,

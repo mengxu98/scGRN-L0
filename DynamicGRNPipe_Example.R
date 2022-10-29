@@ -3,8 +3,8 @@
 # Example
 # The example data can be downloaded at https://www.jianguoyun.com/p/DeYtp_AQ1bXiCRjXvYwE
 # ====0.input====
-load(file = "DynamicGRNPipe_ExampleData/clusterSig.RData") # genes used to construct cell trajectories
-load(file = "DynamicGRNPipe_ExampleData/CD8TCellExp.norm.RData") # expression profile and cell annotation #from GSE99254
+load(file = "../scGRN-L0_data/DynamicGRNPipe_ExampleData/clusterSig.RData") # genes used to construct cell trajectories
+load(file = "../scGRN-L0_data/DynamicGRNPipe_ExampleData/CD8TCellExp.norm.RData") # expression profile and cell annotation #from GSE99254
 
 # ====1. Construction of cell state transformation trajectory (slingshot)====
 library(slingshot)

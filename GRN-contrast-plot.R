@@ -1,5 +1,5 @@
 
-if (F) {
+if (T) {
     library(patchwork)
     library(ggplot2)
     library(reshape2)
@@ -212,8 +212,7 @@ if (F) {
 }
 
 # --------------------------------------------------
-
-if (F) {
+if (T) {
     library(patchwork)
     library(ggplot2)
     library(reshape2)

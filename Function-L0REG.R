@@ -1,5 +1,23 @@
 
 
+if (F) {
+  fit <- L0Learn.fit(X, Y,
+    penalty = penalty,
+    maxSuppSize = maxSuppSize
+  )
+  fit_inf <- as.data.frame(print(fit))
+  fit_inf <- fit_inf[order(fit_inf$suppSize, decreasing = TRUE), ]
+  lambda <- fit_inf$lambda[1]
+  gamma <- fit_inf$gamma[1]
+  # lambda <- fit_inf$lambda[ceiling(nrow(fit_inf))]
+  # gamma <- fit_inf$gamma[ceiling(nrow(fit_inf))]
+  temp <- coef(fit,
+    lambda = lambda,
+    gamma = gamma
+  )
+  temp <- as.vector(temp)
+}
+
 LO_fit <- function(X, Y,
                    penalty = penalty,
                    nFolds = 10,
@@ -41,7 +59,7 @@ L0REG <- function(matrix,
   if (is.null(maxSuppSize)) {
     maxSuppSize <- dim(matrix)[2]
   }
-  if(is.null(targets)){
+  if (is.null(targets)) {
     targets <- rownames(matrix)
   }
   if (!is.null(regulators)) {
@@ -71,7 +89,7 @@ L0REG <- function(matrix,
         # wghts[1:length(wghts)] <- 1
         wghts[zeros] <- 0
       }
-      if (length(wghts) != (ncol(matrix)-1)) {
+      if (length(wghts) != (ncol(matrix) - 1)) {
         weightd <- data.frame(regulatoryGene = colnames(X), targetGene = targets[i], weight = 0)
         # weightd <- data.frame(regulatoryGene = targets[i], targetGene = colnames(X), weight = 0)
       } else {
@@ -107,7 +125,7 @@ L0REG <- function(matrix,
         # wghts[1:length(wghts)] <- 1
         wghts[zeros] <- 0
       }
-      if (length(wghts) != (ncol(matrix)-1)) {
+      if (length(wghts) != (ncol(matrix) - 1)) {
         weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = 0)
         # weightd <- data.frame(regulatoryGene = regulators[i], targetGene = colnames(X), weight = 0)
       } else {
@@ -140,24 +158,6 @@ if (F) {
         gammaMin = 0.0001, gammaMax = 10
       )
       temp <- as.vector(temp)
-
-      if (F) {
-        fit <- L0Learn.fit(X, Y,
-          penalty = penalty,
-          maxSuppSize = maxSuppSize
-        )
-        fit_inf <- as.data.frame(print(fit))
-        fit_inf <- fit_inf[order(fit_inf$suppSize, decreasing = TRUE), ]
-        lambda <- fit_inf$lambda[1]
-        gamma <- fit_inf$gamma[1]
-        # lambda <- fit_inf$lambda[ceiling(nrow(fit_inf))]
-        # gamma <- fit_inf$gamma[ceiling(nrow(fit_inf))]
-        temp <- coef(fit,
-          lambda = lambda,
-          gamma = gamma
-        )
-        temp <- as.vector(temp)
-      }
     }
   } else {
     regulators <- rownames(matrix)

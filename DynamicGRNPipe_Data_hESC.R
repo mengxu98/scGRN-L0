@@ -72,18 +72,12 @@ Windows1 <- list(W1 = W1, W2 = W2, W3 = W3, W4 = W4)
 
 
 
-
-
-
-
-
-
 cellTypesList <- unique(cellTypes$Time)
-dataCellType <- data[tfs$TF[150:200], grep(cellTypesList[1], colnames(data))] %>% na.omit()
+dataCellType <- data[tfs$TF[1:500], grep(cellTypesList[1], colnames(data))] %>% na.omit()
 L0REG_L0 <- L0REG(
   matrix = dataCellType,
-  regulators = tfs$TF,
-  targets = colnames(data_GENIE3),
+  # regulators = tfs$TF,
+  # targets = colnames(data_GENIE3),
   penalty = "L0"
 )
 write.table(L0REG_L0,

@@ -87,9 +87,12 @@ if (F) {
     path = paste0("Results/"),
     width = 25, height = 15, units = "cm"
   )
+  
 }
 
-GSE131907_B <- as.matrix(seu_obj_data@assays$RNA@counts)
+# ====0.input====
+load(file = "DynamicGRNPipe_ExampleData/clusterSig.RData") # genes used to construct cell trajectories
+matrix <- as.matrix(seu_obj_data@assays$RNA@counts)
 meta <- seu_obj_data@meta.data
 CellInfor_B <- data.frame(
   UniqueCell_ID = colnames(seu_obj_data),
@@ -97,16 +100,12 @@ CellInfor_B <- data.frame(
   majorCluster = meta$main_cell_type,
   sampleType = meta$tissue_type
 )
-# ====0.input====
-load(file = "DynamicGRNPipe_ExampleData/clusterSig.RData") # genes used to construct cell trajectories
-# load(file = "../scGRN-L0_data/GSE131907_B.RData") # expression profile and cell annotation #from GSE99254
-
 # ==== 1. Construction of cell state transformation trajectory (slingshot) ====
 library(slingshot)
 source("DynamicGRNPipe_1.slingshot_B.R")
 source("DynamicGRNPipe_Function.R")
 t.slingshot <- slingshot_run(
-  scRNAseq.Exp = GSE131907_B,
+  scRNAseq.Exp = matrix,
   clusterLabels = CellInfor_B$majorCluster,
   ordergene = unlist(clusterSig),
   RMmethod = "pca",
@@ -114,7 +113,7 @@ t.slingshot <- slingshot_run(
   start.cluster = "Follicular B cells" # cannot determine what type of cell types as the first type
 )
 CellInfor.trajectory <- cbind.data.frame(CellInfor_B, t.slingshot$data)
-CD8TCellExp.trajectory <- GSE131907_B
+CD8TCellExp.trajectory <- matrix
 
 # ====2.slinding windows based on pseudotime and anotation of cells====
 source("DynamicGRNPipe_2.CellWindowing.R")
@@ -170,6 +169,83 @@ W2 <- unlist(bincells[2:3])
 W3 <- unlist(bincells[3:4])
 W4 <- unlist(bincells[4:5])
 Windows1 <- list(W1 = W1, W2 = W2, W3 = W3, W4 = W4)
+
+if (F) {
+  cellInfor1 <- cellInfor[order(cellInfor$PseTime.Lineage1),]
+  samples_labels <- c()
+  for (i in 1:10) {
+    s <- floor(length(cellInfor1$PseTime.Lineage1)*(i-1)/10)+1
+    e <- floor(length(cellInfor1$PseTime.Lineage1)*i/10)
+    sample <- cellInfor1$UniqueCell_ID[s:e]
+    samples_label <- data.frame(cell_id=sample,time_label=paste0("t",i))
+    samples_labels <- rbind.data.frame(samples_labels,samples_label)
+  }
+  
+  metadata <- seu_obj_data@meta.data
+  metadata$cell_id <- rownames(metadata)
+  metadata$sample_id <- metadata$orig.ident
+  metadata <- left_join(x = metadata, y = samples_labels, by = "cell_id")
+  rownames(metadata) <- metadata$cell_id
+  seu_obj_data <- AddMetaData(seu_obj_data, metadata = metadata)
+  
+  
+  Cellratio1 <- prop.table(table(seu_obj_data$main_cell_type, seu_obj_data$time_label), margin = 2)#计算各组样本不同细胞群比例
+  Cellratio1
+  Cellratio1 <- as.data.frame(table(seu_obj_data$main_cell_type, seu_obj_data$time_label))
+  Cellratio1 <- as.data.frame(Cellratio1)
+  colourCount1 = length(unique(Cellratio1$Var1))
+  library(ggplot2)
+  ggplot(Cellratio1) + 
+    geom_bar(aes(x =Var2, y= Freq, fill = Var1),position="dodge",stat = "identity",width = 0.7,size = 0.5,colour = '#222222')+ 
+    theme_classic() +
+    labs(x='Sample',y = 'Ratio')+
+    scale_x_discrete(labels = c("t1","t2","t3","t4","t5","t6","t7","t8","t9","t10"))+
+    # coord_flip()+
+    theme(panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"))
+  
+  Cellratio2 <- prop.table(table(seu_obj_data$tissue_type, seu_obj_data$time_label), margin = 2)#计算各组样本不同细胞群比例
+  Cellratio2
+  
+  Cellratio2 <- as.data.frame(table(seu_obj_data$tissue_type, seu_obj_data$time_label))
+  Cellratio2 <- as.data.frame(Cellratio2)
+  colourCount2 = length(unique(Cellratio2$Var1))
+  library(ggplot2)
+  ggplot(Cellratio2) + 
+    geom_bar(aes(x =Var2, y= Freq, fill = Var1),position="dodge",stat = "identity",width = 0.7,size = 0.5,colour = '#222222')+ 
+    theme_classic() +
+    labs(x='Sample',y = 'Ratio')+
+    scale_x_discrete(labels = c("t1","t2","t3","t4","t5","t6","t7","t8","t9","t10"))+
+    # coord_flip()+
+    theme(panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"))
+  
+  cell_types <- FetchData(seu_obj_data, vars = c("sample_id", "main_cell_type", "time_label")) %>%
+    mutate(main_cell_type = factor(main_cell_type, levels = c("Follicular B cells", "Germinal center B cells","Plasma"))) %>%
+    mutate(sample_id = factor(sample_id, levels = rev(c("p018t", "p019t", "p023t", "p024t", "p027t", "p028t",
+                                                        "p030t", "p031t", "p032t", "p033t", "p034t", "p018n",
+                                                        "p019n", "p027n", "p028n", "p029n", "p030n", "p031n",
+                                                        "p032n", "p033n", "p034n"))))
+  
+  ggplot(data = cell_types) + 
+    geom_bar(mapping = aes(x = time_label, fill = main_cell_type, ), position = "fill", width = 0.75) +
+    # scale_fill_manual(values = use_colors) +
+    scale_x_discrete(labels = c("t1","t2","t3","t4","t5","t6","t7","t8","t9","t10"))+
+    coord_flip()
+  
+  seu_obj_data$tissue_type
+  cell_types <- FetchData(seu_obj_data, vars = c("tissue_type", "main_cell_type", "time_label")) %>%
+    mutate(main_cell_type = factor(main_cell_type, levels = c("Follicular B cells", "Germinal center B cells","Plasma"))) %>%
+    mutate(tissue_type = factor(tissue_type, levels = rev(c("Normal", "Tumor"))))
+  
+  ggplot(data = cell_types) + 
+    geom_bar(mapping = aes(x = time_label, fill = tissue_type, ), position = "fill", width = 0.75) +
+    # scale_fill_manual(values = use_colors) +
+    scale_x_discrete(labels = c("t1","t2","t3","t4","t5","t6","t7","t8","t9","t10"))+
+    coord_flip()
+  
+  p <- ggplot(cell_types,aes(x=time_label,y=tissue_type,fill=tissue_type))+geom_bar(position="dodge",stat="identity")
+  p+xlab("time_label") + ylab("tissue_type") + labs(fill="count")
+  
+}
 
 
 # ====3.constructing dynamic networks (GENIE3)======

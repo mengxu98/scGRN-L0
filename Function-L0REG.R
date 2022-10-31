@@ -3,9 +3,12 @@
 if (F) {
   fit <- L0Learn.fit(X, Y,
     penalty = penalty,
-    maxSuppSize = maxSuppSize
+    maxSuppSize = maxSuppSize,
+    nGamma = 5,
+    gammaMin = 0.0001,
+    gammaMax = 10
   )
-  fit_inf <- as.data.frame(print(fit))
+  fit_inf <- print(fit)
   fit_inf <- fit_inf[order(fit_inf$suppSize, decreasing = TRUE), ]
   lambda <- fit_inf$lambda[1]
   gamma <- fit_inf$gamma[1]
@@ -15,6 +18,40 @@ if (F) {
   )
   temp <- as.vector(temp)
 }
+
+tryCatch(
+  {
+    print(12113)
+    temp <- LO_fit(X, Y,
+      penalty = penalty,
+      nFolds = 10, seed = 1,
+      maxSuppSize = maxSuppSize,
+      nGamma = 5,
+      gammaMin = 0.0001,
+      gammaMax = 10
+    )
+    temp <- as.vector(temp)
+  },
+  error = function(e) {
+    print("error")
+    fit <- L0Learn.fit(X, Y,
+      penalty = penalty,
+      maxSuppSize = maxSuppSize,
+      nGamma = 5,
+      gammaMin = 0.0001,
+      gammaMax = 10
+    )
+    fit_inf <- print(fit)
+    fit_inf <- fit_inf[order(fit_inf$suppSize, decreasing = TRUE), ]
+    lambda <- fit_inf$lambda[1]
+    gamma <- fit_inf$gamma[1]
+    temp <- coef(fit,
+      lambda = lambda,
+      gamma = gamma
+    )
+    temp <- as.vector(temp)
+  }
+)
 
 LO_fit <- function(X, Y,
                    penalty = penalty,

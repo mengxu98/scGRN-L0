@@ -1,5 +1,110 @@
 
 
+library(Seurat)
+library(destiny)
+library(slingshot)
+library(plotly)
+library(gam)
+library(RColorBrewer)
+library(EBSeq)
+library(Rtsne)
+load("../scGRN-L0_data/data/seu_obj_B.Rdata")
+
+# Read input files. The input file is from https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE75748
+# Chu2017 <- read.table('../scGRN-L0_data/BEELINE-data/inputs/scRNAseq_preprocessing/data/GSE75748/GSE75748_sc_time_course_ec.csv', sep = ',', header = T, row.names = 1)
+Chu2017 <- as.matrix(seu_obj_data@assays$RNA@counts)
+Chu2017 <- as.matrix(seu_obj_data@assays$RNA@data)
+# ChuCellTypes <- data.frame()
+# for (col in colnames(Chu2017)){
+#   cType <- strsplit(strsplit(col,'[.]')[[1]][2],'b4s_|_')[[1]][1]
+#   ChuCellTypes[col,'Time'] <- cType
+# }
+ChuCellTypes <- seu_obj_data$main_cell_type
+head(Chu2017)
+head(ChuCellTypes)
+# Compute diffusion map projection of the cells
+# The scRNA-seq data were normalized by median-by-ratio normalization
+Sizes <- MedianNorm(Chu2017)
+if (is.na(Sizes[1])) {
+  Sizes <- MedianNorm(Chu2017, alternative = TRUE)
+  message("alternative normalization method is applied")
+}
+Chu2017MedNorm <- GetNormalizedMat(Chu2017, Sizes)
+logExpression <- log2(Chu2017MedNorm + 1)
+geneFiltered <- apply(Chu2017, 1, function(x) {
+  sum(x >= 1) >= 1
+})
+logExpressionFiltered <- logExpression[which(geneFiltered), ]
+logExpressionFiltered <- Chu2017
+# Compute PCA to identify informative genes
+pcaRes <- prcomp(t(logExpressionFiltered), scale. = FALSE)
+dmapRes <- DiffusionMap(t(logExpressionFiltered), distance = "cosine", sigma = 0.25, k = 100)
+rd1 <- as.data.frame(cbind(PC1 = pcaRes$x[, 1], PC2 = pcaRes$x[, 2], PC3 = pcaRes$x[, 3]))
+rd2 <- as.data.frame(cbind(DC1 = dmapRes$DC1, DC2 = dmapRes$DC2))
+plot_ly(as.data.frame(pcaRes$x), x = ~PC1, y = ~PC2, color = ChuCellTypes$Time, colors = brewer.pal(6, "Set1"))
+plot_ly(rd2, x = ~DC1, y = ~DC2, color = ChuCellTypes$Time, colors = brewer.pal(6, "Set1"))
+# Run slingshot
+slingshotPT <- slingshot(rd2,
+  reducedDim = rd2,
+  clusterLabels = ChuCellTypes$Time, start.clus = "00h", end.clus = "96h"
+)
+ssPT <- slingPseudotime(slingshotPT)
+ssPT <- as.data.frame(ssPT)
+# plot_ly(rd2, x=~DC1, y= ~DC2,  color = ssPT$curve1)
+# plot_ly(rd1, x=~PC1, y= ~PC2,  color = ssPT$curve1)
+plot_ly(rd2, x = ~DC1, y = ~DC2, color = ssPT$Lineage1)
+plot_ly(rd1, x = ~PC1, y = ~PC2, color = ssPT$Lineage1)
+# t <- ssPT$curve1
+t <- ssPT$Lineage1
+
+# look at top variable gens
+Y <- logExpressionFiltered
+var1K <- names(sort(apply(Y, 1, var), decreasing = TRUE))
+Y <- Y[var1K, ]
+
+# fit a GAM with a loess term for pseudotime
+gam.pval <- apply(Y, 1, function(z) {
+  d <- data.frame(z = z, t = t)
+  suppressWarnings({
+    tmp <- gam(z ~ lo(t), data = d)
+  })
+  p <- summary(tmp)[4][[1]][1, 5]
+  p
+})
+topgenes <- names(sort(gam.pval, decreasing = FALSE))[1:15]
+heatdata <- logExpressionFiltered[topgenes, order(t, na.last = NA)]
+cTypes <- as.data.frame(ChuCellTypes$Time)
+rownames(cTypes) <- colnames(Chu2017)
+heatclus <- as.factor(cTypes[order(t, na.last = NA), ])
+
+heatmap(as.matrix(heatdata),
+  Colv = NA,
+  ColSideColors = brewer.pal(6, "Set1")[heatclus], labCol = FALSE
+)
+exprData <- logExpressionFiltered
+colnames(exprData) <- gsub(pattern = "[.]", replacement = "_", colnames(exprData))
+# ptData <- data.frame(ssPT$curve1)
+ptData <- data.frame(ssPT$Lineage1)
+
+rownames(ptData) <- colnames(exprData)
+colnames(ptData) <- "PseudoTime"
+
+geneData <- data.frame(sort(gam.pval, decreasing = FALSE))
+colnames(geneData) <- "VGAMpValue"
+geneData[, "Variance"] <- apply(logExpressionFiltered[rownames(geneData), ], 1, var)
+
+write.csv(x = exprData, file = "data/GSE75748/ExpressionData.csv", quote = FALSE)
+write.csv(x = ptData, file = "data/GSE75748/PseudoTime.csv", quote = FALSE)
+write.csv(x = geneData, file = "data/GSE75748/GeneOrdering.csv", quote = FALSE)
+write.csv(x = ChuCellTypes, file = "data/GSE75748/CellType.csv", quote = FALSE)
+
+rdDF <- as.data.frame(rd2)
+
+plot_ly(rdDF, x = ~DC1, y = ~DC2, color = ptData$PseudoTime)
+# plot_ly(as.data.frame(rd2), x=~DC1, y= ~DC2, color = ssPT$curve1)
+plot_ly(as.data.frame(rd2), x = ~DC1, y = ~DC2, color = ssPT$Lineage1)
+
+
 source("Function-L0REG.R")
 data <- read.csv("../scGRN-L0_data/BEELINE-data/inputs/scRNAseq_preprocessing/data/GSE75748/ExpressionData.csv", row.name = 1)
 cellTypes <- read.csv("../scGRN-L0_data/BEELINE-data/inputs/scRNAseq_preprocessing/data/GSE75748/CellType.csv")
@@ -91,7 +196,7 @@ for (i in 1:length(cellTypesList)) {
     L0REG_L0_list$weight <- L0REG_L0_list$weight + L0REG_L0$weight
   }
 }
-L0REG_L0_list <- L0REG_L0_list[order(L0REG_L0_list$weight,decreasing = TRUE),]
+L0REG_L0_list <- L0REG_L0_list[order(L0REG_L0_list$weight, decreasing = TRUE), ]
 
 write.table(L0REG_L0_list,
   paste0("../scGRN-L0_output/output_scRNA-Seq/output_L0GRN.txt"),

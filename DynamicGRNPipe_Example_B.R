@@ -2,120 +2,101 @@
 
 library(Seurat)
 library(tidyr)
+library(ggplot2)
+library(dplyr)
+library(ggpubr)
+library(cowplot)
+library(patchwork)
+library(reshape2)
 
 if (F) {
-  
-  Cellratio <- prop.table(table(seu_obj_data$main_cell_type, seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
-  Cellratio
-
-  Cellratio <- as.data.frame(Cellratio)
-  colourCount = length(unique(Cellratio$Var1))
-  library(ggplot2)
-  ggplot(Cellratio) + 
-    geom_bar(aes(x =Var2, y= Freq, fill = Var1),stat = "identity",width = 0.7,size = 0.5,colour = '#222222')+ 
-    theme_classic() +
-    labs(x='Sample',y = 'Ratio')+
-    coord_flip()+
-    theme(panel.border = element_rect(fill=NA,color="black", size=0.5, linetype="solid"))
-  
+  Cellratio <- prop.table(table(seu_obj_data$main_cell_type, seu_obj_data$orig.ident),
+    margin = 2
+  ) %>% as.data.frame()
+  colourCount <- length(unique(Cellratio$Var1))
+  ggplot(Cellratio) +
+    geom_bar(aes(x = Var2, y = Freq, fill = Var1),
+      stat = "identity",
+      width = 0.8,
+      size = 1,
+      colour = "black"
+    ) +
+    labs(x = "Sample", y = "Ratio") +
+    coord_flip() +
+    theme_bw()
   ggsave2(paste0("Fig6.contrast1.png"),
-          path = paste0("Results/"),
-          width = 15, height = 10, units = "cm"
+    path = paste0("Results/"),
+    width = 15, height = 10, units = "cm"
   )
-  
-  table(seu_obj_data$orig.ident)#查看各组细胞数
-  prop.table(table(Idents(seu_obj_data)))
-  table(Idents(seu_obj_data), seu_obj_data$orig.ident)#各组不同细胞群细胞数 colnames(scRNA_harmony)
-  Cellratio <- prop.table(table(seu_obj_data$main_cell_type, seu_obj_data$orig.ident), margin = 2)#计算各组样本不同细胞群比例
-  Cellratio <- data.frame(Cellratio)
-  library(reshape2)
-  cellper <- reshape2::dcast(Cellratio,Var2~Var1, value.var = "Freq")#长数据转为宽数据
-  rownames(cellper) <- cellper[,1]
-  cellper <- cellper[,-1]
-  
-  ###添加分组信息
+
+  cellper <- reshape2::dcast(Cellratio, Var2 ~ Var1, value.var = "Freq")
+  rownames(cellper) <- cellper[, 1]
+  cellper <- cellper[, -1]
   sample <- seu_obj_data$orig.ident
-  group <-seu_obj_data$tissue_type
-  samples <- data.frame(sample, group)#创建数据框
-  
-  # rownames(samples)=samples$sample
-  
-  # cellper$sample <- samples[rownames(cellper),'sample']#R添加列
-  cellper$sample <- rownames(cellper)#R添加列
-  # cellper$group <- samples[rownames(cellper),'group']#R添加列
+  group <- seu_obj_data$tissue_type
+  samples <- data.frame(sample, group)
+  cellper$sample <- rownames(cellper)
   cellper$group <- ""
   for (i in 1:nrow(cellper)) {
-    stage <- samples[which(samples$sample== cellper$sample[i])[1] , "group"]
+    stage <- samples[which(samples$sample == cellper$sample[i])[1], "group"]
     cellper$group[i] <- stage
   }
-  table(seu_obj_data$main_cell_type)
-  ###作图展示
-  
-  sce_groups = c("Follicular B cells", "Germinal center B cells","Plasma" )
-  library(ggplot2)
-  library(dplyr)
-  library(ggpubr)
-  pplist = list()
-  for(group_ in sce_groups){
-    cellper_  = cellper %>% select(one_of(c('sample','group',group_)))#选择一组数据
-    colnames(cellper_) = c('sample','group','percent')#对选择数据列命名
-    cellper_$percent = as.numeric(cellper_$percent)#数值型数据
-    cellper_ <- cellper_ %>% group_by(group) %>% mutate(upper =  quantile(percent, 0.75), 
-                                                        lower = quantile(percent, 0.25),
-                                                        mean = mean(percent),
-                                                        median = median(percent))#上下分位数
-    print(group_)
-    print(cellper_$median)
-    
-    pp1 = ggplot(cellper_,aes(x=group,y=percent)) + #ggplot作图
-      geom_jitter(shape = 21,aes(fill=group),width = 0.25) + 
-      stat_summary(fun=mean, geom="point", color="grey60") +
-      theme_cowplot() +
-      theme(axis.text = element_text(size = 8),
-            axis.title = element_text(size = 8),
-            legend.text = element_text(size = 8),
-            legend.title = element_text(size = 8),
-            plot.title = element_text(size = 4,face = 'plain'),
-            legend.position = 'none') + 
-      labs(title = group_, y='Percentage') +
-      geom_errorbar(aes(ymin = lower, ymax = upper),col = "grey60",width =  0.5)+theme_bw()
-    
-    ###组间t检验分析
-    labely = max(cellper_$percent)
-    compare_means(percent ~ group,  data = cellper_)
-    my_comparisons <- list( c("Normal", "Tumor") )
-    pp1 = pp1 + stat_compare_means(comparisons = my_comparisons,size = 3,method = "t.test")
-    pplist[[group_]] = pp1
-  }
-  
-  library(cowplot)
-  library(patchwork)
-  # plot_grid(pplist[["Follicular B cells"]],
-  #           pplist[["Plasma"]],
-  #           pplist[["Germinal center B cells"]])
-  pplist[["Follicular B cells"]]+
-    pplist[["Germinal center B cells"]]+
-  pplist[["Plasma"]]+
-    plot_annotation(tag_levels = 'a')+
-    plot_layout(guides = 'collect')&
-    theme(legend.position='bottom')
-  ggsave2(paste0("Fig6.contrast.png"),
-          path = paste0("Results/"),
-          width = 25, height = 15, units = "cm"
-  )
+  sce_groups <- c("Follicular B cells", "Germinal center B cells", "Plasma")
+  pplist <- list()
+  for (group_ in sce_groups) {
+    cellper_ <- cellper %>% select(one_of(c("sample", "group", group_)))
+    colnames(cellper_) <- c("sample", "group", "percent")
+    cellper_$percent <- as.numeric(cellper_$percent)
+    cellper_ <- cellper_ %>%
+      group_by(group) %>%
+      mutate(
+        upper = quantile(percent, 0.75),
+        lower = quantile(percent, 0.25),
+        mean = mean(percent),
+        median = median(percent)
+      )
+    pp1 <- ggplot(cellper_, aes(x = group, y = percent)) +
+      geom_jitter(shape = 21, aes(fill = group), width = 0.25) +
+      stat_summary(fun = mean, geom = "point", color = "grey60") +
+      theme(
+        axis.text = element_text(size = 8),
+        axis.title = element_text(size = 8),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 8),
+        plot.title = element_text(size = 4, face = "plain"),
+        legend.position = "none"
+      ) +
+      labs(title = group_, y = "Percentage") +
+      geom_errorbar(aes(ymin = lower, ymax = upper), col = "grey60", width = 0.5) +
+      theme_bw()
 
+    labely <- max(cellper_$percent)
+    compare_means(percent ~ group, data = cellper_)
+    my_comparisons <- list(c("Normal", "Tumor"))
+    pp1 <- pp1 + stat_compare_means(comparisons = my_comparisons, size = 3, method = "t.test")
+    pplist[[group_]] <- pp1
+  }
+
+  pplist[["Follicular B cells"]] +
+    pplist[["Germinal center B cells"]] +
+    pplist[["Plasma"]] +
+    plot_annotation(tag_levels = "a") +
+    plot_layout(guides = "collect") &
+    theme(legend.position = "bottom")
+  ggsave2(paste0("Fig6.contrast.png"),
+    path = paste0("Results/"),
+    width = 25, height = 15, units = "cm"
+  )
 }
 
-meta <- seu_obj_data@meta.data
-
-CellInfor_B <- data.frame(UniqueCell_ID = colnames(seu_obj_data),
-                        Patient = meta$orig.ident,
-                        majorCluster= meta$main_cell_type,
-                        sampleType=meta$tissue_type)
-table(CellInfor_B$majorCluster)
 GSE131907_B <- as.matrix(seu_obj_data@assays$RNA@counts)
-# Example
-# The example data can be downloaded at https://www.jianguoyun.com/p/DeYtp_AQ1bXiCRjXvYwE
+meta <- seu_obj_data@meta.data
+CellInfor_B <- data.frame(
+  UniqueCell_ID = colnames(seu_obj_data),
+  Patient = meta$orig.ident,
+  majorCluster = meta$main_cell_type,
+  sampleType = meta$tissue_type
+)
 # ====0.input====
 load(file = "DynamicGRNPipe_ExampleData/clusterSig.RData") # genes used to construct cell trajectories
 # load(file = "../scGRN-L0_data/GSE131907_B.RData") # expression profile and cell annotation #from GSE99254
@@ -124,7 +105,8 @@ load(file = "DynamicGRNPipe_ExampleData/clusterSig.RData") # genes used to const
 library(slingshot)
 source("DynamicGRNPipe_1.slingshot_B.R")
 source("DynamicGRNPipe_Function.R")
-t.slingshot <- slingshot_run(scRNAseq.Exp = GSE131907_B,
+t.slingshot <- slingshot_run(
+  scRNAseq.Exp = GSE131907_B,
   clusterLabels = CellInfor_B$majorCluster,
   ordergene = unlist(clusterSig),
   RMmethod = "pca",
@@ -170,12 +152,14 @@ C5_C61_cross <- densityintersections(
   filename = "Results/all.png"
 )
 # Manually select the intersection point according to the density plot
-binpoint <- c(0, 
-              max(cellInfor$PseTime.Lineage1)/5, 
-              max(cellInfor$PseTime.Lineage1)*2/5, 
-              max(cellInfor$PseTime.Lineage1)*3/5, 
-              max(cellInfor$PseTime.Lineage1)*4/5, 
-              max(cellInfor$PseTime.Lineage1))
+binpoint <- c(
+  0,
+  max(cellInfor$PseTime.Lineage1) / 5,
+  max(cellInfor$PseTime.Lineage1) * 2 / 5,
+  max(cellInfor$PseTime.Lineage1) * 3 / 5,
+  max(cellInfor$PseTime.Lineage1) * 4 / 5,
+  max(cellInfor$PseTime.Lineage1)
+)
 
 # Two consecutive bins of cells as a window
 # extract cells for each window
@@ -208,8 +192,8 @@ lineage1dynet <- DynNet_filter(
   weightofWindows = weightofWindows,
   weightThr = 0.02,
   nsd = 2,
-  positivecor = 0#,
-  #confidence = NULL
+  positivecor = 0 # ,
+  # confidence = NULL
 )
 lineage1dynet1 <- lineage1dynet[1:2]
 length(lineage1dynet1[[4]])
@@ -248,8 +232,8 @@ lineage1dynet_L0 <- DynNet_filter(
   weightofWindows = weightofWindows_L0,
   weightThr = 0.02,
   nsd = 2,
-  positivecor = 0#,
-  #confidence = NULL
+  positivecor = 0 # ,
+  # confidence = NULL
 )
 lineage1dynet_L0[[4]]
 lineage1dynet1_L0 <- lineage1dynet_L0[1:2]
@@ -264,8 +248,8 @@ names(Dynnet_active1_L0) <- paste0("W", 1:length(Dynnet_active1_L0))
 
 ground_truth_T(weightofWindows_L0[[1]], dorothea_regulon_human)
 evaluationObject_L0 <- prepareEval("ground_pred.txt",
-                                   paste0("ground_truth.tsv"),
-                                   totalPredictionsAccepted = 100000
+  paste0("ground_truth.tsv"),
+  totalPredictionsAccepted = 100000
 )
 
 L0_AUROC <- calcAUROC(evaluationObject_L0)

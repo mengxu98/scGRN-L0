@@ -27,7 +27,7 @@ pHB_upper <- 5
 
 theme_set(theme_cowplot())
 
-#color scheme
+# color scheme
 use_colors <- c(
   Tumor = "brown2",
   Normal = "deepskyblue2",
@@ -42,7 +42,8 @@ use_colors <- c(
   p019 = "#46ACC8",
   p023 = "#E58601",
   p024 = "#B40F20",
-  p027 = "#0B775E")
+  p027 = "#0B775E"
+)
 
 # Data loading and QC
 
@@ -50,19 +51,21 @@ use_colors <- c(
 samples <- read_excel("/data/mengxu/data/PhilipBischoff2021/metadata/patients_metadata_raw.xlsx", range = cell_cols("A:A")) %>% .$sample_id
 
 ### import cellranger files from different data sets
-for (i in seq_along(samples)){
+for (i in seq_along(samples)) {
   assign(paste0("scs_data", i), Read10X(data.dir = paste0("/data/mengxu/data/PhilipBischoff2021/cellranger/", samples[i], "/filtered_feature_bc_matrix")))
 }
 
 ### create seurat objects from cellranger files
-for (i in seq_along(samples)){
+for (i in seq_along(samples)) {
   assign(paste0("seu_obj", i), CreateSeuratObject(counts = eval(parse(text = paste0("scs_data", i))), project = samples[i], min.cells = 3))
 }
 
 ### merge data sets
-seu_obj <- merge(seu_obj1, y = c(seu_obj2, seu_obj3, seu_obj4, seu_obj5, seu_obj6, seu_obj7, seu_obj8, seu_obj9, seu_obj10, 
-                                 seu_obj11, seu_obj12, seu_obj13, seu_obj14, seu_obj15, seu_obj16, seu_obj17, seu_obj18, 
-                                 seu_obj19, seu_obj20), add.cell.ids = samples, project = "lung")
+seu_obj <- merge(seu_obj1, y = c(
+  seu_obj2, seu_obj3, seu_obj4, seu_obj5, seu_obj6, seu_obj7, seu_obj8, seu_obj9, seu_obj10,
+  seu_obj11, seu_obj12, seu_obj13, seu_obj14, seu_obj15, seu_obj16, seu_obj17, seu_obj18,
+  seu_obj19, seu_obj20
+), add.cell.ids = samples, project = "lung")
 
 ### calculate mitochondrial, hemoglobin and ribosomal gene counts
 seu_obj <- PercentageFeatureSet(seu_obj, pattern = "^MT-", col.name = "pMT")
@@ -70,10 +73,10 @@ seu_obj <- PercentageFeatureSet(seu_obj, pattern = "^HBA|^HBB", col.name = "pHB"
 seu_obj <- PercentageFeatureSet(seu_obj, pattern = "^RPS|^RPL", col.name = "pRP")
 
 qcparams <- c("nFeature_RNA", "nCount_RNA", "pMT", "pHB", "pRP")
-for (i in seq_along(qcparams)){
+for (i in seq_along(qcparams)) {
   print(VlnPlot(object = seu_obj, features = qcparams[i], group.by = "orig.ident", pt.size = 0))
 }
-for (i in seq_along(qcparams)){
+for (i in seq_along(qcparams)) {
   print(RidgePlot(object = seu_obj, features = qcparams[i], group.by = "orig.ident"))
 }
 
@@ -133,7 +136,7 @@ seu_obj <- FindClusters(seu_obj, resolution = 0.2)
 #   seu_obj <- FindClusters(seu_obj, resolution = i)
 #   print(DimPlot(seu_obj, reduction = "umap") + labs(title = paste0("resolution: ", i)))
 # }
-# 
+#
 # for (i in c("nFeature_RNA", "nCount_RNA", "pMT", "pHB", "pRP")) {
 #   print(FeaturePlot(seu_obj, features = i, coord.fixed = T, sort.cell = T))
 # }
@@ -150,62 +153,63 @@ rownames(metadata) <- metadata$cell_id
 seu_obj <- AddMetaData(seu_obj, metadata = metadata)
 
 p1 <- DimPlot(seu_obj,
-              reduction = "umap",
-              group.by = "orig.ident"
+  reduction = "umap",
+  group.by = "orig.ident"
 ) +
   theme_bw()
 p2 <- DimPlot(seu_obj,
-              reduction = "umap",
-              group.by = "patient_id"
+  reduction = "umap",
+  group.by = "patient_id"
 ) +
   theme_bw()
 p3 <- DimPlot(seu_obj,
-              reduction = "umap",
-              group.by = "tissue_type"
+  reduction = "umap",
+  group.by = "tissue_type"
 ) +
   theme_bw()
 p4 <- DimPlot(seu_obj,
-              reduction = "umap",
-              group.by = "SCT_snn_res.0.2"
+  reduction = "umap",
+  group.by = "SCT_snn_res.0.2"
 ) +
-  theme_bw()+
+  theme_bw() +
   NoLegend()
-p1 + p2 + p3+ p4
+p1 + p2 + p3 + p4
 
 library(harmony)
 seu_obj_harmony <- RunHarmony(seu_obj,
-                            group.by.vars = "orig.ident",
-                            assay.use = "SCT",
-                            lambda = 1, # [0.5-2] The more smaller lambda value, the bigger integration efforts.
-                            max.iter.harmony = 20)
+  group.by.vars = "orig.ident",
+  assay.use = "SCT",
+  lambda = 1, # [0.5-2] The more smaller lambda value, the bigger integration efforts.
+  max.iter.harmony = 20
+)
 
 seu_obj_harmony <- RunPCA(seu_obj_harmony)
-seu_obj_harmony <- RunUMAP(seu_obj_harmony, reduction = "harmony",dims = 1:15, verbose = T)
+seu_obj_harmony <- RunUMAP(seu_obj_harmony, reduction = "harmony", dims = 1:15, verbose = T)
 seu_obj_harmony <- FindNeighbors(seu_obj_harmony, dims = 1:15)
 seu_obj_harmony <- FindClusters(seu_obj_harmony, resolution = 0.2)
 
 p1 <- DimPlot(seu_obj_harmony,
-              reduction = "umap",
-              group.by = "orig.ident"
+  reduction = "umap",
+  group.by = "orig.ident"
 ) +
   theme_bw()
 p2 <- DimPlot(seu_obj_harmony,
-              reduction = "umap",
-              group.by = "patient_id"
+  reduction = "umap",
+  group.by = "patient_id"
 ) +
   theme_bw()
 p3 <- DimPlot(seu_obj_harmony,
-              reduction = "umap",
-              group.by = "tissue_type"
+  reduction = "umap",
+  group.by = "tissue_type"
 ) +
   theme_bw()
 p4 <- DimPlot(seu_obj_harmony,
-              reduction = "umap",
-              group.by = "SCT_snn_res.0.2"
+  reduction = "umap",
+  group.by = "SCT_snn_res.0.2"
 ) +
-  theme_bw()+
+  theme_bw() +
   NoLegend()
-p1+p2+p3+p4
+p1 + p2 + p3 + p4
 
 save(seu_obj, file = "../scGRN-L0_data/data/seu_obj.Rdata")
 save(seu_obj_harmony, file = "../scGRN-L0_data/data/seu_obj_harmony.Rdata")
@@ -214,11 +218,11 @@ load("../scGRN-L0_data/data/seu_obj_harmony.Rdata")
 # Main cell type annotation
 
 # seu_obj_harmony <- annotation_celltype(seu_obj_harmony, method = "celltypist")
-# 
+#
 # table(seu_obj_harmony$celltype)
-# 
-# DotPlot(seu_obj_harmony, features = mainmarkers, group.by = "SCT_snn_res.0.2") + 
-#   coord_flip() + 
+#
+# DotPlot(seu_obj_harmony, features = mainmarkers, group.by = "SCT_snn_res.0.2") +
+#   coord_flip() +
 #   scale_color_viridis()
 
 mainmarkers <- c("PECAM1", "VWF", "ACTA2", "JCHAIN", "MS4A1", "PTPRC", "CD68", "KIT", "EPCAM", "CDH1", "KRT7", "KRT19")
@@ -237,7 +241,7 @@ mainmarkers <- c(
   # "FCER2",
   # "GAPT",
   # "HVCN1",
-  #Germinal center B cells
+  # Germinal center B cells
   "AICDA",
   "HMGA1",
   "RGS13",
@@ -245,7 +249,7 @@ mainmarkers <- c(
   # "LRMP",
   # "AC023590.1",
   # "SUSD3",
-  #Plasma cell
+  # Plasma cell
   "MZB1",
   "DERL3",
   "XBP1",
@@ -266,49 +270,48 @@ mainmarkers <- c(
   # Other papers
   # "MSA41", # B(MS4A1+)
   "IGHG1", # naive B cells (MS4A1+IGHG1-)
-  #plasma cells (MZB1+IGHG1+)
-  #cycling plasma cells(MZB1+IGHG1+MKI67+TOP2A+)
+  # plasma cells (MZB1+IGHG1+)
+  # cycling plasma cells(MZB1+IGHG1+MKI67+TOP2A+)
   "MKI67",
   "TOP2A",
-  #memory B cells(CD27+MS4A1+IGHG1+)
+  # memory B cells(CD27+MS4A1+IGHG1+)
   "CD27",
-  #Bn (TCL1A, IGHD 和 IL4R)
+  # Bn (TCL1A, IGHD 和 IL4R)
   "TCL1A",
   "IGHD",
   "IL4R",
   "TNFRSF13B",
   "JCHAIN",
   "IGHG3",
-  #Bm (AIM2, TNFRSF13B 和 CD27)
+  # Bm (AIM2, TNFRSF13B 和 CD27)
   "AIM2"
-  #浆细胞 (MZB1, IGHG3 和 JCHAIN)
+  # 浆细胞 (MZB1, IGHG3 和 JCHAIN)
 )
-DotPlot(seu_obj_harmony, features = mainmarkers, group.by = "SCT_snn_res.0.2") +theme_bw()+ 
-  coord_flip() + 
+DotPlot(seu_obj_harmony, features = mainmarkers, group.by = "SCT_snn_res.0.2") + theme_bw() +
+  coord_flip() +
   scale_color_viridis()
 
 ggsave2(paste0("Fig5.FeaturePlot_mainmarkers.png"),
-        path = paste0("Results/"),
-        width = 20, height = 12, units = "cm"
+  path = paste0("Results/"),
+  width = 20, height = 12, units = "cm"
 )
 
 for (i in seq_along(mainmarkers)) {
   if (mainmarkers[i] %in% rownames(seu_obj_harmony)) {
-      FeaturePlot(seu_obj_harmony, features = mainmarkers[i], coord.fixed = T, order = T, cols = viridis(10))
-      ggsave2(paste0("FeaturePlot_mainmarkers_", mainmarkers[i], ".png"),
-              path = paste0("Results/marker/"),
-              width = 10, height = 10, units = "cm"
-      )
-    
+    FeaturePlot(seu_obj_harmony, features = mainmarkers[i], coord.fixed = T, order = T, cols = viridis(10))
+    ggsave2(paste0("FeaturePlot_mainmarkers_", mainmarkers[i], ".png"),
+      path = paste0("Results/marker/"),
+      width = 10, height = 10, units = "cm"
+    )
   }
 }
 
-DotPlot(seu_obj, features = mainmarkers, group.by = "SCT_snn_res.0.2") + 
-  coord_flip() + 
+DotPlot(seu_obj, features = mainmarkers, group.by = "SCT_snn_res.0.2") +
+  coord_flip() +
   scale_color_viridis()
 
 DimPlot(seu_obj_harmony, group.by = "SCT_snn_res.0.2", label = T, label.size = 5)
-#ggsave2("DimPlot_all_clusters.pdf", path = "../results", width = 20, height = 20, units = "cm")
+# ggsave2("DimPlot_all_clusters.pdf", path = "../results", width = 20, height = 20, units = "cm")
 
 Idents(seu_obj_harmony) <- seu_obj_harmony$SCT_snn_res.0.2
 annotation_curated_main <- read_excel("/data/mengxu/data/PhilipBischoff2021/curated_annotation/curated_annotation_main2.xlsx")
@@ -317,8 +320,6 @@ names(new_ids_main) <- levels(seu_obj_harmony)
 seu_obj_harmony <- RenameIdents(seu_obj_harmony, new_ids_main)
 seu_obj_harmony@meta.data$main_cell_type <- Idents(seu_obj_harmony)
 DimPlot(seu_obj_harmony, label = T, label.size = 5)
-
-
 
 obj_cells <- c("Follicular B cells", "Plasma", "Germinal center B cells")
 # subset(x = pbmc, idents = c("CD4 T cells", "CD8 T cells"), invert = TRUE)
@@ -334,15 +335,4 @@ rm(seu_obj_data_obj_cells)
 dim(seu_obj_data)
 table(seu_obj_data$main_cell_type)
 
-
-
-
-
-
-
-
-
-
-
-
-
+save(seu_obj_data, file = "../scGRN-L0_data/data/seu_obj_B.Rdata")

@@ -41,7 +41,7 @@ cell_drop <- c(
     "9", "9-50", "9-70",
     "10", "10-50", "10-70"
 )
-output <- "output_Curated/"
+output <- "../scGRN-L0_output/test"
 evaluation_infromations_all <- c()
 for (j in 1:length(data_path)) {
     evaluation_infromations <- c()
@@ -63,7 +63,7 @@ for (j in 1:length(data_path)) {
             simulation_data_new <- cbind.data.frame(t(simulation_data), h = simulation_PseudoTime$PseudoTime) %>% na.omit()
             write.csv(simulation_data_new, paste0(simulation_data_dir, "ExpressionData_all", ".csv"), row.names = FALSE)
         }
-        data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_1.csv"),
+        data_GENIE3 <- read.csv(paste0(simulation_data_dir, "ExpressionData_all.csv"),
             header = T
         )
         data_GENIE3 <- data_GENIE3[order(data_GENIE3$h), ]
@@ -74,7 +74,7 @@ for (j in 1:length(data_path)) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
                 rownames(L0REG_L0_adjs) <- colnames(data_GENIE31)
                 colnames(L0REG_L0_adjs) <- colnames(data_GENIE31)
-                n <- 1
+                n <- 5
                 for (t in 1:n) {
                     # s <- floor(nrow(data_GENIE31) * (t - 1) / 10) + 1
                     # e <- floor(nrow(data_GENIE31) * t / 10)
@@ -94,7 +94,7 @@ for (j in 1:length(data_path)) {
                     L0REG_L0_1 <- L0REG(t(data),
                         regulators = colnames(data),
                         targets = colnames(data),
-                        penalty = "L0L2"
+                        penalty = "L0"
                     )
                     # L0REG_L0_1$weight <- as.numeric(L0REG_L0_1$weight)
                     # L0REG_L0_1 <- as.matrix(L0REG_L0_1)
@@ -133,15 +133,27 @@ for (j in 1:length(data_path)) {
                 )
                 L0REG_L0Dynamic_AUROC <- calcAUROC(evaluationObject)
                 L0REG_L0Dynamic_AUPR <- calcAUPR(evaluationObject)
-                print(
-                    paste0(
-                        L0REG_L0Dynamic_AUROC,
-                        "---",
-                        L0REG_L0Dynamic_AUROC_S
-                    )
-                )
             }
-
+            L0Dynamic <- L0REG(
+                matrix = t(data_GENIE31),
+                regulators = colnames(data_GENIE31),
+                targets = colnames(data_GENIE31),
+                # maxSuppSize = 5,
+                penalty = "L0"
+            )
+            write.table(L0Dynamic,
+                paste0(output, "GRN_L0.txt"),
+                sep = "\t",
+                quote = F,
+                row.names = F,
+                col.names = F
+            )
+            evaluationObject <- prepareEval(paste0(output, "GRN_L0.txt"),
+                paste0(paste0(output, "ground_truth.tsv")),
+                totalPredictionsAccepted = 100000
+            )
+            AUROC_L0 <- calcAUROC(evaluationObject)
+            AUPRC_L0 <- calcAUPR(evaluationObject)
             # data_GENIE31 <- FQnorm(data_GENIE31)
             if (F) {
                 L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
@@ -168,7 +180,7 @@ for (j in 1:length(data_path)) {
                     L0REG_L0_1 <- L0REG(t(data),
                         regulators = colnames(data),
                         targets = colnames(data),
-                        penalty = "L0L2"
+                        penalty = "L0"
                     )
                     # L0REG_L0_1$weight <- as.numeric(L0REG_L0_1$weight)
                     # L0REG_L0_1 <- as.matrix(L0REG_L0_1)
@@ -217,17 +229,17 @@ for (j in 1:length(data_path)) {
             }
 
             if (F) {
-                L0REG_L0_adjs <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
-                rownames(L0REG_L0_adjs) <- colnames(data_GENIE3)
-                colnames(L0REG_L0_adjs) <- colnames(data_GENIE3)
+                L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
+                rownames(L0REG_L0_adjs) <- colnames(data_GENIE31)
+                colnames(L0REG_L0_adjs) <- colnames(data_GENIE31)
                 win <- 100
-                for (t in 1:(nrow(data_GENIE3) - win)) {
+                for (t in 1:(nrow(data_GENIE31) - win)) {
                     s <- t
                     e <- win + t
-                    if (e < dim(data_GENIE3)[1]) {
-                        data <- data_GENIE3[s:e, ]
+                    if (e < dim(data_GENIE31)[1]) {
+                        data <- data_GENIE31[s:e, ]
                     } else {
-                        data <- data_GENIE3
+                        data <- data_GENIE31
                     }
                     L0REG_L0_1 <- L0REG(t(data),
                         regulators = colnames(data),
@@ -235,9 +247,9 @@ for (j in 1:length(data_path)) {
                     )
                     L0REG_L0_1$weight <- as.numeric(L0REG_L0_1$weight)
                     L0REG_L0_1 <- as.matrix(L0REG_L0_1)
-                    L0REG_L0_adj <- matrix(0, ncol(data_GENIE3), ncol(data_GENIE3))
-                    rownames(L0REG_L0_adj) <- colnames(data_GENIE3)
-                    colnames(L0REG_L0_adj) <- colnames(data_GENIE3)
+                    L0REG_L0_adj <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
+                    rownames(L0REG_L0_adj) <- colnames(data_GENIE31)
+                    colnames(L0REG_L0_adj) <- colnames(data_GENIE31)
                     L0REG_L0_adj[L0REG_L0_1[, 1:2]] <- L0REG_L0_1[, 3]
                     L0REG_L0_adjs <- L0REG_L0_adjs + as.numeric(L0REG_L0_adj)
                 }
@@ -246,7 +258,7 @@ for (j in 1:length(data_path)) {
                 L0REG_L0Dynamic_AUROC_S <- AUCresult_L0REG_L0$AUROC
                 L0REG_L0Dynamic_AUPR_S <- AUCresult_L0REG_L0$AUPR
 
-                weightdf <- getLinkList(L0REG_L0_adjs)
+                weightdf <- GENIE3::getLinkList(L0REG_L0_adjs)
                 # weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
                 names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
                 write.table(weightdf, file = paste0(output, "L0REG_L02.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
@@ -256,13 +268,7 @@ for (j in 1:length(data_path)) {
                 )
                 L0REG_L0Dynamic_AUROC <- calcAUROC(evaluationObject)
                 L0REG_L0Dynamic_AUPR <- calcAUPR(evaluationObject)
-                print(
-                    paste0(
-                        L0REG_L0Dynamic_AUROC,
-                        "---",
-                        L0REG_L0Dynamic_AUROC_S
-                    )
-                )
+
             }
         }
 
@@ -270,7 +276,8 @@ for (j in 1:length(data_path)) {
         evaluation_infromation <- data.frame(
             datasets = paste0(data_path[j], "-2000-", cell_drop[i]),
             AUROC_L0Dynamic = L0REG_L0Dynamic_AUROC,
-            AUROC_L0Dynamic_S = L0REG_L0Dynamic_AUROC_S
+            AUROC_L0Dynamic_S = L0REG_L0Dynamic_AUROC_S,
+            AUROC_L0 = AUROC_L0
         )
         message(paste0("----- ", evaluation_infromation, " -----"))
         print(evaluation_infromation)
@@ -282,7 +289,7 @@ for (j in 1:length(data_path)) {
 }
 evaluation_infromations_all[evaluation_infromations_all == 0] <- NA
 na.omit(evaluation_infromations_all)
-write.csv(evaluation_infromations_all, "Results/evaluation_infromations_Curated_L0REG.csv")
+write.csv(evaluation_infromations_all, paste0(output, "evaluation_infromations_Curated_L0REG.csv"))
 
 if (F) {
     library(patchwork)

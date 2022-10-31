@@ -9,6 +9,7 @@ library(cowplot)
 library(patchwork)
 library(reshape2)
 
+load("../scGRN-L0_data/data/seu_obj_B.Rdata")
 if (F) {
   Cellratio <- prop.table(table(seu_obj_data$main_cell_type, seu_obj_data$orig.ident),
     margin = 2
@@ -91,9 +92,17 @@ if (F) {
 }
 
 # ====0.input====
-load(file = "DynamicGRNPipe_ExampleData/clusterSig.RData") # genes used to construct cell trajectories
+load(file = "../scGRN-L0_data/DynamicGRNPipe_ExampleData/clusterSig.RData") # genes used to construct cell trajectories
 matrix <- as.matrix(seu_obj_data@assays$RNA@counts)
 meta <- seu_obj_data@meta.data
+ordergene <- c("B220", "BCL6", "CD137", "CD20", "CD21", 
+               "CD22", "CD23", "CD24", "CD27", "CD275", 
+               "CD279", "CD360", "CD40", "CD69", "CD80", 
+              " CD81", "CD86", "EBF1", "FOXO1", "HLA-DR", 
+              "IgD", "IgM", "IKAROS", "PAX5",
+              "HGAL", "LMO2","CD9","GCET2", "HGAL","AID", "BACH2", 
+              "BCL6", "B220", "CD81", "IRF8", "NF-kappa-B", "PAX5")
+
 CellInfor_B <- data.frame(
   UniqueCell_ID = colnames(seu_obj_data),
   Patient = meta$orig.ident,
@@ -108,6 +117,7 @@ t.slingshot <- slingshot_run(
   scRNAseq.Exp = matrix,
   clusterLabels = CellInfor_B$majorCluster,
   ordergene = unlist(clusterSig),
+  # ordergene = unlist(ordergene),
   RMmethod = "pca",
   plot_output = TRUE,
   start.cluster = "Follicular B cells" # cannot determine what type of cell types as the first type

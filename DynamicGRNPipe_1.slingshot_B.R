@@ -1,7 +1,5 @@
-# TODO: Add comment
-#
-# Author: xiaoyun
-###############################################################################
+
+
 # This algorithm is a trajectory construction algorithm based on cell clusters.
 # First, the cells are dimensionality reduction (PCA), and then the center of each cluster is identified, and the center points are connected to determine the preliminary trajectory
 # then smooth the trajectory; finally project all points on the branch, and the distance between each point and the starting point is the pseudo time of the cell state.
@@ -15,7 +13,7 @@
 #' @param RMmethod: character,Methods of dimensionality reduction, pca/tsne
 #' @param start.cluster: character
 #' @param end.cluster:   character
-#' @param  stretch:default 2, numeric factor by which curves can be extrapolated beyond endpoints.
+#' @param stretch:default 2, numeric factor by which curves can be extrapolated beyond endpoints.
 #'                  Must be a numeric value between 0 and 2.
 #' @return
 #' 1) PC：top 3 PCs of PCA；Branch：Which branch the cell belongs to；W.curve：weighs of cells in lineage；PseTime.curve：pseudotime of cells
@@ -24,7 +22,7 @@
 #' 4) Lineages：different lineages
 slingshot_run <- function(scRNAseq.Exp,
                           clusterLabels,
-                          ordergene,
+                          ordergene = NULL,
                           RMmethod = "pca",
                           start.cluster = NULL,
                           end.cluster = NULL,
@@ -34,21 +32,20 @@ slingshot_run <- function(scRNAseq.Exp,
     library(slingshot)
     library(SingleCellExperiment)
     cat(format(Sys.time(), "[%b-%d,%H:%M:%S] "), "start to run......", "\n")
-    # 2)Feature selection
-    ordergene <- intersect(ordergene, rownames(scRNAseq.Exp))
-    sim <- SingleCellExperiment(assays = List(counts = scRNAseq.Exp[ordergene, ]), colData = CellInfor_B) ##### revise
+    # 2) Feature selection
+    if (is.null(ordergene)) {
+        sim <- SingleCellExperiment(assays = List(counts = scRNAseq.Exp), colData = CellInfor_B)
+    } else {
+        ordergene <- intersect(ordergene, rownames(scRNAseq.Exp))
+        sim <- SingleCellExperiment(assays = List(counts = scRNAseq.Exp[ordergene, ]), colData = CellInfor_B)
+    }
     sim <- sc_obj_filter(sim)
-    # 3)Dimensionality reduction and cell trajectory construction
+    # 3) Dimensionality reduction and cell trajectory construction
     if (RMmethod == "pca") {
-        # pca <- prcomp(t(scRNAseq.Exp[ordergene, ]), scale. = T)
-        #pca <- prcomp(t(scRNAseq.Exp[ordergene, ]), scale. = FALSE) ##### revise #for a count
-        # pca <- prcomp(t(log1p(assays(sim)$norm)), scale. = FALSE) ##### revise #for a seurat objective
-        pca <- prcomp(t(log1p(assays(sim)$counts)), scale. = FALSE) ##### revise #for a seurat objective
-        reducedDims(sim) <- SimpleList(PCA = pca$x[, 1:30]) ##### revise
-        # top 30 PCs
-        sds <- slingshot(sim, clusterLabels = clusterLabels, start.clus = start.cluster, end.clus = end.cluster, stretch = stretch, reducedDim = "PCA") ##### revise
+        pca <- prcomp(t(log1p(assays(sim)$counts)), scale. = FALSE)
+        reducedDims(sim) <- SimpleList(PCA = pca$x[, 1:30]) # Top 30 PCs
+        sds <- slingshot(sim, clusterLabels = clusterLabels, start.clus = start.cluster, end.clus = end.cluster, stretch = stretch, reducedDim = "PCA")
         # sds <- slingshot(sim, clusterLabels = "majorCluster", reducedDim = "UMAP")
-        # sds <- slingshot(pca$x[,1:30], clusterLabels = clusterLabels, start.clus = start.cluster, end.clus=end.cluster, stretch=stretch)
     }
 
     if (RMmethod == "tsne") {
@@ -65,43 +62,43 @@ slingshot_run <- function(scRNAseq.Exp,
         colors <- colorRampPalette(brewer.pal(11, "Spectral")[-6])(100)
         plotcol <- colors[cut(sds$slingPseudotime_1, breaks = 100)]
         plotPCA(sds,
-                # ncomponents = 4,
-                colour_by = "majorCluster"
+            # ncomponents = 4,
+            colour_by = "majorCluster"
         )
         # plotUMAP(sds,
         #         # ncomponents = 4,
         #         colour_by = "majorCluster"
         # )
         png("Results/Slingshot1.png")
-        plot(reducedDims(sds)$PCA, col = plotcol, pch = 16, asp = 1,xlab="UMAP_1",ylab="UMAP_2")
+        plot(reducedDims(sds)$PCA, col = plotcol, pch = 16, asp = 1, xlab = "UMAP_1", ylab = "UMAP_2")
         lines(SlingshotDataSet(sds), lwd = 2, col = "black")
         dev.off()
         png("Results/Slingshot2.png")
-        plot(reducedDims(sds)$PCA, col = brewer.pal(9, "Set1"), pch = 16, asp = 1 ,xlab="UMAP_1",ylab="UMAP_2")
+        plot(reducedDims(sds)$PCA, col = brewer.pal(9, "Set1"), pch = 16, asp = 1, xlab = "UMAP_1", ylab = "UMAP_2")
         # plot(reducedDims(sds)$UMAP, col = brewer.pal(9, "Set1")[sds$majorCluster], pch = 16, asp = 1)
         lines(SlingshotDataSet(sds), lwd = 2, type = "lineages", col = "black")
         dev.off()
         # plotColData(sds, x = "sum", y="detected", colour_by="Patient")
         # plotColData(sds, x = "sum", y="detected", colour_by="majorCluster")
         # plotColData(sds, x = "sum", y="detected", colour_by="sampleType")
-        # plotColData(sds, x = "sum", y="subsets_Mito_percent", 
+        # plotColData(sds, x = "sum", y="subsets_Mito_percent",
         #             other_fields="majorCluster") + facet_wrap(~majorCluster)
-        
+
         # plotHighestExprs(sds, exprs_values = "counts")
         p <- plotPCA(sds,
-                      # ncomponents = 4,
-                      colour_by = "Patient"
-        )+theme_bw()
+            # ncomponents = 4,
+            colour_by = "Patient"
+        ) + theme_bw()
         ggsave(p, filename = "Results/Patient.png")
         p <- plotPCA(sds,
-                      # ncomponents = 4,
-                      colour_by = "majorCluster"
-        )+theme_bw()
+            # ncomponents = 4,
+            colour_by = "majorCluster"
+        ) + theme_bw()
         ggsave(p, filename = "Results/Cluster.png")
         p <- plotPCA(sds,
-                # ncomponents = 4,
-                colour_by = "sampleType"
-        )+theme_bw()
+            # ncomponents = 4,
+            colour_by = "sampleType"
+        ) + theme_bw()
         ggsave(p, filename = "Results/PatientType.png")
         # plotTSNE(sds,
         #          # ncomponents = 4,
@@ -115,7 +112,6 @@ slingshot_run <- function(scRNAseq.Exp,
         #          # ncomponents = 4,
         #          colour_by = "sampleType"
         # )
-        
     }
 
     # top 3 PCs

@@ -91,7 +91,7 @@ for (j in 1:length(data_path)) {
                     L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
                     rownames(L0REG_L0_adjs) <- colnames(data_GENIE31)
                     colnames(L0REG_L0_adjs) <- colnames(data_GENIE31)
-                    n <- 1
+                    n <- 5
                     for (t in 1:n) {
                         # s <- floor(nrow(data_GENIE31) * (t - 1) / 10) + 1
                         # e <- floor(nrow(data_GENIE31) * t / 10)
@@ -108,7 +108,8 @@ for (j in 1:length(data_path)) {
                         e <- e[length(e)]
                         data <- data_GENIE31[s:e, ]
 
-                        L0REG_L0_1 <- L0REG(t(data),
+                        L0REG_L0_1 <- L0REG(
+                            matrix = t(data),
                             regulators = colnames(data),
                             targets = colnames(data),
                             penalty = "L0"

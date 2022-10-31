@@ -9,8 +9,6 @@ if (F) {
   fit_inf <- fit_inf[order(fit_inf$suppSize, decreasing = TRUE), ]
   lambda <- fit_inf$lambda[1]
   gamma <- fit_inf$gamma[1]
-  # lambda <- fit_inf$lambda[ceiling(nrow(fit_inf))]
-  # gamma <- fit_inf$gamma[ceiling(nrow(fit_inf))]
   temp <- coef(fit,
     lambda = lambda,
     gamma = gamma
@@ -27,10 +25,12 @@ LO_fit <- function(X, Y,
                    gammaMin = 0.0001, gammaMax = 10) {
   fit <- L0Learn.cvfit(X, Y,
     penalty = penalty,
-    nFolds = 10, seed = 1,
     maxSuppSize = maxSuppSize,
+    nFolds = 10,
+    seed = 1,
     nGamma = 5,
-    gammaMin = 0.0001, gammaMax = 10
+    gammaMin = 0.0001,
+    gammaMax = 10
   )
   fit_inf <- print(fit)
   optimalGammaIndex <- which(unlist(lapply(fit$cvMeans, min)) == min(unlist(lapply(fit$cvMeans, min))))
@@ -60,7 +60,7 @@ L0REG <- function(matrix,
     maxSuppSize <- dim(matrix)[2]
   }
   if (is.null(targets)) {
-    targets <- rownames(matrix)
+    targets <- colnames(matrix)
   }
   if (!is.null(regulators)) {
     matrix_reg <- matrix[, regulators]
@@ -76,7 +76,8 @@ L0REG <- function(matrix,
         nFolds = 10, seed = 1,
         maxSuppSize = maxSuppSize,
         nGamma = 5,
-        gammaMin = 0.0001, gammaMax = 10
+        gammaMin = 0.0001,
+        gammaMax = 10
       )
       temp <- as.vector(temp)
       wghts <- temp[-1]

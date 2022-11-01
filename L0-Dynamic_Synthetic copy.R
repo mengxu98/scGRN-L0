@@ -49,23 +49,16 @@ cell_drop <- c(
     "10"
 )
 
-output <- "../scGRN-L0_output/test"
+output <- "../scGRN-L0_output/test/"
 evaluation_infromations_all <- c()
 for (j in 1:length(data_path)) {
     evaluation_infromations2 <- c()
     for (k in 1:length(cell_num)) {
         evaluation_infromations <- c()
         for (i in 1:length(cell_drop)) {
-            # if (i == 1) {
-            #   message(paste0("----- Now run the GRN model with ", data_path[j], " dataset and drop-out of cell with 1", "! -----"))
-            #   simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], "-2000-1", "/")
-            # } else {
-            #   message(paste0("----- Now run the GRN model with ", data_path[j], " dataset and drop-out of cell with ", cell_drop[i], "! -----"))
             simulation_data_dir <- paste0("../scGRN-L0_data/BEELINE-data/inputs/Synthetic/", data_path[j], "/", data_path[j], "-", cell_num[k], "-", cell_drop[i], "/")
-            # }
             simulation_data_file <- "ExpressionData.csv"
             simulation_PseudoTime_file <- "PseudoTime.csv"
-
             simulation_data <- read.csv(paste0(simulation_data_dir, simulation_data_file), row.names = 1)
             simulation_PseudoTime <- read.csv(paste0(simulation_data_dir, simulation_PseudoTime_file), row.names = 1)
             if (ncol(simulation_PseudoTime) > 1) {
@@ -91,7 +84,7 @@ for (j in 1:length(data_path)) {
                     L0REG_L0_adjs <- matrix(0, ncol(data_GENIE31), ncol(data_GENIE31))
                     rownames(L0REG_L0_adjs) <- colnames(data_GENIE31)
                     colnames(L0REG_L0_adjs) <- colnames(data_GENIE31)
-                    n <- 5
+                    n <- 10
                     for (t in 1:n) {
                         # s <- floor(nrow(data_GENIE31) * (t - 1) / 10) + 1
                         # e <- floor(nrow(data_GENIE31) * t / 10)
@@ -306,8 +299,9 @@ for (j in 1:length(data_path)) {
 # evaluation_infromations_all
 # evaluation_infromations_all[evaluation_infromations_all==0] <- NA
 evaluation_infromations_all <- na.omit(evaluation_infromations_all)
-write.csv(evaluation_infromations_all, "Results/evaluation_infromations.csv")
-
+write.csv(evaluation_infromations_all, paste0(output, "evaluation_infromations.csv"))
+mean(evaluation_infromations_all$AUROC_L0Dynamic)
+mean(evaluation_infromations_all$AUROC_L0)
 if (F) {
     library(patchwork)
     library(ggplot2)

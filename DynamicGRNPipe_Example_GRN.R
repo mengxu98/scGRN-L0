@@ -139,20 +139,21 @@ source("framework_main.R")
 
 evaluate_AUROC_all <- c()
 evaluate_AUPRC_all <- c()
+edgenum <- 5000
 for (i in 1:4) {
-  ground_truth_T(weightofWindows[[i]], dorothea_regulon_human)
+  ground_truth_T(weightofWindows[[i]], dorothea_regulon_human,edgenum = edgenum)
   evaluationObject <- prepareEval("ground_pred.txt",
                                   paste0("ground_truth.tsv"),
-                                  totalPredictionsAccepted = 10000
+                                  totalPredictionsAccepted = edgenum
   )
   
   GENIE3_AUROC <- calcAUROC(evaluationObject)
   GENIE3_AUPRC <- calcAUPR(evaluationObject)
   
-  ground_truth_T(weightofWindows_L0[[i]], dorothea_regulon_human,edgenum = 10000)
+  ground_truth_T(weightofWindows_L0[[i]], dorothea_regulon_human,edgenum = edgenum)
   evaluationObject_L0 <- prepareEval("ground_pred.txt",
                                      paste0("ground_truth.tsv"),
-                                     totalPredictionsAccepted = 10000
+                                     totalPredictionsAccepted = edgenum
   )
   
   L0_AUROC <- calcAUROC(evaluationObject_L0)

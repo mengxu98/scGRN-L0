@@ -69,7 +69,7 @@ DynNet_L0 <- function(Windows,
         SVMRankThreshold = 5, SVMEnsembleSize = 100,
         ELPredSampleMin = 20, ELPredSampleMax = 80,
         ELExpSampleMin = 20, ELExpSampleMax = 80,
-        ELRankThreshold = 5, ELEnsembleSize = 5 # dim(t(matrix))[1]
+        ELRankThreshold = 5, ELEnsembleSize = 5 # dim(matrix)[2]
       )
       weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
       names(weightdf) <- c("regulatoryGene", "targetGene", "weight")

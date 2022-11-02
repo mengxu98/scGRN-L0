@@ -36,7 +36,6 @@ data_filetr <- function(data, dataset_dir, database = "ALL") {
   }
 }
 
-# 是否应该以参考网络作为标准去比对输入
 ground_truth_h <- function(intput, output, dataset_dir, database = "STRING") {
   if (database %in% c("STRING", "ChIP-seq", "HepG2-ChIP-se", "hESC-ChIP-seq", "All")) {
     if (database == "STRING") {
@@ -217,11 +216,14 @@ ground_truth_simulation <- function(intput, output, dataset_dir, file) {
 }
 
 # For T cell dynamic regulation
-ground_truth_T <- function(input, dataset, output = NULL) {
+ground_truth_T <- function(input, dataset, output = NULL, edgenum = NULL) {
   if (!exists("input")) {
     message("----- Regulatory network does not exist! Please check input or dataset! -----")
   } else {
     grn <- input
+    if (!is.null(edgenum)) {
+      grn <- grn[1:edgenum, ]
+    }
     tf_genes <- c()
     pred_tf_genes <- c()
     for (i in 1:nrow(grn)) {

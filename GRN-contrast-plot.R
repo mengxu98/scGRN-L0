@@ -21,7 +21,6 @@ if (T) {
         "70"
     )
     evaluation_AUROC_all <- read.csv(paste0(output, "evaluation_AUROC.csv"))
-    evaluation_AUROC_all <- evaluation_AUROC_all[, -3]
     names(evaluation_AUROC_all) <- c("Dataset", "L0Dynamic", "GENIE3", "SINCERITITES", "PPCOR", "LEAP")
     my_comparisons <- list(
         c("L0Dynamic", "GENIE3"),
@@ -239,7 +238,6 @@ if (T) {
         "5000"
     )
     evaluation_AUROC_all <- read.csv(paste0(output, "evaluation_AUROC.csv"))
-    evaluation_AUROC_all <- evaluation_AUROC_all[, -3]
     head(evaluation_AUROC_all[1:3, 1:3])
     my_comparisons <- list(
         c("L0Dynamic", "GENIE3"),

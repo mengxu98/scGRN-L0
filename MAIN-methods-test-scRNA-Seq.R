@@ -286,6 +286,7 @@ for (j in 1:length(data_path)) {
     AUPRC_L0L2 <- calcAUPR(evaluationObject)
   }
   # --------------------------------------------------
+  library(dyngen)
   if (T) {
     library(ppcor)
     inputExpr <- t(data_grn)

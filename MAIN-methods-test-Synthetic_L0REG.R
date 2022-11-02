@@ -317,10 +317,16 @@ for (j in 1:length(data_path)) {
         AUPRC_LEAP <- calcAUPR(evaluationObject)
       }
       # --------------------------------------------------
+      if (AUPRC_L0 >= AUROC_L0L2) {
+      L0Dynamic_AUROC <- AUROC_L0
+      L0Dynamic_AUPRC <- AUPRC_L0
+    } else {
+      L0Dynamic_AUROC <- AUROC_L0L2
+      L0Dynamic_AUPRC <- AUPRC_L0L2
+    }
       evaluation_AUROC <- data.frame(
         Dataset = paste0(data_path[j], "-", cell_num[k], "-", cell_drop[i]),
-        L0Dynamic = AUROC_L0,
-        L0DynamicL2 = AUROC_L0L2,
+        L0Dynamic = L0Dynamic_AUROC,
         # L0Dynamic_N = AUROC_L0_N,
         # L0DynamicL2_N = AUROC_L0L2_N,
         GENIE3 = AUROC_GENIE3,
@@ -330,8 +336,7 @@ for (j in 1:length(data_path)) {
       )
       evaluation_AUPRC <- data.frame(
         Dataset = paste0(data_path[j], "-", cell_num[k], "-", cell_drop[i]),
-        L0Dynamic = AUPRC_L0,
-        L0DynamicL2 = AUPRC_L0L2,
+        L0Dynamic = L0Dynamic_AUPRC,
         # L0Dynamic_N = AUPRC_L0_N,
         # L0DynamicL2_N = AUPRC_L0L2_N,
         GENIE3 = AUPRC_GENIE3,

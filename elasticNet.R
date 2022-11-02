@@ -188,7 +188,8 @@ elasticNetRankedSolve <- function(expressionMatrix,
       source("Function-L0REG.R")
       temp <- LO_fit(predictorsWithoutTarget, target,
         penalty = penalty,
-        nFolds = 10, seed = 1,
+        nFolds = 10,
+        seed = 1,
         maxSuppSize = 20,
         nGamma = 5,
         gammaMin = 0.0001, gammaMax = 10

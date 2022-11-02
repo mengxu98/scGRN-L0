@@ -33,7 +33,14 @@ DynNet_RF <- function(Windows, CD8TCellExp.trajectory, DynamicGene, allTFs, dete
   return(weightofWindows)
 }
 
-DynNet_L0 <- function(Windows, CD8TCellExp.trajectory, DynamicGene, allTFs, detectNum = 10, detectPro = 0.05, meanExp = 1) {
+DynNet_L0 <- function(Windows, 
+                      CD8TCellExp.trajectory, 
+                      DynamicGene, 
+                      allTFs, 
+                      detectNum = 10, 
+                      detectPro = 0.05, 
+                      meanExp = 1,
+                      penalty = "L0") {
   # 1. quality control for each window
   ExpofWindows <- lapply(Windows, function(x) {
     windExp <- CD8TCellExp.trajectory[intersect(DynamicGene, rownames(CD8TCellExp.trajectory)), x]
@@ -50,13 +57,11 @@ DynNet_L0 <- function(Windows, CD8TCellExp.trajectory, DynamicGene, allTFs, dete
     if (T) {
       weightdf <- L0REG(
         matrix = matrix,
-        penalty = "L0",
         regulators = intersect(allTFs, rownames(matrix)),
         targets = rownames(matrix)
       )
     } else {
       source("Function.R")
-      package.check("parallel")
       NIMEFI(t(matrix),
         GENIE = F, SVM = F, EL = T, penalty = "L0",
         outputFileName = paste0("output_NIMEFI_L0"),
@@ -66,27 +71,11 @@ DynNet_L0 <- function(Windows, CD8TCellExp.trajectory, DynamicGene, allTFs, dete
         ELExpSampleMin = 20, ELExpSampleMax = 80,
         ELRankThreshold = 5, ELEnsembleSize = 5 # dim(t(matrix))[1]
       )
-
-      # fun <- NIMEFI(t(matrix),
-      #   GENIE = F, SVM = F, EL = T, penalty = "L0",
-      #   outputFileName = paste0("output_NIMEFI_L0"),
-      #   outputFileFormat = "txt",
-      #   SVMRankThreshold = 5, SVMEnsembleSize = 100,
-      #   ELPredSampleMin = 20, ELPredSampleMax = 80,
-      #   ELExpSampleMin = 20, ELExpSampleMax = 80,
-      #   ELRankThreshold = 5, ELEnsembleSize = 5 # dim(t(matrix))[1]
-      # )
-      # test <- makeCluster(detectCores())
-      # parLapply(test, matrix, fun)
-      # stopCluster(test)
-
       weightdf <- read.table("output_NIMEFI_L0.txt", header = F)
       names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
     }
-    # weightdf <- getLinkList(weightMat)
     return(weightdf)
   })
-
   return(weightofWindows)
 }
 

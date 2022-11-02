@@ -23,7 +23,6 @@ source("DynamicGRNPipe_2.CellWindowing.R")
 cells <- rownames(CellInfor.trajectory)[grep("1", CellInfor.trajectory$Branch)] # cells in lineage1
 cellInfor <- CellInfor.trajectory[cells, c("UniqueCell_ID", "majorCluster", "PseTime.Lineage1")]
 
-
 # Calculate all intersections of pseudo-time density curves of cells in different states
 C1_C2_cross <- densityintersection(
   a = cellInfor[cellInfor$majorCluster == "CD8_C1-LEF1", "PseTime.Lineage1"],
@@ -129,39 +128,41 @@ weightofWindows_L0 <- DynNet_L0(
   CD8TCellExp.trajectory = CD8TCellExp.trajectory,
   DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
   allTFs = allTFs, # set regulators
-  detectNum = 10, 
-  detectPro = 0.05, 
+  detectNum = 10,
+  detectPro = 0.05,
   meanExp = 1 # Noise filtering threshold
 )
 
 source("ground-truth.R")
 source("framework_main.R")
-
+hnetwork_data_dir <- "../scGRN-L0_data/BEELINE-Networks/Networks/human/"
+dorothea_regulon_human1 <- read.csv("../scGRN-L0_data/BEELINE-Networks/Networks/human/STRING-network.csv")
+names(dorothea_regulon_human1) <- c("tf", "target")
 evaluate_AUROC_all <- c()
 evaluate_AUPRC_all <- c()
-edgenum <- 5000
+edgenum <- 50000
 for (i in 1:4) {
-  ground_truth_T(weightofWindows[[i]], dorothea_regulon_human,edgenum = edgenum)
+  ground_truth_T(weightofWindows[[i]], dorothea_regulon_human, edgenum = edgenum)
   evaluationObject <- prepareEval("ground_pred.txt",
-                                  paste0("ground_truth.tsv"),
-                                  totalPredictionsAccepted = edgenum
+    paste0("ground_truth.tsv"),
+    totalPredictionsAccepted = edgenum
   )
-  
+
   GENIE3_AUROC <- calcAUROC(evaluationObject)
   GENIE3_AUPRC <- calcAUPR(evaluationObject)
-  
-  ground_truth_T(weightofWindows_L0[[i]], dorothea_regulon_human,edgenum = edgenum)
+
+  ground_truth_T(weightofWindows_L0[[i]], dorothea_regulon_human, edgenum = edgenum)
   evaluationObject_L0 <- prepareEval("ground_pred.txt",
-                                     paste0("ground_truth.tsv"),
-                                     totalPredictionsAccepted = edgenum
+    paste0("ground_truth.tsv"),
+    totalPredictionsAccepted = edgenum
   )
-  
+
   L0_AUROC <- calcAUROC(evaluationObject_L0)
   L0_AUPRC <- calcAUPR(evaluationObject_L0)
-  
-  evaluate_AUROC <- data.frame(L0DYGRN=L0_AUROC,GENIE3=GENIE3_AUROC)
-  evaluate_AUPRC <- data.frame(L0DYGRN=L0_AUPRC,GENIE3=GENIE3_AUPRC)
-  evaluate_AUROC_all <- rbind.data.frame(evaluate_AUROC_all,evaluate_AUROC)
-  evaluate_AUPRC_all <- rbind.data.frame(evaluate_AUPRC_all,evaluate_AUPRC)
-}
 
+  evaluate_AUROC <- data.frame(L0DYGRN = L0_AUROC, GENIE3 = GENIE3_AUROC)
+  evaluate_AUPRC <- data.frame(L0DYGRN = L0_AUPRC, GENIE3 = GENIE3_AUPRC)
+  evaluate_AUROC_all <- rbind.data.frame(evaluate_AUROC_all, evaluate_AUROC)
+  evaluate_AUPRC_all <- rbind.data.frame(evaluate_AUPRC_all, evaluate_AUPRC)
+}
+evaluate_AUROC_all

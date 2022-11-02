@@ -99,7 +99,7 @@ L0REG <- function(matrix,
         # wghts[1:length(wghts)] <- 1
         wghts[zeros] <- 0
       }
-      if (length(wghts) != (ncol(matrix) - 1)) {
+      if (length(wghts) != dim(X)[2]) {
         weightd <- data.frame(regulatoryGene = colnames(X), targetGene = targets[i], weight = 0)
         # weightd <- data.frame(regulatoryGene = targets[i], targetGene = colnames(X), weight = 0)
       } else {
@@ -135,7 +135,7 @@ L0REG <- function(matrix,
         # wghts[1:length(wghts)] <- 1
         wghts[zeros] <- 0
       }
-      if (length(wghts) != (ncol(matrix) - 1)) {
+      if (length(wghts) != dim(X)[2]) {
         weightd <- data.frame(regulatoryGene = colnames(X), targetGene = regulators[i], weight = 0)
         # weightd <- data.frame(regulatoryGene = regulators[i], targetGene = colnames(X), weight = 0)
       } else {

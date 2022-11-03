@@ -176,11 +176,9 @@ elasticNetRankedSolve <- function(expressionMatrix,
         nGamma = 5,
         gammaMin = 0.0001, gammaMax = 10
       )
-
       temp <- as.vector(temp)
       wghts <- temp[-1]
     }
-
     if (F) {
       wghts <- abs(wghts)
     } else {
@@ -195,7 +193,6 @@ elasticNetRankedSolve <- function(expressionMatrix,
       # Set the ones that were zero to zero anyway
       wghts[zeros] <- 0
     }
-
     # write result to matrix
     resultMatrix[colnames(predictorsWithoutTarget), colnames(expressionMatrix)[targetIndex]] <- wghts
   }

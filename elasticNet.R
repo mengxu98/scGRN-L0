@@ -38,12 +38,10 @@ ElVariableEnsembleSolve <- function(expressionMatrix,
   if ((minSampleSize <= 0 || maxSampleSize > dim(expressionMatrix)[1] || maxSampleSize < minSampleSize)) {
     stop("Please specify a valid sample sample size minimum and maximum.")
   }
-
   # Preallocate the return matrix
   resultMatrix <- matrix(0.0, length(predictorIndices), length(targetIndices))
   rownames(resultMatrix) <- colnames(expressionMatrix)[predictorIndices]
   colnames(resultMatrix) <- colnames(expressionMatrix)[targetIndices]
-
   # Take a sample this many times
   for (i in 1:ensembleSize) {
     # sampling
@@ -52,16 +50,13 @@ ElVariableEnsembleSolve <- function(expressionMatrix,
     } else {
       sampleSize <- sample(minSampleSize:maxSampleSize, 1)
     }
-
     # Take sample of specified size
     ind <- sample(dim(expressionMatrix)[1], sampleSize)
     sampleMatrix <- expressionMatrix[ind, ]
-
     # report on progress
     if (trace) {
       print(paste("Sample: ", i, " of size: ", sampleSize, " out of ", ensembleSize, " iterations and a rank threshold of ", rankThreshold))
     }
-
     # Call EL procedure
     resultMatrix <- resultMatrix + elasticNetRankedSolve(sampleMatrix, predictorIndices = predictorIndices, targetIndices = targetIndices, alpha = alpha, traceDetail = traceDetail, rankThreshold = rankThreshold, predictorSampleSizeMin = predictorSampleSizeMin, predictorSampleSizeMax = predictorSampleSizeMax, ...)
   }

@@ -72,7 +72,6 @@ for (n in 1:2) {
 
     L0_AUROC
     GENIE3_AUROC
-
   }
   write.csv(evaluation_gnw_5, paste0("evaluation_gnw_5_", n, ".csv"))
   evaluation_gnw_5_list[[n]] <- evaluation_gnw_5

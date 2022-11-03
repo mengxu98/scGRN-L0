@@ -167,24 +167,6 @@ elasticNetRankedSolve <- function(expressionMatrix,
       # get the weights
       wghts <- abs(as.vector(bestModel$beta))
     } else {
-      # L0_Model_cvfit <- L0Learn.cvfit(predictorsWithoutTarget,
-      #                         target,
-      #                         penalty = penalty,
-      #                         maxSuppSize = ncol(predictorsWithoutTarget))
-      # L0_Model <- L0Learn.fit(predictorsWithoutTarget,
-      #   target,
-      #   penalty = penalty,
-      #   maxSuppSize = ncol(predictorsWithoutTarget)
-      # )
-      # L0_Model_Information <- as.data.frame(print(L0_Model))
-      # L0_Model_Information <- L0_Model_Information[order(L0_Model_Information$suppSize, decreasing = TRUE), ]
-      # lambda_L0 <- L0_Model_Information$lambda[1]
-      # gamma_L0 <- L0_Model_Information$gamma[1]
-      # temp <- coef(L0_Model,
-      #   lambda = lambda_L0,
-      #   gamma = gamma_L0
-      # )
-      
       source("Function-L0REG.R")
       temp <- LO_fit(predictorsWithoutTarget, target,
         penalty = penalty,

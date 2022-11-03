@@ -99,7 +99,7 @@ weightofWindows <- DynNet_RF(
   Windows = Windows1,
   CD8TCellExp.trajectory = CD8TCellExp.trajectory,
   DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
-  allTFs = allTFs, # set regulators
+  allTFs = allTFs[1:100], # set regulators
   detectNum = 10, detectPro = 0.05, meanExp = 1 # Noise filtering threshold
 )
 
@@ -127,7 +127,7 @@ weightofWindows_L0 <- DynNet_L0(
   Windows = Windows1,
   CD8TCellExp.trajectory = CD8TCellExp.trajectory,
   DynamicGene = DynamicGene1, # set Background genes,which used to construct the network, such as highly variable genes, dynamic genes along trajectory
-  allTFs = allTFs, # set regulators
+  allTFs = allTFs[1:100], # set regulators
   detectNum = 10,
   detectPro = 0.05,
   meanExp = 1 # Noise filtering threshold
@@ -140,7 +140,7 @@ dorothea_regulon_human1 <- read.csv("../scGRN-L0_data/BEELINE-Networks/Networks/
 names(dorothea_regulon_human1) <- c("tf", "target")
 evaluate_AUROC_all <- c()
 evaluate_AUPRC_all <- c()
-edgenum <- 50000
+edgenum <- 200000
 for (i in 1:4) {
   ground_truth_T(weightofWindows[[i]], dorothea_regulon_human, edgenum = edgenum)
   evaluationObject <- prepareEval("ground_pred.txt",

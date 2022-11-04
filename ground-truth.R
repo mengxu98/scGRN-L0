@@ -5,7 +5,9 @@
 # output = "output/"
 # dataset_dir = "../scGRN-L0_data/BEELINE-Networks/Networks/human/"
 
-data_filetr <- function(data, dataset_dir, database = "ALL") {
+data_filetr <- function(data,
+                        dataset_dir,
+                        database = "ALL") {
   if (database %in% c("STRING", "ChIP-seq", "HepG2-ChIP-se", "hESC-ChIP-seq", "All")) {
     if (database == "STRING") {
       dataset <- read.csv(paste0(dataset_dir, "STRING-network.csv"))
@@ -36,7 +38,10 @@ data_filetr <- function(data, dataset_dir, database = "ALL") {
   }
 }
 
-ground_truth_h <- function(intput, output, dataset_dir, database = "STRING") {
+ground_truth_h <- function(intput, output,
+                           dataset_dir,
+                           database = "STRING",
+                           edgenum = NUL) {
   if (database %in% c("STRING", "ChIP-seq", "HepG2-ChIP-se", "hESC-ChIP-seq", "All")) {
     if (database == "STRING") {
       dataset <- read.csv(paste0(dataset_dir, "STRING-network.csv"))
@@ -62,6 +67,9 @@ ground_truth_h <- function(intput, output, dataset_dir, database = "STRING") {
       message("----- Regulatory network does not exist! Please run NIMEFI! -----")
     } else {
       grn <- read.table(paste0(intput))
+      if (!is.null(edgenum)) {
+        grn <- grn[1:edgenum, ]
+      }
       tf_genes <- c()
       pred_tf_genes <- c()
       for (i in 1:nrow(grn)) {
@@ -99,7 +107,11 @@ ground_truth_h <- function(intput, output, dataset_dir, database = "STRING") {
   }
 }
 # --------------------------------------------------
-ground_truth_m <- function(intput, output, dataset_dir, database = "STRING") {
+ground_truth_m <- function(intput,
+                           output,
+                           dataset_dir,
+                           database = "STRING",
+                           edgenum = NULL) {
   if (database %in% c("STRING", "mDC-ChIP-seq", "mESC-ChIP-seq", "mESC-lofgof", "mHSC-ChIP-seq", "ChIP-seq", "All")) {
     if (database == "STRING") {
       dataset <- read.csv(paste0(dataset_dir, "STRING-network.csv"))
@@ -131,6 +143,9 @@ ground_truth_m <- function(intput, output, dataset_dir, database = "STRING") {
       message("----- Regulatory network does not exist! Please run NIMEFI! -----")
     } else {
       grn <- read.table(paste0(intput))
+      if (!is.null(edgenum)) {
+        grn <- grn[1:edgenum, ]
+      }
       tf_genes <- c()
       pred_tf_genes <- c()
       for (i in 1:nrow(grn)) {
@@ -167,7 +182,11 @@ ground_truth_m <- function(intput, output, dataset_dir, database = "STRING") {
   }
 }
 # --------------------------------------------------
-ground_truth_simulation <- function(intput, output, dataset_dir, file) {
+ground_truth_simulation <- function(intput,
+                                    output,
+                                    dataset_dir,
+                                    file,
+                                    edgenum = NUL) {
   if (!is.null(dataset_dir) && !is.null(file)) {
     dataset <- read.csv(paste0(dataset_dir, file))
 
@@ -179,6 +198,9 @@ ground_truth_simulation <- function(intput, output, dataset_dir, file) {
       message("----- Regulatory network does not exist! Please run NIMEFI! -----")
     } else {
       grn <- read.table(paste0(intput))
+      if (!is.null(edgenum)) {
+        grn <- grn[1:edgenum, ]
+      }
       tf_genes <- c()
       pred_tf_genes <- c()
       for (i in 1:nrow(grn)) {

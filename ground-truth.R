@@ -41,7 +41,7 @@ data_filetr <- function(data,
 ground_truth_h <- function(intput, output,
                            dataset_dir,
                            database = "STRING",
-                           edgenum = NUL) {
+                           edgenum = NULL) {
   if (database %in% c("STRING", "ChIP-seq", "HepG2-ChIP-se", "hESC-ChIP-seq", "All")) {
     if (database == "STRING") {
       dataset <- read.csv(paste0(dataset_dir, "STRING-network.csv"))
@@ -186,7 +186,7 @@ ground_truth_simulation <- function(intput,
                                     output,
                                     dataset_dir,
                                     file,
-                                    edgenum = NUL) {
+                                    edgenum = NULL) {
   if (!is.null(dataset_dir) && !is.null(file)) {
     dataset <- read.csv(paste0(dataset_dir, file))
 

@@ -59,22 +59,20 @@ weightMat <- GENIE3(
 )
 weightdf <- getLinkList(weightMat)
 names(weightdf) <- c("regulatoryGene", "targetGene", "weight")
-write.table(weightdf, file = paste0(output, "GRN_GENIE3.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
+write.table(weightdf[1:10000,], file = paste0(output, "GRN_GENIE3.txt"), row.names = FALSE, col.names = FALSE, sep = "\t", quote = FALSE)
 if (data_path[j] %in% c("hESC", "hHep")) {
     ground_truth_h(
         intput = paste0(output, "GRN_GENIE3.txt"),
         output = output,
         dataset_dir = hnetwork_data_dir,
-        database = "STRING",
-        edgenum = 10000
+        database = "STRING"
     )
 } else {
     ground_truth_m(
         intput = paste0(output, "GRN_GENIE3.txt"),
         output = output,
         dataset_dir = mnetwork_data_dir,
-        database = "STRING",
-        edgenum = 10000
+        database = "STRING"
     )
 }
 evaluationObject <- prepareEval(paste0(output, "GRN_GENIE3.txt"),
@@ -84,14 +82,12 @@ evaluationObject <- prepareEval(paste0(output, "GRN_GENIE3.txt"),
 AUROC_GENIE3 <- calcAUROC(evaluationObject)
 AUPRC_GENIE3 <- calcAUPR(evaluationObject)
 
-
-
 L0Dynamic <- L0REG(
     matrix = data_grn_bulk,
     targets = TF,
     penalty = "L0"
 )
-write.table(L0Dynamic,
+write.table(L0Dynamic[1:10000,],
     paste0(output, "GRN_L0.txt"),
     sep = "\t",
     quote = F,
@@ -103,21 +99,19 @@ if (data_path[j] %in% c("hESC", "hHep")) {
         intput = paste0(output, "GRN_L0.txt"),
         output = output,
         dataset_dir = hnetwork_data_dir,
-        database = "STRING",
-        edgenum = 10000
+        database = "STRING"
     )
 } else {
     ground_truth_m(
         intput = paste0(output, "GRN_L0.txt"),
         output = output,
         dataset_dir = mnetwork_data_dir,
-        database = "STRING",
-        edgenum = 10000
+        database = "STRING"
     )
 }
 evaluationObject <- prepareEval(paste0(output, "GRN_L0.txt"),
     paste0(paste0(output, "ground_truth.tsv")),
-    totalPredictionsAccepted = 100000
+    totalPredictionsAccepted = 10000
 )
 AUROC_L0 <- calcAUROC(evaluationObject)
 AUPRC_L0 <- calcAUPR(evaluationObject)

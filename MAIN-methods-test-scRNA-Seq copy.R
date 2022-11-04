@@ -144,25 +144,16 @@ for (j in 1:length(data_path)) {
     AUPRC_GENIE3 <- calcAUPR(evaluationObject)
   }
   if (T) {
-    L0REG_L0_adjs <- matrix(0, ncol(data_grn), ncol(data_grn))
-    rownames(L0REG_L0_adjs) <- colnames(data_grn)
-    colnames(L0REG_L0_adjs) <- colnames(data_grn)
-    n <- 1
+    anno <- read.csv(paste0(simulation_data_dir, "anno.csv"), row.names = 1)
+    data_expr <- read.csv(paste0(simulation_data_dir, "counts.csv"), row.names = 1)
+    L0REG_L0_adjs <- matrix(0, ncol(data_expr), ncol(data_expr))
+    rownames(L0REG_L0_adjs) <- colnames(data_expr)
+    colnames(L0REG_L0_adjs) <- colnames(data_expr)
+    cell_anno <- unique(anno$label)
+    n <- length(cell_anno)
     for (t in 1:n) {
-      s <- floor(nrow(data_grn) * (t - 1) / 10) + 1
-      e <- floor(nrow(data_grn) * t / 10)
-
-      # s <- which(data_GENIE3$h <= max(PseudoTime) / n * (t - 1))
-      # if (length(s) == 0) {
-      #     s <- 1
-      # } else {
-      #     s <- s[length(s)]
-      # }
-      # e <- which(data_GENIE3$h <= max(PseudoTime) / n * t)
-      # e <- e[length(e)]
-
-      data <- data_grn[s:e, ]
-
+      data <- data_expr[which(anno$label == cell_anno[t]), ]
+      # rownames(data)
       L0REG_L0_1 <- L0REG(
         matrix = t(data),
         regulators = colnames(data),
@@ -171,16 +162,15 @@ for (j in 1:length(data_path)) {
       )
       # L0REG_L0_1$weight <- as.numeric(L0REG_L0_1$weight)
       # L0REG_L0_1 <- as.matrix(L0REG_L0_1)
-      L0REG_L0_adj <- matrix(0, ncol(data_grn), ncol(data_grn))
-      rownames(L0REG_L0_adj) <- colnames(data_grn)
-      colnames(L0REG_L0_adj) <- colnames(data_grn)
+      L0REG_L0_adj <- matrix(0, ncol(data_expr), ncol(data_expr))
+      rownames(L0REG_L0_adj) <- colnames(data_expr)
+      colnames(L0REG_L0_adj) <- colnames(data_expr)
       # L0REG_L0_adj[L0REG_L0_1[, 1:2]] <- L0REG_L0_1[, 3]
       for (g in 1:nrow(L0REG_L0_1)) {
         L0REG_L0_adj[L0REG_L0_1$regulatoryGene[g], L0REG_L0_1$targetGene[g]] <- L0REG_L0_1$weight[g]
       }
       L0REG_L0_adjs <- L0REG_L0_adjs + as.numeric(L0REG_L0_adj)
     }
-    L0REG_L0_adjs <- L0REG_L0_adjs / max(L0REG_L0_adjs)
 
     AUCresult_L0 <- auc_from_ranks_TC_sign(L0REG_L0_adjs, grn_adjmatrix, 10000)
     AUROC_L0_S <- AUCresult_L0$AUROC

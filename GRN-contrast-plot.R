@@ -623,7 +623,6 @@ evaluation_AUROC_all1 <- read.csv(paste0(output, "evaluation_AUROC.csv"))
 output <- "../scGRN-L0_output/output_Synthetic/"
 evaluation_AUROC_all2 <- read.csv(paste0(output, "evaluation_AUROC.csv"))
 evaluation_AUROC_all <- rbind.data.frame(evaluation_AUROC_all1, evaluation_AUROC_all2)
-evaluation_AUROC <- evaluation_AUROC_all[, -3]
 head(evaluation_AUROC_all[1:3, 1:3])
 methods_barplot_all <- evaluation_AUROC %>%
     as.data.frame() %>%
@@ -633,7 +632,6 @@ methods_barplot_all <- evaluation_AUROC %>%
         values_to = "AUROC"
     )
 
-methods <- names(evaluation_AUROC[, -1])
 methods_barplot_all$Method <- factor(methods_barplot_all$Method,
     levels = methods
 )
@@ -704,7 +702,7 @@ evaluation_AUROC_all1 <- read.csv(paste0(output, "evaluation_AUROC.csv"))
 output <- "../scGRN-L0_output/output_Synthetic/"
 evaluation_AUROC_all2 <- read.csv(paste0(output, "evaluation_AUROC.csv"))
 evaluation_AUROC_all <- rbind.data.frame(evaluation_AUROC_all1, evaluation_AUROC_all2)
-evaluation_AUROC <- evaluation_AUROC_all1[, -3]
+
 head(evaluation_AUROC_all1[1:3, 1:3])
 methods_barplot_all <- evaluation_AUROC %>%
     as.data.frame() %>%
@@ -714,7 +712,6 @@ methods_barplot_all <- evaluation_AUROC %>%
         values_to = "AUROC"
     )
 
-methods <- names(evaluation_AUROC[, -1])
 methods_barplot_all$Method <- factor(methods_barplot_all$Method,
     levels = methods
 )
@@ -779,7 +776,6 @@ P1 <- ggplot(methods_barplot_all, aes(x = Method, y = AUROC, fill = Method)) +
 P1
 ggsave(paste0("../scGRN-L0_output/Methods-contrast-Curated-2.png"), width = 4, height = 4, dpi = 600)
 
-evaluation_AUROC <- evaluation_AUROC_all2[, -3]
 head(evaluation_AUROC_all2[1:3, 1:3])
 methods_barplot_all <- evaluation_AUROC %>%
     as.data.frame() %>%
@@ -789,7 +785,6 @@ methods_barplot_all <- evaluation_AUROC %>%
         values_to = "AUROC"
     )
 
-methods <- names(evaluation_AUROC[, -1])
 methods_barplot_all$Method <- factor(methods_barplot_all$Method,
     levels = methods
 )

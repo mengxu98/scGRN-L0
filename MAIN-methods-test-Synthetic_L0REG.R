@@ -191,10 +191,11 @@ for (j in 1:length(data_path)) {
         AUPRC_L0L2_N <- calcAUPR(evaluationObject)
       }
       if (T) {
-        L0Dynamic <- L0REG(matrix = t(data_grn),
+        L0Dynamic <- L0REG(
+          matrix = t(data_grn),
           regulators = colnames(data_grn),
           targets = colnames(data_grn),
-          # maxSuppSize = 2,
+          maxSuppSize = (nrow(data_grn) * 0.5),
           penalty = "L0"
         )
         write.table(L0Dynamic,
@@ -319,13 +320,13 @@ for (j in 1:length(data_path)) {
         AUPRC_LEAP <- calcAUPR(evaluationObject)
       }
       # --------------------------------------------------
-      if (AUPRC_L0 >= AUROC_L0L2) {
-      L0Dynamic_AUROC <- AUROC_L0
-      L0Dynamic_AUPRC <- AUPRC_L0
-    } else {
-      L0Dynamic_AUROC <- AUROC_L0L2
-      L0Dynamic_AUPRC <- AUPRC_L0L2
-    }
+      if (AUROC_L0 >= AUROC_L0L2) {
+        L0Dynamic_AUROC <- AUROC_L0
+        L0Dynamic_AUPRC <- AUPRC_L0
+      } else {
+        L0Dynamic_AUROC <- AUROC_L0L2
+        L0Dynamic_AUPRC <- AUPRC_L0L2
+      }
       evaluation_AUROC <- data.frame(
         Dataset = paste0(data_path[j], "-", cell_num[k], "-", cell_drop[i]),
         L0Dynamic = L0Dynamic_AUROC,

@@ -4,6 +4,4 @@ The scL0Reg framework is a tool for build regulatory network!
 ![image](https://github.com/mengxu98/scGRN-L0/blob/master/workflow/DynamicGRNPipe_pipeline.png)
 
 ## If you encounter any problems when use these code, please contact me by Wechat: 
-![image](https://github.com/mengxu98/scGRN-L0/blob/master/other%20img/Wechat.jpg width="50")
-
-<img src="https://github.com/mengxu98/scGRN-L0/blob/master/other%20img/Wechat.jpg" width="50" height="50" alt="Wechat"/><br/>
+<img src="https://github.com/mengxu98/scGRN-L0/blob/master/other%20img/Wechat.jpg" width="150" height="150" alt="Wechat"/><br/>

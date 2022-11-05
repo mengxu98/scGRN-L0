@@ -135,7 +135,9 @@ for (j in 1:length(data_path)) {
         library(GENIE3)
         weightMat <- GENIE3(
           exprMatrix = t(data_grn),
-          nCores = 32
+          nCores = 32,
+          nTrees = 1000,
+          verbose = TRUE
         )
         # AUCresult_GENIE3 <- auc_from_ranks_TC_sign(weightMat, truth_network, 1000)
         # AUROC_GENIE3_S <- AUCresult_GENIE3$AUROC

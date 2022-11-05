@@ -307,7 +307,7 @@ for (j in 1:length(data_path)) {
       AUPRC_LEAP <- calcAUPR(evaluationObject)
     }
     # --------------------------------------------------
-    if (AUPRC_L0 >= AUROC_L0L2) {
+    if (AUROC_L0 >= AUROC_L0L2) {
       L0Dynamic_AUROC <- AUROC_L0
       L0Dynamic_AUPRC <- AUPRC_L0
     } else {

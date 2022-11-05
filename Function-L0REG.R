@@ -91,7 +91,7 @@ L0REG <- function(matrix,
       temp <- as.vector(temp)
       wghts <- temp[-1]
       wghts <- abs(wghts)
-      wghts <- wghts / max(wghts)
+      # wghts <- wghts / max(wghts)
       if (F) {
         wghts <- wghts / max(wghts)
         indices <- sort.list(wghts, decreasing = TRUE)

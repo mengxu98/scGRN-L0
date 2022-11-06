@@ -91,11 +91,13 @@ L0REG <- function(matrix,
       # --------------------------------------------------
       temp <- as.vector(temp)
       wghts <- temp[-1]
-      for (i in 1:length(wghts)) {
-        wght <- wghts[i]
-        X[, i] <- X[, i] * wght
-      }
-      temp <- LO_fit(X, Y,
+      wghts <- abs(wghts)
+      # wghts <- wghts / max(wghts)
+      # mean(wghts)
+      # median(wghts)
+      index <- which(wghts >= median(wghts))
+      X1 <- X[, index]
+      temp1 <- LO_fit(X1, Y,
         penalty = penalty,
         nFolds = 10,
         seed = 1,
@@ -105,11 +107,14 @@ L0REG <- function(matrix,
         gammaMax = 10
       )
       # --------------------------------------------------
-
-      temp <- as.vector(temp)
-      wghts <- temp[-1]
-      wghts <- abs(wghts)
-      wghts <- wghts / max(wghts)
+      temp1 <- as.vector(temp1)
+      wghts1 <- temp1[-1]
+      wghts1 <- abs(wghts1)
+      # wghts1 <- wghts1 / max(wghts)
+      wghts[1:length(wghts)] <- 0
+      for (i in 1:length(index)) {
+        wghts[index[i]] <- wghts1[i]
+      }
       if (F) {
         wghts <- wghts / max(wghts)
         indices <- sort.list(wghts, decreasing = TRUE)

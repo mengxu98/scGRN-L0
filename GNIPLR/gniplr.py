@@ -83,7 +83,7 @@ def granger(gene_1,gene_2):
 	b1_rssr_1 = np.sum((model.predict(b1_t1_t2_1)-b1_t_1)**2)
 	f1_1 = ((b1_rssr_1-b1_rssu_1)/1)/(b1_rssu_1/(len(samples1)-3))
 	p1_1 = f.sf(f1_1,1,len(samples1)-3) 
-	 #Lag phase 2
+	#Lag phase 2
 	a1_t = np.array(a1_cha[0:len(samples1)-2])
 	a1_t1 = np.array(a1_cha[1:len(samples1)-1])
 	a1_t2 = np.array(a1_cha[2:len(samples1)])

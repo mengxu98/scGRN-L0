@@ -14,6 +14,7 @@ library("patchwork")
 source("framework_main.R")
 source("ground-truth.R")
 source("Function-L0REG.R")
+source("Function-L0REG_delay.R")
 
 uploading <- dget("SINCERITIES functions/uploading.R")
 SINCERITITES <- dget("SINCERITIES functions/SINCERITIES.R")
@@ -204,6 +205,12 @@ for (j in 1:length(data_path)) {
           quote = F,
           row.names = F,
           col.names = F
+        )
+        ground_truth_simulation(
+          intput = paste0(output, "GRN_L0.txt"),
+          output = output,
+          dataset_dir = simulation_data_dir,
+          file = "refNetwork.csv"
         )
         evaluationObject <- prepareEval(paste0(output, "GRN_L0.txt"),
           paste0(paste0(output, "ground_truth.tsv")),

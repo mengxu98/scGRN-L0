@@ -95,25 +95,27 @@ L0REG <- function(matrix,
       # wghts <- wghts / max(wghts)
       # mean(wghts)
       # median(wghts)
-      index <- which(wghts >= median(wghts))
+      index <- which(wghts >= mean(wghts))
       X1 <- X[, index]
-      temp1 <- LO_fit(X1, Y,
-        penalty = penalty,
-        nFolds = 10,
-        seed = 1,
-        maxSuppSize = maxSuppSize,
-        nGamma = 5,
-        gammaMin = 0.0001,
-        gammaMax = 10
-      )
-      # --------------------------------------------------
-      temp1 <- as.vector(temp1)
-      wghts1 <- temp1[-1]
-      wghts1 <- abs(wghts1)
-      # wghts1 <- wghts1 / max(wghts)
-      wghts[1:length(wghts)] <- 0
-      for (i in 1:length(index)) {
-        wghts[index[i]] <- wghts1[i]
+      if (ncol(X1) > 1) {
+        temp1 <- LO_fit(X1, Y,
+          penalty = penalty,
+          nFolds = 10,
+          seed = 1,
+          maxSuppSize = maxSuppSize,
+          nGamma = 5,
+          gammaMin = 0.0001,
+          gammaMax = 10
+        )
+        # --------------------------------------------------
+        temp1 <- as.vector(temp1)
+        wghts1 <- temp1[-1]
+        wghts1 <- abs(wghts1)
+        # wghts1 <- wghts1 / max(wghts)
+        wghts[1:length(wghts)] <- 0
+        for (ii in 1:length(index)) {
+          wghts[index[ii]] <- wghts1[ii]
+        }
       }
       if (F) {
         wghts <- wghts / max(wghts)

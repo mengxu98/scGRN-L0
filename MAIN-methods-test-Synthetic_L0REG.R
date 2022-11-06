@@ -14,7 +14,7 @@ library("patchwork")
 source("framework_main.R")
 source("ground-truth.R")
 source("Function-L0REG.R")
-source("Function-L0REG_delay.R")
+# source("Function-L0REG_delay.R")
 
 uploading <- dget("SINCERITIES functions/uploading.R")
 SINCERITITES <- dget("SINCERITIES functions/SINCERITIES.R")
@@ -196,7 +196,7 @@ for (j in 1:length(data_path)) {
           matrix = t(data_grn),
           regulators = colnames(data_grn),
           targets = colnames(data_grn),
-          maxSuppSize = (nrow(data_grn) * 0.5),
+          # maxSuppSize = (nrow(data_grn) * 0.5),
           penalty = "L0"
         )
         write.table(L0Dynamic,

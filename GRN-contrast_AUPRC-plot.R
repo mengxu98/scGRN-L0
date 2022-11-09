@@ -289,6 +289,7 @@ if (T) {
                 scale_fill_manual(values = mycol) +
                 # scale_color_manual(values = mycol) +
                 scale_x_discrete(labels = methods) +
+                # ggtitle(" ") +
                 labs(x = "Methods", y = "AUPRC") +
                 theme(legend.position = "bottom") +
                 theme_bw() +

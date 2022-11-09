@@ -21,12 +21,12 @@ if (T) {
         "70"
     )
     evaluation_AUPRC_all <- read.csv(paste0(output, "evaluation_AUPRC.csv"))
-    names(evaluation_AUPRC_all) <- c("Dataset", "L0Dynamic", "GENIE3", "SINCERITITES", "PPCOR", "LEAP")
+    names(evaluation_AUPRC_all) <- c("Dataset", "L0DWGRN", "GENIE3", "SINCERITITES", "PPCOR", "LEAP")
     my_comparisons <- list(
-        c("L0Dynamic", "GENIE3"),
-        c("L0Dynamic", "SINCERITITES"),
-        c("L0Dynamic", "PPCOR"),
-        c("L0Dynamic", "LEAP")
+        c("L0DWGRN", "GENIE3"),
+        c("L0DWGRN", "SINCERITITES"),
+        c("L0DWGRN", "PPCOR"),
+        c("L0DWGRN", "LEAP")
     )
     mycol <- c("gray", "#008B00", "#008B8B", "#3366cc", "#104E8B")
     head(evaluation_AUPRC_all[1:3, 1:3])
@@ -242,12 +242,13 @@ if (T) {
         "5000"
     )
     evaluation_AUPRC_all <- read.csv(paste0(output, "evaluation_AUPRC.csv"))
+    names(evaluation_AUROC_all) <- c("Dataset", "L0DWGRN", "GENIE3", "SINCERITITES", "PPCOR", "LEAP")
     head(evaluation_AUPRC_all[1:3, 1:3])
     my_comparisons <- list(
-        c("L0Dynamic", "GENIE3"),
-        c("L0Dynamic", "SINCERITITES"),
-        c("L0Dynamic", "PPCOR"),
-        c("L0Dynamic", "LEAP")
+        c("L0DWGRN", "GENIE3"),
+        c("L0DWGRN", "SINCERITITES"),
+        c("L0DWGRN", "PPCOR"),
+        c("L0DWGRN", "LEAP")
     )
     mycol <- c("gray", "#008B00", "#008B8B", "#3366cc", "#104E8B")
     for (c in 1:length(cell_num)) {

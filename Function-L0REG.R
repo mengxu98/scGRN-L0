@@ -81,7 +81,7 @@ L0REG <- function(matrix,
       Y <- matrix[, targets[i]]
       temp <- LO_fit(X, Y,
         penalty = penalty,
-        nFolds = 10, 
+        nFolds = 10,
         seed = 1,
         maxSuppSize = maxSuppSize,
         nGamma = 5,
@@ -155,7 +155,7 @@ L0REG <- function(matrix,
 # --------------------------------------------------
 if (F) {
   wghts <- wghts / max(wghts)
-  
+
   # Now sort the wghts
   indices <- sort.list(wghts, decreasing = TRUE)
   # Check for zero entries
@@ -166,8 +166,51 @@ if (F) {
   # wghts[indices[1:5]] <- 1
   # Set the ones that were zero to zero anyway
   wghts[zeros] <- 0
-  
+
   weightdf[colnames(matrix)[-i], colnames(matrix)[i]] <- wghts
   rownames(weightdf) <- colnames(matrix)
   colnames(weightdf) <- colnames(matrix)
+}
+
+# Plot function --------------------------------------------------
+L0Plot <- function(data, plotType = NULL) {
+  if (is.null(plotType)) {
+    plotType <- boxplot
+  }
+  if (plotType == boxplot) {
+    p <- ggplot(
+      data,
+      aes(x = Method, y = AUPRC)
+    ) +
+      # geom_violin(aes(fill = Method),
+      #     trim = FALSE
+      # ) +
+      geom_boxplot(aes(fill = Method),
+        width = 0.8
+      ) +
+      stat_compare_means(
+        method = "wilcox.test",
+        label = "p.signif",
+        comparisons = my_comparisons,
+        bracket.size = 0.6,
+        sizen = 4,
+        color = "#6699cc"
+      ) +
+      scale_fill_manual(values = mycol) +
+      # scale_color_manual(values = mycol) +
+      scale_x_discrete(labels = methods) +
+      labs(x = "Methods", y = "AUPRC") +
+      theme(legend.position = "bottom") +
+      theme_bw() +
+      theme(
+        axis.text.x = element_text(
+          angle = 45,
+          hjust = 1,
+          vjust = 1,
+          size = 10
+        )
+      )
+  }
+
+  p
 }

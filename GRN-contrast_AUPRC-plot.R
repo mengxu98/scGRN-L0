@@ -48,10 +48,12 @@ if (T) {
             methods_barplot_all,
             aes(x = Method, y = AUPRC)
         ) +
-            geom_violin(aes(fill = Method),
-                trim = FALSE
+            # geom_violin(aes(fill = Method),
+            #     trim = FALSE
+            # ) +
+            geom_boxplot(aes(fill = Method),
+                width = 0.8
             ) +
-            geom_boxplot(width = 0.2) +
             stat_compare_means(
                 method = "wilcox.test",
                 label = "p.signif",
@@ -75,8 +77,8 @@ if (T) {
                 )
             )
         p
-        
-        ggsave(paste0("../scGRN-L0_output/output_Curated/dataset/Methods-contrast-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
+
+        ggsave(paste0("../scGRN-L0_output/output_Curated/dataset/Methods-contrast-AUPRC-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
 
         # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUPRC, colour = Methods)) +
         #   geom_boxplot() +
@@ -115,7 +117,7 @@ if (T) {
                 )
             )
         p2
-        ggsave(paste0("../scGRN-L0_output/output_Curated/dataset/Methods-contrast-", dataset, "-2.png"),
+        ggsave(paste0("../scGRN-L0_output/output_Curated/dataset/Methods-contrast-AUPRC-", dataset, "-2.png"),
             width = 15, height = 4, dpi = 600
         )
     }
@@ -138,10 +140,12 @@ if (T) {
             methods_barplot_all,
             aes(x = Method, y = AUPRC)
         ) +
-            geom_violin(aes(fill = Method),
-                trim = FALSE
+            # geom_violin(aes(fill = Method),
+            #     trim = FALSE
+            # ) +
+            geom_boxplot(aes(fill = Method),
+                width = 0.8
             ) +
-            geom_boxplot(width = 0.2) +
             stat_compare_means(
                 method = "wilcox.test",
                 label = "p.signif",
@@ -165,7 +169,7 @@ if (T) {
                 )
             )
         p
-        ggsave(paste0("../scGRN-L0_output/output_Curated/cell/Methods-contrast-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
+        ggsave(paste0("../scGRN-L0_output/output_Curated/cell/Methods-contrast-AUPRC-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
 
         # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUPRC, colour = Methods)) +
         #   geom_boxplot() +
@@ -206,7 +210,7 @@ if (T) {
                 )
             )
         p2
-        ggsave(paste0("../scGRN-L0_output/output_Curated/cell/Methods-contrast-", dataset, "-2.png"), width = 15, height = 4, dpi = 600)
+        ggsave(paste0("../scGRN-L0_output/output_Curated/cell/Methods-contrast-AUPRC-", dataset, "-2.png"), width = 15, height = 4, dpi = 600)
     }
 }
 
@@ -267,10 +271,12 @@ if (T) {
                 methods_barplot_all,
                 aes(x = Method, y = AUPRC)
             ) +
-                geom_violin(aes(fill = Method),
-                    trim = FALSE
+                # geom_violin(aes(fill = Method),
+                #     trim = FALSE
+                # ) +
+                geom_boxplot(aes(fill = Method),
+                    width = 0.8
                 ) +
-                geom_boxplot(width = 0.2) +
                 stat_compare_means(
                     method = "wilcox.test",
                     label = "p.signif",
@@ -294,7 +300,7 @@ if (T) {
                     )
                 )
             p
-            ggsave(paste0("../scGRN-L0_output/output_Synthetic/cell-dataset/Methods-contrast-", cell, "-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
+            ggsave(paste0("../scGRN-L0_output/output_Synthetic/cell-dataset/Methods-contrast-AUPRC-", cell, "-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
 
             # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUPRC, colour = Methods)) +
             #   geom_boxplot() +
@@ -335,7 +341,7 @@ if (T) {
                     )
                 )
             p2
-            ggsave(paste0("../scGRN-L0_output/output_Synthetic/cell-dataset/Methods-contrast-", cell, "-", dataset, "-2.png"), width = 15, height = 4, dpi = 600)
+            ggsave(paste0("../scGRN-L0_output/output_Synthetic/cell-dataset/Methods-contrast-AUPRC-", cell, "-", dataset, "-2.png"), width = 15, height = 4, dpi = 600)
         }
     }
 
@@ -362,10 +368,12 @@ if (T) {
                 methods_barplot_all,
                 aes(x = Method, y = AUPRC)
             ) +
-                geom_violin(aes(fill = Method),
-                    trim = FALSE
+                # geom_violin(aes(fill = Method),
+                #     trim = FALSE
+                # ) +
+                geom_boxplot(aes(fill = Method),
+                    width = 0.8
                 ) +
-                geom_boxplot(width = 0.2) +
                 stat_compare_means(
                     method = "wilcox.test",
                     label = "p.signif",
@@ -389,7 +397,7 @@ if (T) {
                     )
                 )
             p
-            ggsave(paste0("../scGRN-L0_output/output_Synthetic/dataset-cell/Methods-contrast-", cell, "-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
+            ggsave(paste0("../scGRN-L0_output/output_Synthetic/dataset-cell/Methods-contrast-AUPRC-", cell, "-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
 
             # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUPRC, colour = Methods)) +
             #   geom_boxplot() +
@@ -430,7 +438,7 @@ if (T) {
                     )
                 )
             p2
-            ggsave(paste0("../scGRN-L0_output/output_Synthetic/dataset-cell/Methods-contrast-", cell, "-", dataset, "-2.png"), width = 15, height = 4, dpi = 600)
+            ggsave(paste0("../scGRN-L0_output/output_Synthetic/dataset-cell/Methods-contrast-AUPRC-", cell, "-", dataset, "-2.png"), width = 15, height = 4, dpi = 600)
         }
     }
 
@@ -454,10 +462,12 @@ if (T) {
             methods_barplot_all,
             aes(x = Method, y = AUPRC)
         ) +
-            geom_violin(aes(fill = Method),
-                trim = FALSE
+            # geom_violin(aes(fill = Method),
+            #     trim = FALSE
+            # ) +
+            geom_boxplot(aes(fill = Method),
+                width = 0.8
             ) +
-            geom_boxplot(width = 0.2) +
             stat_compare_means(
                 method = "wilcox.test",
                 label = "p.signif",
@@ -481,7 +491,7 @@ if (T) {
                 )
             )
         p
-        ggsave(paste0("../scGRN-L0_output/output_Synthetic/dataset/Methods-contrast-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
+        ggsave(paste0("../scGRN-L0_output/output_Synthetic/dataset/Methods-contrast-AUPRC-", dataset, "-1.png"), width = 4, height = 4, dpi = 600)
 
         # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUPRC, colour = Methods)) +
         #   geom_boxplot() +
@@ -522,7 +532,7 @@ if (T) {
                 )
             )
         p2
-        ggsave(paste0("../scGRN-L0_output/output_Synthetic/dataset/Methods-contrast-", dataset, "-2.png"), width = 15, height = 4, dpi = 600)
+        ggsave(paste0("../scGRN-L0_output/output_Synthetic/dataset/Methods-contrast-AUPRC-", dataset, "-2.png"), width = 15, height = 4, dpi = 600)
     }
 
     for (c in 1:length(cell_num)) {
@@ -545,10 +555,12 @@ if (T) {
             methods_barplot_all,
             aes(x = Method, y = AUPRC)
         ) +
-            geom_violin(aes(fill = Method),
-                trim = FALSE
+            # geom_violin(aes(fill = Method),
+            #     trim = FALSE
+            # ) +
+            geom_boxplot(aes(fill = Method),
+                width = 0.8
             ) +
-            geom_boxplot(width = 0.2) +
             stat_compare_means(
                 method = "wilcox.test",
                 label = "p.signif",
@@ -572,7 +584,7 @@ if (T) {
                 )
             )
         p
-        ggsave(paste0("../scGRN-L0_output/output_Synthetic/cell/Methods-contrast-", cell, "-1.png"), width = 4, height = 4, dpi = 600)
+        ggsave(paste0("../scGRN-L0_output/output_Synthetic/cell/Methods-contrast-AUPRC-", cell, "-1.png"), width = 4, height = 4, dpi = 600)
 
         # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUPRC, colour = Methods)) +
         #   geom_boxplot() +
@@ -613,7 +625,7 @@ if (T) {
                 )
             )
         p2
-        ggsave(paste0("../scGRN-L0_output/output_Synthetic/cell/Methods-contrast-", cell, "-2.png"), width = 15, height = 4, dpi = 600)
+        ggsave(paste0("../scGRN-L0_output/output_Synthetic/cell/Methods-contrast-AUPRC-", cell, "-2.png"), width = 15, height = 4, dpi = 600)
     }
 }
 
@@ -639,10 +651,12 @@ p <- ggplot(
     methods_barplot_all,
     aes(x = Method, y = AUPRC)
 ) +
-    geom_violin(aes(fill = Method),
-        trim = FALSE
+    # geom_violin(aes(fill = Method),
+    #     trim = FALSE
+    # ) +
+    geom_boxplot(aes(fill = Method),
+        width = 0.8
     ) +
-    geom_boxplot(width = 0.2) +
     stat_compare_means(
         method = "wilcox.test",
         label = "p.signif",
@@ -666,7 +680,7 @@ p <- ggplot(
         )
     )
 p
-ggsave(paste0("../scGRN-L0_output/Methods-contrast-all-1.png"), width = 4, height = 4, dpi = 600)
+ggsave(paste0("../scGRN-L0_output/Methods-contrast-AUPRC-all-1.png"), width = 4, height = 4, dpi = 600)
 
 # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUPRC, colour = Methods)) +
 #   geom_boxplot() +
@@ -694,7 +708,7 @@ P1 <- ggplot(methods_barplot_all, aes(x = Method, y = AUPRC, fill = Method)) +
         )
     )
 P1
-ggsave(paste0("../scGRN-L0_output/Methods-contrast-all-2.png"), width = 4, height = 4, dpi = 600)
+ggsave(paste0("../scGRN-L0_output/Methods-contrast-AUPRC-all-2.png"), width = 4, height = 4, dpi = 600)
 
 # --------------------------------------------------
 output <- "../scGRN-L0_output/output_Curated/"
@@ -719,10 +733,12 @@ p <- ggplot(
     methods_barplot_all,
     aes(x = Method, y = AUPRC)
 ) +
-    geom_violin(aes(fill = Method),
-        trim = FALSE
+    # geom_violin(aes(fill = Method),
+    #     trim = FALSE
+    # ) +
+    geom_boxplot(aes(fill = Method),
+        width = 0.8
     ) +
-    geom_boxplot(width = 0.2) +
     stat_compare_means(
         method = "wilcox.test",
         label = "p.signif",
@@ -746,7 +762,7 @@ p <- ggplot(
         )
     )
 p
-ggsave(paste0("../scGRN-L0_output/Methods-contrast-Curated-1.png"), width = 4, height = 4, dpi = 600)
+ggsave(paste0("../scGRN-L0_output/Methods-contrast-AUPRC-Curated-1.png"), width = 4, height = 4, dpi = 600)
 
 # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUPRC, colour = Methods)) +
 #   geom_boxplot() +
@@ -774,7 +790,7 @@ P1 <- ggplot(methods_barplot_all, aes(x = Method, y = AUPRC, fill = Method)) +
         )
     )
 P1
-ggsave(paste0("../scGRN-L0_output/Methods-contrast-Curated-2.png"), width = 4, height = 4, dpi = 600)
+ggsave(paste0("../scGRN-L0_output/Methods-contrast-AUPRC-Curated-2.png"), width = 4, height = 4, dpi = 600)
 
 head(evaluation_AUPRC_all2[1:3, 1:3])
 methods_barplot_all <- evaluation_AUPRC %>%
@@ -792,10 +808,12 @@ p <- ggplot(
     methods_barplot_all,
     aes(x = Method, y = AUPRC)
 ) +
-    geom_violin(aes(fill = Method),
-        trim = FALSE
+    # geom_violin(aes(fill = Method),
+    #     trim = FALSE
+    # ) +
+    geom_boxplot(aes(fill = Method),
+        width = 0.8
     ) +
-    geom_boxplot(width = 0.2) +
     stat_compare_means(
         method = "wilcox.test",
         label = "p.signif",
@@ -819,7 +837,7 @@ p <- ggplot(
         )
     )
 p
-ggsave(paste0("../scGRN-L0_output/Methods-contrast-Synthetic-1.png"), width = 4, height = 4, dpi = 600)
+ggsave(paste0("../scGRN-L0_output/Methods-contrast-AUPRC-Synthetic-1.png"), width = 4, height = 4, dpi = 600)
 
 # methods_barplot_all %>% ggplot(., aes(x = Methods, y = AUPRC, colour = Methods)) +
 #   geom_boxplot() +
@@ -847,4 +865,4 @@ P1 <- ggplot(methods_barplot_all, aes(x = Method, y = AUPRC, fill = Method)) +
         )
     )
 P1
-ggsave(paste0("../scGRN-L0_output/Methods-contrast-Synthetic-2.png"), width = 4, height = 4, dpi = 600)
+ggsave(paste0("../scGRN-L0_output/Methods-contrast-AUPRC-Synthetic-2.png"), width = 4, height = 4, dpi = 600)

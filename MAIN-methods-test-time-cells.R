@@ -23,12 +23,12 @@ auc_from_ranks_TC_sign <- dget("SINCERITIES functions/auc_from_ranks_TC_sign.R")
 final_ranked_predictions <- dget("SINCERITIES functions/final_ranked_predictions.R")
 
 data_path <- c(
-  "dyn-BF",
-  # "dyn-BFC",
-  "dyn-CY",
-  "dyn-LI",
-  # "dyn-TF",
-  "dyn-LL"
+  # "dyn-BF",
+  # # "dyn-BFC",
+  # "dyn-CY",
+  # "dyn-LI",
+  # # "dyn-TF",
+  # "dyn-LL"
   "dyn-LL"
 )
 cell_num <- c(
@@ -39,18 +39,20 @@ cell_num <- c(
   "5000"
 )
 cell_drop <- c(
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
+  # "1",
+  # "2",
+  # "3",
+  # "4",
+  # "5",
+  # "6",
+  # "7",
+  # "8",
+  # "9",
   "10"
 )
-
+runtime <- matrix(0, nrow = 5, ncol = 5)
+colnames(runtime) <- cell_num
+rownames(runtime) <- c("L0DWGRN", "GENIE3", "SINCERITITES", "PPCOR", "LEAP")
 output <- "../scGRN-L0_output/output_Synthetic/"
 evaluation_AUROC_all <- c()
 evaluation_AUPRC_all <- c()
@@ -79,6 +81,7 @@ for (j in 1:length(data_path)) {
         write.csv(simulation_data_new, paste0(simulation_data_dir, "ExpressionData_all", ".csv"), row.names = FALSE)
       }
       # --------------------------------------------------
+      start <- Sys.time()
       if (T) {
         DATA <- uploading(paste0(simulation_data_dir, "ExpressionData_all", ".csv"))
         # result <- SINCERITITES(DATA, distance = 1, method = 1, noDIAG = 0, SIGN = 1)
@@ -114,6 +117,8 @@ for (j in 1:length(data_path)) {
           # SINCERITITES_AUPR_S <- AUCresult_SINCERITITES$AUPR
         }
       }
+      end <- Sys.time()
+      runningtime_SINCERITITES <- end - start
       # --------------------------------------------------
       data_grn <- read.csv(paste0(simulation_data_dir, "ExpressionData_all.csv"),
         header = T
@@ -133,6 +138,8 @@ for (j in 1:length(data_path)) {
         AUROC_GENIE3_N <- calcAUROC(evaluationObject)
         AUPRC_GENIE3_N <- calcAUPR(evaluationObject)
       }
+
+      start <- Sys.time()
       if (T) {
         library(GENIE3)
         weightMat <- GENIE3(
@@ -160,6 +167,8 @@ for (j in 1:length(data_path)) {
         AUROC_GENIE3 <- calcAUROC(evaluationObject)
         AUPRC_GENIE3 <- calcAUPR(evaluationObject)
       }
+      end <- Sys.time()
+      runningtime_GENIE3 <- end - start
       # --------------------------------------------------
       if (F) {
         NIMEFI(data_grn,
@@ -192,6 +201,8 @@ for (j in 1:length(data_path)) {
         AUROC_L0L2_N <- calcAUROC(evaluationObject)
         AUPRC_L0L2_N <- calcAUPR(evaluationObject)
       }
+
+      start <- Sys.time()
       if (T) {
         L0Dynamic <- L0REG(
           matrix = t(data_grn),
@@ -219,6 +230,8 @@ for (j in 1:length(data_path)) {
         )
         AUROC_L0 <- calcAUROC(evaluationObject)
         AUPRC_L0 <- calcAUPR(evaluationObject)
+        end <- Sys.time()
+        runningtime_L0 <- end - start
         # L0Dynamic$weight <- as.numeric(L0Dynamic$weight)
         # L0Dynamic$regulatoryGene <- as.factor(L0Dynamic$regulatoryGene)
         # L0Dynamic$targetGene <- as.factor(L0Dynamic$targetGene)
@@ -270,6 +283,7 @@ for (j in 1:length(data_path)) {
         # AUROC_L0DynamicL2_S <- AUCresult_L0REG$AUROC
       }
       # --------------------------------------------------
+      start <- Sys.time()
       if (T) {
         library(ppcor)
         inputExpr <- t(data_grn)
@@ -295,7 +309,10 @@ for (j in 1:length(data_path)) {
         AUROC_PPCOR <- calcAUROC(evaluationObject)
         AUPRC_PPCOR <- calcAUPR(evaluationObject)
       }
+      end <- Sys.time()
+      runningtime_ppcor <- end - start
       # --------------------------------------------------
+      start <- Sys.time()
       if (T) {
         library(LEAP)
         geneNames <- rownames(inputExpr)
@@ -327,44 +344,34 @@ for (j in 1:length(data_path)) {
         AUROC_LEAP <- calcAUROC(evaluationObject)
         AUPRC_LEAP <- calcAUPR(evaluationObject)
       }
-      # --------------------------------------------------
-      if (AUROC_L0 >= AUROC_L0L2) {
-        L0Dynamic_AUROC <- AUROC_L0
-        L0Dynamic_AUPRC <- AUPRC_L0
-      } else {
-        L0Dynamic_AUROC <- AUROC_L0L2
-        L0Dynamic_AUPRC <- AUPRC_L0L2
-      }
-      evaluation_AUROC <- data.frame(
-        Dataset = paste0(data_path[j], "-", cell_num[k], "-", cell_drop[i]),
-        L0Dynamic = L0Dynamic_AUROC,
-        # L0Dynamic_N = AUROC_L0_N,
-        # L0DynamicL2_N = AUROC_L0L2_N,
-        GENIE3 = AUROC_GENIE3,
-        SINCERITITES = AUROC_SINCERITITES,
-        PPCOR = AUROC_PPCOR,
-        LEAP = AUROC_LEAP
-      )
-      evaluation_AUPRC <- data.frame(
-        Dataset = paste0(data_path[j], "-", cell_num[k], "-", cell_drop[i]),
-        L0Dynamic = L0Dynamic_AUPRC,
-        # L0Dynamic_N = AUPRC_L0_N,
-        # L0DynamicL2_N = AUPRC_L0L2_N,
-        GENIE3 = AUPRC_GENIE3,
-        SINCERITITES = AUPRC_SINCERITITES,
-        PPCOR = AUPRC_PPCOR,
-        LEAP = AUPRC_LEAP
-      )
-      evaluation_AUROC_one <- rbind.data.frame(evaluation_AUROC_one, evaluation_AUROC)
-      evaluation_AUPRC_one <- rbind.data.frame(evaluation_AUPRC_one, evaluation_AUPRC)
-      print(evaluation_AUROC_one)
+      end <- Sys.time()
+      runningtime_LEAP <- end - start
+      runtime[1, k] <- runningtime_L0
+      runtime[2, k] <- runningtime_GENIE3
+      runtime[3, k] <- runningtime_SINCERITITES
+      runtime[4, k] <- runningtime_ppcor
+      runtime[5, k] <- runningtime_LEAP
     }
-    evaluation_AUROC_two <- rbind.data.frame(evaluation_AUROC_two, evaluation_AUROC_one)
-    evaluation_AUPRC_two <- rbind.data.frame(evaluation_AUPRC_two, evaluation_AUPRC_one)
   }
-  evaluation_AUROC_all <- rbind.data.frame(evaluation_AUROC_all, evaluation_AUROC_two)
-  evaluation_AUPRC_all <- rbind.data.frame(evaluation_AUPRC_all, evaluation_AUPRC_two)
 }
+runtime
+mydata <- melt(runtime, id = rownames(runtime))
+colnames(mydata) <- c("Method", "Cellnum", "Runtime")
+ggplot(data = mydata, aes(x = factor(Cellnum), y = Runtime, group = Method, color = Method, shape = Method)) +
+  geom_point(
+    size = 2.5
+  ) +
+  geom_line() +
+  scale_color_manual(values = mycol) +
+  scale_fill_manual(values = mycol) +
+  xlab("Cell Number") +
+  ylab("Run Time (Second)") +
+  theme_bw() +
+  theme(
+    text = element_text(family = "Times New Roman"),
+    # legend.position = c(.75, .25),
+    # legend.box.background = element_rect(color = "black"),
+    legend.position = "right"
+  )
 
-write.csv(evaluation_AUROC_all, paste0(output, "evaluation_AUROC.csv"), row.names = F)
-write.csv(evaluation_AUPRC_all, paste0(output, "evaluation_AUPRC.csv"), row.names = F)
+ggsave(paste0("../scGRN-L0_output/output_Synthetic/Methods-contrast-Runtime-cell.png"), width = 5, height = 2, dpi = 600)

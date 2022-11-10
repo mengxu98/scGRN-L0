@@ -527,7 +527,7 @@ if (T) {
         theme(legend.position = "bottom") +
             theme(text = element_text(size = 12)) +
             theme(text = element_text(family = "Times New Roman"))
-    ggsave(paste0("../scGRN-L0_output/output_Synthetic/Methods-contrast-AUROC&AUPRC-dataset.png"), width = 10, height = 4.5, dpi = 600)
+    ggsave(paste0("../scGRN-L0_output/output_Synthetic/Methods-contrast-AUROC&AUPRC-dataset.png"), width = 10, height = 8, dpi = 600)
 
 
     evaluation_AUPRC_mean <- matrix(0, nrow = 5, ncol = 5)

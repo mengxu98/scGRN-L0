@@ -91,7 +91,7 @@ for (j in 1:length(data_path)) {
       library(GENIE3)
       weightMat <- GENIE3(
         exprMatrix = t(data_grn),
-        nCores = 1,
+        nCores = 8,
         nTrees = 1000,
         verbose = TRUE
       )
@@ -150,7 +150,7 @@ for (j in 1:length(data_path)) {
 runtime
 mydata <- melt(runtime, id = rownames(runtime))
 colnames(mydata) <- c("Method", "Cellnum", "Runtime")
-ggplot(data = mydata, aes(x = factor(Cellnum), y = Runtime, group = Method, color = Method, shape = Method)) +
+runtime_cell <- ggplot(data = mydata, aes(x = factor(Cellnum), y = Runtime, group = Method, color = Method, shape = Method)) +
   geom_point(
     size = 2.5
   ) +
@@ -166,5 +166,5 @@ ggplot(data = mydata, aes(x = factor(Cellnum), y = Runtime, group = Method, colo
     # legend.box.background = element_rect(color = "black"),
     legend.position = "right"
   )
-
+runtime_cell
 ggsave(paste0("../scGRN-L0_output/output_Synthetic/Methods-contrast-Runtime-cell.png"), width = 5, height = 2, dpi = 600)

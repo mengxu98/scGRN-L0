@@ -145,4 +145,4 @@ runtime_cell + runtime_gene +
   theme(legend.position = "bottom") +
     theme(text = element_text(size = 10)) +
     theme(text = element_text(family = "Times New Roman"))
-ggsave(paste0("../scGRN-L0_output/output_Synthetic/Methods-contrast-running.png"), width = 8, height = 3, dpi = 600)
+ggsave(paste0("../scGRN-L0_output/output_Synthetic/Methods-contrast-runningtime.png"), width = 8, height = 3, dpi = 600)

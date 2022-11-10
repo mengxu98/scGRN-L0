@@ -24,11 +24,11 @@ final_ranked_predictions <- dget("SINCERITIES functions/final_ranked_predictions
 
 data_path <- c(
   "dyn-BF",
-  "dyn-BFC",
+  # "dyn-BFC",
   "dyn-CY",
   "dyn-LI",
-  "dyn-LL",
-  "dyn-TF"
+  # "dyn-TF",
+  "dyn-LL"
 )
 cell_num <- c(
   "100",

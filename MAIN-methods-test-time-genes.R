@@ -29,6 +29,7 @@ gene_num <- c(
   "200",
   "500"
 )
+mycol <- c("#3366cc", "#008B00", "#008B8B", "#7171C6", "#79CDCD")
 runtime <- matrix(0, nrow = 5, ncol = 5)
 colnames(runtime) <- gene_num
 rownames(runtime) <- c("L0DWGRN", "GENIE3", "SINCERITITES", "PPCOR", "LEAP")

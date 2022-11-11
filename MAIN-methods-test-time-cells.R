@@ -50,6 +50,7 @@ cell_drop <- c(
   # "9",
   "10"
 )
+mycol <- c("#3366cc", "#008B00", "#008B8B", "#7171C6", "#79CDCD")
 runtime <- matrix(0, nrow = 5, ncol = 5)
 colnames(runtime) <- cell_num
 rownames(runtime) <- c("L0DWGRN", "GENIE3", "SINCERITITES", "PPCOR", "LEAP")

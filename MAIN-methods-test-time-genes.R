@@ -26,8 +26,8 @@ gene_num <- c(
   "20",
   "50",
   "100",
-  "200",
-  "500"
+  "150",
+  "200"
 )
 mycol <- c("#3366cc", "#008B00", "#008B8B", "#7171C6", "#79CDCD")
 runtime <- matrix(0, nrow = 5, ncol = 5)
@@ -44,7 +44,7 @@ for (i in 1:length(gene_num)) {
   simulation_PseudoTime <- read.csv(paste0(simulation_data_dir, simulation_PseudoTime_file), row.names = 1)
   simulation_data_a <- cbind.data.frame(t(simulation_data), h = simulation_PseudoTime$PseudoTime) %>% na.omit()
   simulation_data_new <- simulation_data_a[1:500, (ncol(simulation_data_a) - as.numeric(gene_num[i]) - 1):ncol(simulation_data_a)]
-  # simulation_data_new <- rbind(simulation_data_new, simulation_data_new)
+  simulation_data_new <- rbind(simulation_data_new, simulation_data_new)
   simulation_data_new <- rbind(simulation_data_new, simulation_data_new)
   write.csv(simulation_data_new, paste0(simulation_data_dir, "ExpressionData_all_genes", ".csv"), row.names = FALSE)
   data_grn <- read.csv(paste0(simulation_data_dir, "ExpressionData_all_genes.csv"),

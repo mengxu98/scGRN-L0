@@ -78,16 +78,6 @@ DimPlot(sc, reduction = "umap", group.by = "CellType", cols = .color.cell.type)
 sc <- FindNeighbors(sc, dims = 1:10)
 sc <- FindClusters(sc, resolution = 0.05)
 
-## Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
-##
-## Number of nodes: 3822
-## Number of edges: 121361
-##
-## Running Louvain algorithm...
-## Maximum modularity in 10 random starts: 0.9890
-## Number of communities: 5
-## Elapsed time: 0 seconds
-
 # As it is a toy example with well defined cell types (i.e., cell lines), unsupervised clustering fully recapitulates cell line annotation
 table(sc@active.ident, sc$CellType)
 
@@ -156,9 +146,6 @@ MC$purity <- supercell_purity(
 # Metacell purity distribution
 summary(MC$purity)
 
-##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max.
-##       1       1       1       1       1       1
-
 hist(MC$purity, main = paste0("Purity of metacells \nin terms of cell line composition (", method_purity, ")"))
 
 supercell_plot(
@@ -188,51 +175,11 @@ MC.seurat <- supercell_2_Seurat(
   N.comp = 10
 )
 
-## [1] "Done: NormalizeData"
-## [1] "Doing: data to normalized data"
-## [1] "Doing: weighted scaling"
-## [1] "Done: weighted scaling"
-
 Idents(MC.seurat) <- "CellType"
-
 MC.seurat <- RunUMAP(MC.seurat, dims = 1:10)
-
-## 19:46:08 UMAP embedding parameters a = 0.9922 b = 1.112
-
-## 19:46:08 Read 191 rows and found 10 numeric columns
-
-## 19:46:08 Using Annoy for neighbor search, n_neighbors = 30
-
-## 19:46:08 Building Annoy index with metric = cosine, n_trees = 50
-
-## 0%   10   20   30   40   50   60   70   80   90   100%
-
-## [----|----|----|----|----|----|----|----|----|----|
-
-## **************************************************|
-## 19:46:08 Writing NN index file to temp file /var/folders/g3/m1nhnz5910s9mckg3ymbz_b80000gn/T//RtmpfJCuiA/file1e874ac9b766
-## 19:46:08 Searching Annoy index using 1 thread, search_k = 3000
-## 19:46:08 Annoy recall = 100%
-## 19:46:08 Commencing smooth kNN distance calibration using 1 thread
-## 19:46:09 Found 2 connected components, falling back to 'spca' initialization with init_sdev = 1
-## 19:46:09 Initializing from PCA
-## 19:46:09 Using 'irlba' for PCA
-## 19:46:09 PCA: 2 components explained 49.92% variance
-## 19:46:09 Commencing optimization for 500 epochs, with 6042 positive edges
-## 19:46:09 Optimization finished
 
 DimPlot(MC.seurat, cols = .color.cell.type, reduction = "umap")
 MC.seurat <- FindClusters(MC.seurat, resolution = 0.5)
-
-## Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck
-##
-## Number of nodes: 191
-## Number of edges: 3703
-##
-## Running Louvain algorithm...
-## Maximum modularity in 10 random starts: 0.8899
-## Number of communities: 5
-## Elapsed time: 0 seconds
 
 DimPlot(MC.seurat, reduction = "umap")
 
@@ -248,9 +195,8 @@ MC.seurat.all.markers <- FindAllMarkers(
   logfc.threshold = 0.25,
   test.use = "t"
 )
-# saveRDS(MC.seurat.all.markers, file = file.path(data.folder, "output", paste0("MC_gamma_", gamma, "_all_markers_seurat.Rds")))
 
-# Load markers (backup)
+# saveRDS(MC.seurat.all.markers, file = file.path(data.folder, "output", paste0("MC_gamma_", gamma, "_all_markers_seurat.Rds")))
 # MC.seurat.all.markers <- readRDS(file = file.path(data.folder, "output", "MC_gamma_20_all_markers_seurat.Rds"))
 
 # Top markers (select top markers of each cell line)
@@ -260,20 +206,6 @@ MC.seurat.top.markers <- MC.seurat.all.markers %>%
 
 MC.seurat.top.markers
 
-## # A tibble: 10 × 7
-## # Groups:   cluster [5]
-##       p_val avg_log2FC pct.1 pct.2 p_val_adj cluster gene
-##       <dbl>      <dbl> <dbl> <dbl>     <dbl> <fct>   <chr>
-##  1 2.08e-57       5.37     1 0.993  2.45e-53 A549    KRT81
-##  2 1.03e-51       5.12     1 1      1.21e-47 A549    AKR1B10
-##  3 1.89e-14       3.12     1 0.89   2.23e-10 H1975   MT1E
-##  4 5.18e-12       2.84     1 0.695  6.11e- 8 H1975   DHRS2
-##  5 9.90e-43       4.19     1 0.993  1.17e-38 H2228   LCN2
-##  6 1.08e-32       4.09     1 0.954  1.28e-28 H2228   SAA1
-##  7 2.11e-63       4.21     1 0.911  2.49e-59 H838    GAGE12D
-##  8 1.24e-57       4.01     1 0.911  1.47e-53 H838    GAGE12E
-##  9 2.48e-34       4.13     1 1      2.92e-30 HCC827  SEC61G
-## 10 5.92e-30       3.02     1 1      6.98e-26 HCC827  CDK4
 genes.to.plot <- MC.seurat.top.markers$gene[c(seq(1, 9, 2), seq(2, 10, 2))]
 VlnPlot(MC.seurat, features = genes.to.plot, ncol = 5, pt.size = 0.0, cols = .color.cell.type)
 
@@ -320,8 +252,6 @@ supercell_DimPlot(
   dim.name = "UMAP",
   title = paste0("UMAP of metacells colored by metacell clustering")
 )
-
-
 
 # Compute upregulated genes in each cell line (versus other cells)
 MC.all.markers <- supercell_FindAllMarkers(

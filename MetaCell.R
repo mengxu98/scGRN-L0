@@ -8,7 +8,6 @@
 # prof <- lineprof(test("D:/test/testcsv"))
 # shine(prof)
 
-
 # devtools::install_github("shmohammadi86/ACTIONetExperiment", force = TRUE)
 # library(ACTIONetExperiment)
 # BiocManager::install("batchelor")
@@ -30,18 +29,18 @@ library(SuperCell)
 library(Seurat)
 library(dplyr)
 
+# load single-cell (sc) count matrix and cell metadata
 testData <- paste0("../scGRN-L0_data/Data1-Qian et al. Cell Research 2020/", "2096-Lungcancer_counts-export/LC_counts/")
 counts <- Seurat::Read10X(testData)
 head(counts)
 meta <- read.table("../scGRN-L0_data/Data1-Qian et al. Cell Research 2020/2097-Lungcancer_metadata.csv", header = T, sep = ",")
 head(meta)
-# load single-cell (sc) count matrix and cell metadata
 sc.counts <- counts
 rownames(meta) <- meta$Cell
 sc.meta <- meta
 table(sc.meta$CellType)
 proj.name <- "LUNG"
-.color.cell.type <- c(
+colorCellType <- c(
   "Alveolar" = "#E69F00", "B_cell" = "#026b02", "Cancer" = "#9e0000", "EC" = "#F0E442",
   "Epithelial" = "#CC79A7", "Erythroblast" = "#09fa96", "Fibroblast" = "#a31e8d",
   "Mast_cell" = "#0d0ab1", "Myeloid" = "#127032e7",
@@ -69,12 +68,12 @@ sc <- ScaleData(sc, verbose = FALSE)
 sc <- RunPCA(sc, verbose = FALSE)
 
 # Plot PCA (2D representation of scRNA-seq data) colored by cell line
-DimPlot(sc, reduction = "pca", group.by = "CellType", cols = .color.cell.type)
+DimPlot(sc, reduction = "pca", group.by = "CellType", cols = colorCellType)
 
 sc <- RunUMAP(sc, dims = 1:10)
 
 # Plot UMAP (2D representation of scRNA-seq data) colored by cell line
-DimPlot(sc, reduction = "umap", group.by = "CellType", cols = .color.cell.type)
+DimPlot(sc, reduction = "umap", group.by = "CellType", cols = colorCellType)
 sc <- FindNeighbors(sc, dims = 1:10)
 sc <- FindClusters(sc, resolution = 0.05)
 
@@ -98,7 +97,7 @@ sc.top.markers <- sc.all.markers %>%
   slice_max(n = 2, order_by = avg_log2FC)
 
 sc.top.markers
-VlnPlot(sc, features = sc.top.markers$gene[c(seq(1, 9, 2), seq(2, 10, 2))], ncol = 5, pt.size = 0.0, cols = .color.cell.type)
+VlnPlot(sc, features = sc.top.markers$gene[c(seq(1, 9, 2), seq(2, 10, 2))], ncol = 5, pt.size = 0.0, cols = colorCellType)
 
 gamma <- 20 # Graining level
 
@@ -151,7 +150,7 @@ hist(MC$purity, main = paste0("Purity of metacells \nin terms of cell line compo
 supercell_plot(
   MC$graph.supercells,
   group = MC$CellType,
-  color.use = .color.cell.type,
+  color.use = colorCellType,
   seed = 1,
   alpha = -pi / 2,
   main = "Metacells colored by cell line assignment"
@@ -159,7 +158,7 @@ supercell_plot(
 # supercell_plot(
 #   MC$graph.singlecell,
 #   group = sc.meta$CellType,
-#   color.use = .color.cell.type,
+#   color.use = colorCellType,
 #   do.frames = FALSE,
 #   lay.method = "components",
 #   seed = 1,
@@ -178,7 +177,7 @@ MC.seurat <- supercell_2_Seurat(
 Idents(MC.seurat) <- "CellType"
 MC.seurat <- RunUMAP(MC.seurat, dims = 1:10)
 
-DimPlot(MC.seurat, cols = .color.cell.type, reduction = "umap")
+DimPlot(MC.seurat, cols = colorCellType, reduction = "umap")
 MC.seurat <- FindClusters(MC.seurat, resolution = 0.5)
 
 DimPlot(MC.seurat, reduction = "umap")
@@ -207,16 +206,16 @@ MC.seurat.top.markers <- MC.seurat.all.markers %>%
 MC.seurat.top.markers
 
 genes.to.plot <- MC.seurat.top.markers$gene[c(seq(1, 9, 2), seq(2, 10, 2))]
-VlnPlot(MC.seurat, features = genes.to.plot, ncol = 5, pt.size = 0.0, cols = .color.cell.type)
+VlnPlot(MC.seurat, features = genes.to.plot, ncol = 5, pt.size = 0.0, cols = colorCellType)
 
 gene_x <- MC$genes.use[500:505] # 500
 gene_y <- MC$genes.use[550:555] # 600
 
 alpha <- 0.7
 
-p.SC <- supercell_GeneGenePlot(GetAssayData(sc, slot = "data"), gene_x = gene_x, gene_y = gene_y, clusters = sc$CellType, color.use = .color.cell.type, sort.by.corr = F, alpha = alpha)
+p.SC <- supercell_GeneGenePlot(GetAssayData(sc, slot = "data"), gene_x = gene_x, gene_y = gene_y, clusters = sc$CellType, color.use = colorCellType, sort.by.corr = F, alpha = alpha)
 p.SC$p
-p.MC <- supercell_GeneGenePlot(MC.ge, gene_x = gene_x, gene_y = gene_y, supercell_size = MC$supercell_size, clusters = MC$CellType, color.use = .color.cell.type, sort.by.corr = F, alpha = alpha)
+p.MC <- supercell_GeneGenePlot(MC.ge, gene_x = gene_x, gene_y = gene_y, supercell_size = MC$supercell_size, clusters = MC$CellType, color.use = colorCellType, sort.by.corr = F, alpha = alpha)
 p.MC$p
 
 MC$PCA <- supercell_prcomp(
@@ -237,7 +236,7 @@ supercell_DimPlot(
   groups = MC$CellType,
   dim.name = "UMAP",
   title = paste0("UMAP of metacells colored by cell line assignment"),
-  color.use = .color.cell.type
+  color.use = colorCellType
 )
 # compute distance among metacells
 D <- dist(MC$PCA$x)
@@ -288,6 +287,6 @@ supercell_VlnPlot(
   supercell_size = MC$supercell_size,
   clusters = MC$CellType,
   features = MC.top.markers$gene[c(seq(1, 9, 2), seq(2, 10, 2))],
-  color.use = .color.cell.type,
+  color.use = colorCellType,
   ncol = 5
 )

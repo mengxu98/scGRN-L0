@@ -208,8 +208,8 @@ MC.seurat.top.markers
 genes.to.plot <- MC.seurat.top.markers$gene[c(seq(1, 9, 2), seq(2, 10, 2))]
 VlnPlot(MC.seurat, features = genes.to.plot, ncol = 5, pt.size = 0.0, cols = colorCellType)
 
-gene_x <- MC$genes.use[500:505] # 500
-gene_y <- MC$genes.use[550:555] # 600
+gene_x <- MC$genes.use[500:505]
+gene_y <- MC$genes.use[550:555]
 
 alpha <- 0.7
 

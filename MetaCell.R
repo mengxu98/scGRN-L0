@@ -213,9 +213,21 @@ gene_y <- MC$genes.use[550:555] # 600
 
 alpha <- 0.7
 
-p.SC <- supercell_GeneGenePlot(GetAssayData(sc, slot = "data"), gene_x = gene_x, gene_y = gene_y, clusters = sc$CellType, color.use = colorCellType, sort.by.corr = F, alpha = alpha)
+p.SC <- supercell_GeneGenePlot(GetAssayData(sc, slot = "data"), 
+                               gene_x = gene_x, 
+                               gene_y = gene_y, 
+                               clusters = sc$CellType, 
+                               color.use = colorCellType, 
+                               sort.by.corr = F, 
+                               alpha = alpha)
 p.SC$p
-p.MC <- supercell_GeneGenePlot(MC.ge, gene_x = gene_x, gene_y = gene_y, supercell_size = MC$supercell_size, clusters = MC$CellType, color.use = colorCellType, sort.by.corr = F, alpha = alpha)
+p.MC <- supercell_GeneGenePlot(MC.ge, gene_x = gene_x, 
+                               gene_y = gene_y, 
+                               supercell_size = MC$supercell_size, 
+                               clusters = MC$CellType, 
+                               color.use = colorCellType, 
+                               sort.by.corr = F, 
+                               alpha = alpha)
 p.MC$p
 
 MC$PCA <- supercell_prcomp(

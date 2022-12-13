@@ -11,8 +11,8 @@ head(matrix_sc[1:5,1:5])
 max(matrix_sc)
 L0Dynamic <- L0REG(
   matrix = matrix_sc,
-  regulators = hvg[1:200],
-  targets = hvg[1:200],
+  regulators = hvg[101:300],
+  targets = hvg[101:300],
   penalty = "L0"
 )
 max(L0Dynamic$weight)
@@ -44,8 +44,8 @@ head(matrix[1:5,1:5])
 max(matrix)
 L0Dynamic <- L0REG(
   matrix = matrix,
-  regulators = hvg[1:200],
-  targets = hvg[1:200],
+  regulators = hvg[101:300],
+  targets = hvg[101:300],
   penalty = "L0"
 )
 max(L0Dynamic$weight)
@@ -71,4 +71,8 @@ AUROC_L0 <- calcAUROC(evaluationObject)
 AUPRC_L0 <- calcAUPR(evaluationObject)
 AUROC_L0
 AUPRC_L0
+
+# 1:200
+# AUROC_L0  AUROC_L0_sc
+# 0.6341136 0.5219319
 

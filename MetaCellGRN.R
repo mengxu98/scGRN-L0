@@ -39,7 +39,6 @@ AUPRC_L0_sc <- calcAUPR(evaluationObject)
 AUROC_L0_sc
 AUPRC_L0_sc
 
-
 matrix <- as.data.frame(mc_T_cell@assays$RNA@scale.data)
 head(matrix[1:5,1:5])
 max(matrix)
@@ -72,3 +71,4 @@ AUROC_L0 <- calcAUROC(evaluationObject)
 AUPRC_L0 <- calcAUPR(evaluationObject)
 AUROC_L0
 AUPRC_L0
+

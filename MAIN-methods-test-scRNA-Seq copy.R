@@ -281,6 +281,58 @@ for (j in 1:length(data_path)) {
     )
     AUROC_L0 <- calcAUROC(evaluationObject)
     AUPRC_L0 <- calcAUPR(evaluationObject)
+
+    ####
+    gamma <- 5 # Graining level
+    
+    # Compute metacells using SuperCell package
+    MC <- SCimplify(
+      X = t(data_grn), # single-cell log-normalized gene expression data
+      genes.use = rownames(t(data_grn)),
+      gamma = gamma,
+      n.pc = 10
+    )
+    # Compute gene expression of metacells by simply averaging gene expression within each metacell
+    MC.ge2 <- supercell_GE(
+      ge = t(data_grn),
+      groups = MC$membership
+    )
+    newDataGrn <- as.matrix(MC.ge2)
+    L0Dynamic <- L0REG(
+      matrix = newDataGrn,
+      regulators = colnames(data_grn),
+      targets = colnames(data_grn),
+      penalty = "L0L2"
+    )
+    write.table(L0Dynamic,
+                paste0(output, "GRN_L0.txt"),
+                sep = "\t",
+                quote = F,
+                row.names = F,
+                col.names = F
+    )
+    if (data_path[j] %in% c("hESC", "hHep")) {
+      ground_truth_h(
+        intput = paste0(output, "GRN_L0.txt"),
+        output = output,
+        dataset_dir = hnetwork_data_dir,
+        database = "STRING"
+      )
+    } else {
+      ground_truth_m(
+        intput = paste0(output, "GRN_L0.txt"),
+        output = output,
+        dataset_dir = mnetwork_data_dir,
+        database = "STRING"
+      )
+    }
+    evaluationObject <- prepareEval(paste0(output, "GRN_L0.txt"),
+                                    paste0(paste0(output, "ground_truth.tsv")),
+                                    totalPredictionsAccepted = 100000
+    )
+    AUROC_L0_MC <- calcAUROC(evaluationObject)
+    AUPRC_L0_MC <- calcAUPR(evaluationObject)
+
     # --------------------------------------------------
     L0DynamicL2 <- L0REG(t(data_grn),
       regulators = colnames(data_grn),

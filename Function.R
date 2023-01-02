@@ -129,6 +129,7 @@ FQnorm <- function(counts) {
 }
 
 # Normalization for sample --------------------------------------------------
+# This function only support 3 platforms (10X, IndropSeq and SmartSeq2) of scRNA-seq dataset, please pay attention to select one of these.
 normalize_data <- function(seu_obj, platform = NULL) {
   if (length(table(seu_obj$platform)) == 1) {
     if (is.null(platform)) {

@@ -202,7 +202,7 @@ normalize_data <- function(seu_obj, platform = NULL) {
 # package.check("DropletUtils")
 # write10xCounts(x = seu_obj@assays$RNA@counts, path = '10x', version="3")
 
-# Doublets --------------------------------------------------
+# Doublets filter --------------------------------------------------
 doublets_filter <- function(seu_obj, doublet_rate = 0.039, plot = FALSE, filename = NULL) {
   package.check(c("scDblFinder", "DoubletFinder")) # devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
   pc.num <- 1:pc_num(seu_obj)

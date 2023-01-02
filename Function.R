@@ -153,6 +153,7 @@ FQnorm <- function(counts) {
 }
 
 # Normalization for sample --------------------------------------------------
+<<<<<<< HEAD
 #' Title
 #'
 #' @param seu_obj 
@@ -162,6 +163,9 @@ FQnorm <- function(counts) {
 #' @export
 #'
 #' @examples
+=======
+# This function only support 3 platforms (10X, IndropSeq and SmartSeq2) of scRNA-seq dataset, please pay attention to select one of these.
+>>>>>>> 5c8556271737a9abddc7cd22b5db02c1e9be8a8e
 normalize_data <- function(seu_obj, platform = NULL) {
   if (length(table(seu_obj$platform)) == 1) {
     if (is.null(platform)) {
@@ -235,6 +239,7 @@ normalize_data <- function(seu_obj, platform = NULL) {
 # package.check("DropletUtils")
 # write10xCounts(x = seu_obj@assays$RNA@counts, path = '10x', version="3")
 
+<<<<<<< HEAD
 # Doublets --------------------------------------------------
 #' Title
 #'
@@ -247,6 +252,9 @@ normalize_data <- function(seu_obj, platform = NULL) {
 #' @export
 #'
 #' @examples
+=======
+# Doublets filter --------------------------------------------------
+>>>>>>> 5c8556271737a9abddc7cd22b5db02c1e9be8a8e
 doublets_filter <- function(seu_obj, doublet_rate = 0.039, plot = FALSE, filename = NULL) {
   package.check(c("scDblFinder", "DoubletFinder")) # devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
   pc.num <- 1:pc_num(seu_obj)

@@ -41,6 +41,14 @@ colP <- c(
 )
 
 # Packages check, download and library --------------------------------------------------
+#' Title
+#'
+#' @param packages 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 package.check <- function(packages) {
   for (package in packages) {
     if (!requireNamespace(package, quietly = TRUE)) {
@@ -87,6 +95,14 @@ package.check <- function(packages) {
 }
 
 # Auto compute PC value --------------------------------------------------
+#' Title
+#'
+#' @param sce 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 pc_num <- function(sce) {
   # Judgment criteria:
   # 1. The cumulative contribution of principal components is greater than 90%
@@ -117,6 +133,14 @@ pc_num <- function(sce) {
 }
 
 # 使用分位数归一化的方法对表达数据进行归一化处理，它可以使每个细胞具有相同的表达值分布
+#' Title
+#'
+#' @param counts 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 FQnorm <- function(counts) {
   rk <- apply(counts, 2, rank, ties.method = "min")
   counts.sort <- apply(counts, 2, sort)
@@ -129,6 +153,15 @@ FQnorm <- function(counts) {
 }
 
 # Normalization for sample --------------------------------------------------
+#' Title
+#'
+#' @param seu_obj 
+#' @param platform 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 normalize_data <- function(seu_obj, platform = NULL) {
   if (length(table(seu_obj$platform)) == 1) {
     if (is.null(platform)) {
@@ -203,6 +236,17 @@ normalize_data <- function(seu_obj, platform = NULL) {
 # write10xCounts(x = seu_obj@assays$RNA@counts, path = '10x', version="3")
 
 # Doublets --------------------------------------------------
+#' Title
+#'
+#' @param seu_obj 
+#' @param doublet_rate 
+#' @param plot 
+#' @param filename 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 doublets_filter <- function(seu_obj, doublet_rate = 0.039, plot = FALSE, filename = NULL) {
   package.check(c("scDblFinder", "DoubletFinder")) # devtools::install_github('chris-mcginnis-ucsf/DoubletFinder')
   pc.num <- 1:pc_num(seu_obj)
@@ -264,7 +308,15 @@ doublets_filter <- function(seu_obj, doublet_rate = 0.039, plot = FALSE, filenam
 # celltypist$models$download_models(force_update = T) # First run needs to download the trained model data.
 # source_python('celltypist_model_download.py')
 # rownames(seu_obj@assays$RNA@counts)
-
+#' Title
+#'
+#' @param seu_obj 
+#' @param method 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 annotation_celltype <- function(seu_obj, method = "celltypist") {
   if (method == "celltypist") {
     package.check("reticulate") # For Python packages
@@ -319,6 +371,16 @@ annotation_celltype <- function(seu_obj, method = "celltypist") {
 }
 
 # Merge multiple Seurat objects --------------------------------------------------
+#' Title
+#'
+#' @param seu_obj_list 
+#' @param samples 
+#' @param stage 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 merge_seu_obj <- function(seu_obj_list, samples, stage) {
   package.check("Seurat")
   seu_obj <- merge(seu_obj_list[[1]],
@@ -342,12 +404,28 @@ pMT_upper <- 25
 pHB_lower <- 0
 pHB_upper <- 5
 
+#' Title
+#'
+#' @param x 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 qc_std_plot_helper <- function(x) {
   x +
     scale_color_viridis() +
     geom_point(size = 0.01, alpha = 0.3)
 }
 
+#' Title
+#'
+#' @param seu_obj 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 qc_std_plot_nf <- function(seu_obj) {
   qc_data <- as_tibble(FetchData(seu_obj, c("nCount_RNA", "nFeature_RNA", "pMT", "pHB", "pRP")))
   plot_grid(
@@ -369,6 +447,14 @@ qc_std_plot_nf <- function(seu_obj) {
   )
 }
 
+#' Title
+#'
+#' @param seu_obj 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 qc_std_plot <- function(seu_obj) {
   qc_data <- as_tibble(FetchData(seu_obj, c("nCount_RNA", "nFeature_RNA", "pMT", "pHB", "pRP")))
   plot_grid(

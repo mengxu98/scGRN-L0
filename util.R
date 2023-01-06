@@ -1,22 +1,16 @@
 
-# Author: Joeri Ruyssinck (joeri.ruyssinck@intec.ugent.be)
 
-###############################################################################
-
-
-# 	convertAdjMatrixToSortedRankTSV
-#
-#	Converts an adjacency matrix (genes x genes)  to a TSV format where each line 
-#   is formatted as [GENE_X][tab][GENE_Y][tab][RANK]. 
-#		-- inputFilename: name or full path to the file containing the matrix with the adjancency scores. 
-#		-- ouputFilename: name or full path to the outputfile
-#
-#	Parameters (optional):
-#
-#	Returns: NULL								
-#
-#
-#			
+#' convertAdjMatrixToSortedRankTSV
+#' is formatted as [GENE_X][tab][GENE_Y][tab][RANK]
+#' @param inputFilename 
+#' @param inputFile name or full path to the file containing the matrix with the adjancency scores
+#' @param outputFilename name or full path to the outputfile
+#' @param desc 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 convertAdjMatrixToSortedRankTSV <- function(inputFilename=NULL,
                                             inputFile=NULL,
                                             outputFilename=NULL,
@@ -59,22 +53,16 @@ convertAdjMatrixToSortedRankTSV <- function(inputFilename=NULL,
 	}
 }
 
-# 	convertSortedRankTSVToAdjMatrix
-#	
-#	Reads a sorted TSV format from file. Each line is formatted as [GENE_X][tab][GENE_Y][tab][Adjacency_Measure]. The lines are sorted by decreasing adjancency scores. This
-#	format is frequently used as standard for DREAM challenge evaluation scripts (http://wiki.c2b2.columbia.edu/dream/index.php/The_DREAM_Project).
-#	Returns a file formatted as an adjacency matrix (genes x genes), the colums and rows are sorted(ascending) (Format: spaces as seperators, colnames and rownames present to file.
-#	Parameters	(required):
-#		-- inputFilename: name or full path to the TSV file
-#		-- ouputFilename: name or full path to the outputfile
-#
-#	Parameters (optional):
-#
-#	Returns: NULL								
-#
-#   Warning: Temporary version, either I'm missing something with all the data type restrictions or this could be a lot shorter.
-#
-#			
+#' convertSortedRankTSVToAdjMatrix
+#'
+#' @param inputFilename name or full path to the TSV file
+#' @param input 
+#' @param outputFilename name or full path to the outputfile
+#'
+#' @return
+#' @export
+#'
+#' @examples
 convertSortedRankTSVToAdjMatrix <- function(inputFilename=NULL,
                                             input=NULL,
                                             outputFilename=NULL){
@@ -105,7 +93,6 @@ convertSortedRankTSVToAdjMatrix <- function(inputFilename=NULL,
 		predToAdd   <- tbl[startIndices[i]:(startIndices[i+1]-1),1]
 		valuesToAdd <- tbl[startIndices[i]:(startIndices[i+1]-1),3]
 		colIndex   <- which(colnames(m) %in% targetToAdd)
-		
 		tmp <- c()
 		for (i in predToAdd){
 			tmp <- c(tmp, which(rownames(m) == i))
@@ -123,7 +110,6 @@ convertSortedRankTSVToAdjMatrix <- function(inputFilename=NULL,
 	rowIndexes <- tmp
 	colIndex   <- which(colnames(m) %in% targetToAdd)	
 	m[rowIndexes,colIndex] <- valuesToAdd	
-	
 	if(!is.null(outputFilename)){
 		write.table(m,outputFilename)
 	}
@@ -132,7 +118,14 @@ convertSortedRankTSVToAdjMatrix <- function(inputFilename=NULL,
 	}
 }
 
-# isPercentage
+#' isPercentage
+#'
+#' @param number 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 isPercentage <- function(number){
 	if (!is.numeric(number) || number <=0 || number > 100 || length(number) != 1){
 		return (FALSE)
@@ -142,52 +135,128 @@ isPercentage <- function(number){
 	}
 }
 
-################# Utility functions ##################################
-#	isWholeNumber - check for integer number
+# Utility functions -------------------------------------------------------
+
+#' isWholeNumber Check for integer number
+#'
+#' @param x 
+#' @param tol 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 isWholeNumber <- function(x, tol = .Machine$double.eps^0.5){
 	return (is.numeric(x) &&abs(x - round(x)) < tol)
 }
 
-#	isIntegerVector - checks if a vector is entirely composed of integers
+#' isIntegerVector Checks if a vector is entirely composed of integers
+#'
+#' @param integerVector 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 isIntegerVector <- function(integerVector){
 	return (!any(!isWholeNumber(integerVector)))
 }
 
-#	isPositiveIntegerVector - checks if a vector is entirely composed of positive integers
+#' isPositiveIntegerVector Checks if a vector is entirely composed of positive integers
+#'
+#' @param integerVector 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 isPositiveIntegerVector <- function(integerVector){
 	return (isIntegerVector(integerVector) && !any(integerVector <0))
 }
 
-#	isPositiveNonZeroIntegerVector - checks if a vector is entirely composed of positive non zero integers
+#' isPositiveNonZeroIntegerVector Checks if a vector is entirely composed of positive non zero integers
+#'
+#' @param integerVector 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 isPositiveNonZeroIntegerVector <- function(integerVector){
 	return (isIntegerVector(integerVector) && !any(integerVector <=0))
 }
 
-# Sorts a matrix according to col and rownames
+#' sortMatrix Sorts a matrix according to col and rownames
+#'
+#' @param mat 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 sortMatrix <- function(mat){
 	mat <- mat[sort.list(rownames(mat)),sort.list(colnames(mat))  ]
 	return(mat)
 }
 
+#' isDirectory
+#'
+#' @param directory 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 isDirectory <- function(directory){
 	return(file.info(directory)$isdir)
-	
 }
 
+#' areBothNullOrNonNull
+#'
+#' @param a 
+#' @param b 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 areBothNullOrNonNull <- function(a,b){
 	return (is.null(a) && is.null(b) || !is.null(a) && !is.null(b) )
 }
 
+#' areAllNullOrNonNull
+#'
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 areAllNullOrNonNull <- function(...){
 	e <- ( (length((which(c(...)==FALSE)))))
 	return (e!=1)
 }
 
+#' factorToNumber
+#'
+#' @param vec 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 factorToNumber <- function(vec){
 	return(as.numeric(levels(vec))[vec])
 }
 
+#' numericMatrix
+#'
+#' @param a 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 numericMatrix <- function(a){
 	a<- apply(a,c(1,2),function(x){as.numeric(x)})
 }
-############## End Utility functions #################################

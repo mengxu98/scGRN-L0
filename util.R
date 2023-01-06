@@ -17,8 +17,10 @@
 #
 #
 #			
-convertAdjMatrixToSortedRankTSV <- function(inputFilename=NULL,inputFile=NULL,outputFilename=NULL, desc=TRUE){
-	
+convertAdjMatrixToSortedRankTSV <- function(inputFilename=NULL,
+                                            inputFile=NULL,
+                                            outputFilename=NULL,
+                                            desc=TRUE){
 	if(is.null(inputFile)){
 		# Read the table from file
 		tbl <- read.table(inputFilename)
@@ -57,10 +59,6 @@ convertAdjMatrixToSortedRankTSV <- function(inputFilename=NULL,inputFile=NULL,ou
 	}
 }
 
-
-
-
-
 # 	convertSortedRankTSVToAdjMatrix
 #	
 #	Reads a sorted TSV format from file. Each line is formatted as [GENE_X][tab][GENE_Y][tab][Adjacency_Measure]. The lines are sorted by decreasing adjancency scores. This
@@ -77,9 +75,9 @@ convertAdjMatrixToSortedRankTSV <- function(inputFilename=NULL,inputFile=NULL,ou
 #   Warning: Temporary version, either I'm missing something with all the data type restrictions or this could be a lot shorter.
 #
 #			
-convertSortedRankTSVToAdjMatrix <- function(inputFilename=NULL,input=NULL,outputFilename=NULL){
-	
-	
+convertSortedRankTSVToAdjMatrix <- function(inputFilename=NULL,
+                                            input=NULL,
+                                            outputFilename=NULL){
 	# Read the table from file
 	if(!is.null(inputFilename)){
 		tbl <- read.table(inputFilename)
@@ -114,8 +112,6 @@ convertSortedRankTSVToAdjMatrix <- function(inputFilename=NULL,input=NULL,output
 		}
 		rowIndexes <- tmp
 		m[rowIndexes,colIndex] <- valuesToAdd
-		
-		
 	}
 	targetToAdd <- tbl[startIndices[length(startIndices)],2]
 	predToAdd   <- tbl[startIndices[length(startIndices)]:length(tbl[,1]),1]
@@ -136,28 +132,17 @@ convertSortedRankTSVToAdjMatrix <- function(inputFilename=NULL,input=NULL,output
 	}
 }
 
-
-
 # isPercentage
 isPercentage <- function(number){
-	
-	
 	if (!is.numeric(number) || number <=0 || number > 100 || length(number) != 1){
-		
 		return (FALSE)
 	}
-	
 	else{
-		
 		return (TRUE)
 	}
-	
 }
 
-
-
 ################# Utility functions ##################################
-
 #	isWholeNumber - check for integer number
 isWholeNumber <- function(x, tol = .Machine$double.eps^0.5){
 	return (is.numeric(x) &&abs(x - round(x)) < tol)
@@ -185,40 +170,25 @@ sortMatrix <- function(mat){
 }
 
 isDirectory <- function(directory){
-	
 	return(file.info(directory)$isdir)
 	
 }
 
 areBothNullOrNonNull <- function(a,b){
-	
 	return (is.null(a) && is.null(b) || !is.null(a) && !is.null(b) )
-	
-	
 }
-
 
 areAllNullOrNonNull <- function(...){
-	
 	e <- ( (length((which(c(...)==FALSE)))))
-	
 	return (e!=1)
 }
-
-
 
 factorToNumber <- function(vec){
 	return(as.numeric(levels(vec))[vec])
 }
 
-
 numericMatrix <- function(a){
 	
 	a<- apply(a,c(1,2),function(x){as.numeric(x)})
 }
-
-
-
-
-
 ############## End Utility functions #################################

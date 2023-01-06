@@ -188,7 +188,6 @@ factorToNumber <- function(vec){
 }
 
 numericMatrix <- function(a){
-	
 	a<- apply(a,c(1,2),function(x){as.numeric(x)})
 }
 ############## End Utility functions #################################

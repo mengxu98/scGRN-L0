@@ -29,7 +29,6 @@ data_path <- c(
   "dyn-LI",
   # "dyn-TF",
   "dyn-LL"
-  "dyn-LL"
 )
 cell_num <- c(
   "100",

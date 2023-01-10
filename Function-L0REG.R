@@ -189,17 +189,17 @@ L0REG <- function(matrix,
 #' @export
 #'
 #' @examples
-compute.gene.rank <- function(weightdf, directedGraph=FALSE) {
+compute.gene.rank <- function(weightdf, directedGraph = FALSE) {
   library("igraph")
-  colnames(weightdf)<-c("regulatoryGene", "targetGene", "weight")
-  tfnet<-graph_from_data_frame(df,directed=directed_graph)
-  pagerank<-data.frame(page_rank(tfnet,directed=directed_graph)$vector)
-  colnames(pagerank)<-c("page_rank")
-  pagerank$gene<-rownames(pagerank)
-  pagerank<-pagerank[,c("gene","page_rank")]
-  pagerank<-pagerank[order(pagerank$page_rank,decreasing=TRUE),]
-  pagerank$is_regulator<-FALSE
-  pagerank$is_regulator[pagerank$gene %in% unique(df$TF)]<-TRUE
+  colnames(weightdf) <- c("regulatoryGene", "targetGene", "weight")
+  tfnet <- graph_from_data_frame(weightdf, directed = directed_graph)
+  pagerank <- data.frame(page_rank(tfnet, directed = directed_graph)$vector)
+  colnames(pagerank) <- c("page_rank")
+  pagerank$gene <- rownames(pagerank)
+  pagerank <- pagerank[, c("gene", "page_rank")]
+  pagerank <- pagerank[order(pagerank$page_rank, decreasing = TRUE), ]
+  pagerank$is_regulator <- FALSE
+  pagerank$is_regulator[pagerank$gene %in% unique(weightdf$regulatoryGene)] <- TRUE
   return(pagerank)
 }
 

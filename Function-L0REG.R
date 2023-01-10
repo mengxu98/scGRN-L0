@@ -1,5 +1,19 @@
-
-
+#' LO_fit
+#'
+#' @param X The rows are samples and the columns are genes of the matrix
+#' @param Y 
+#' @param penalty 
+#' @param nFolds 
+#' @param seed 
+#' @param maxSuppSize 
+#' @param nGamma 
+#' @param gammaMin 
+#' @param gammaMax 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 LO_fit <- function(X, Y,
                    penalty = penalty,
                    nFolds = 10,
@@ -53,6 +67,18 @@ LO_fit <- function(X, Y,
   )
 }
 
+#' L0REG
+#'
+#' @param matrix The rows are samples and the columns are genes of the matrix
+#' @param penalty 
+#' @param regulators 
+#' @param targets 
+#' @param maxSuppSize 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 L0REG <- function(matrix,
                   penalty = NULL,
                   regulators = NULL,
@@ -164,6 +190,7 @@ L0REG <- function(matrix,
 #'
 #' @examples
 compute.gene.rank <- function(weightdf, directedGraph=FALSE) {
+  library("igraph")
   colnames(weightdf)<-c("regulatoryGene", "targetGene", "weight")
   tfnet<-graph_from_data_frame(df,directed=directed_graph)
   pagerank<-data.frame(page_rank(tfnet,directed=directed_graph)$vector)
